@@ -1,0 +1,36 @@
+[update]
+tasks = ["interfaces", "code", "transform", "normalize"]
+
+[update.interfaces]
+paths = ["../MTEList/Assets/OtherResources"]
+defaultToBase = false
+ignoreEmptyStrings = true
+unstripped = false
+
+[update.code]
+codePaths = ["../MTEList/Classes"]
+localizablePaths = ["Localizable"]
+defaultToKeys = false
+additive = false
+unstripped = false
+plistArguments = true
+customFunction = "mt_localizedString"
+
+[update.transform]
+codePaths = ["."]
+localizablePaths = ["."]
+transformer = "foundation"
+supportedLanguageEnumPath = "."
+typeName = "BartyCrouch"
+translateMethodName = "translate"
+
+[update.normalize]
+paths = ["."]
+sourceLocale = "en"
+harmonizeWithSource = true
+sortByKeys = true
+
+[lint]
+paths = ["."]
+duplicateKeys = true
+emptyValues = true

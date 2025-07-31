@@ -1,0 +1,53 @@
+PODS:
+  - Kingfisher (7.12.0)
+  - KingfisherWebP (1.6.1):
+    - Kingfisher (~> 7.11)
+    - libwebp (>= 1.1.0)
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
+    - libwebp/webp
+  - libwebp/mux (1.5.0):
+    - libwebp/demux
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
+    - libwebp/sharpyuv
+  - QuickList/Base (1.0.0):
+    - SnapKit
+  - QuickList/Items (1.0.0)
+  - QuickList/SegmentPage (1.0.0)
+  - QuickList/WebImage (1.0.0):
+    - Kingfisher
+    - KingfisherWebP
+  - SnapKit (5.7.1)
+
+DEPENDENCIES:
+  - QuickList/Base (from `../`)
+  - QuickList/Items (from `../`)
+  - QuickList/SegmentPage (from `../`)
+  - QuickList/WebImage (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - Kingfisher
+    - KingfisherWebP
+    - libwebp
+    - SnapKit
+
+EXTERNAL SOURCES:
+  QuickList:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Kingfisher: 53a10ea35051a436b5fb626ca2dd8f3144d755e9
+  KingfisherWebP: 77fc86e1342523f0a49148fc9809b6f5fc12e73b
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  QuickList: a698ba8c6db8ffea400b77ac30040e0be9b1e01d
+  SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
+
+PODFILE CHECKSUM: 4680051d3648c90ca044306e656fe113de8bc30e
+
+COCOAPODS: 1.16.2
