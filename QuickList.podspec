@@ -52,5 +52,6 @@ TODO: Add long description of the pod here.
   
   s.subspec "SegmentPage" do |ss|
     ss.source_files = 'QuickList/Classes/SegmentPage/**/*.{h,m,mm,swift}'
+    ss.dependency 'SnapKit'
   end
 end
