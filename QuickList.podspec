@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'QuickList'
-  s.version          = '1.0.1'
+  s.version          = '1.0.2'
   s.summary          = 'A short description of QuickList.'
 
 # This description is used to generate tags and improve search results.
@@ -49,6 +49,7 @@ TODO: Add long description of the pod here.
     ss.source_files = 'QuickList/Classes/WebImage/**/*.{h,m,mm,swift}'
     
     ss.dependency 'QuickList/Base'
+    ss.dependency 'QuickList/Items'
     ss.dependency 'Kingfisher'
     ss.dependency 'KingfisherWebP'
   end
