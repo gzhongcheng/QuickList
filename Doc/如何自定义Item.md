@@ -50,9 +50,9 @@ class <#CellName#>: ItemCell {
 以下是代码模版：
 
 ```swift
-// MARK: - <#RowName#>
-// <#Row Description#>
-final class <#RowName#>: ItemOf<<#CellName#>>, ItemType {
+// MARK: - <#ItemName#>
+// <#Item Description#>
+final class <#ItemName#>: ItemOf<<#CellName#>>, ItemType {
     
     
     // 更新cell的布局
@@ -100,9 +100,9 @@ final class <#RowName#>: ItemOf<<#CellName#>>, ItemType {
 以下是代码模版：
 
 ```swift
-// MARK: - <#RowName#>
-// <#Row Description#>
-final class <#RowName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
+// MARK: - <#ItemName#>
+// <#Item Description#>
+final class <#ItemName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
     
     
     // 更新cell的布局
@@ -124,3 +124,5 @@ final class <#RowName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
     }
 }
 ```
+
+可以将创建Cell和Item的模板代码添加到Xcode的[Code Snippets](https://cloud.tencent.com/developer/article/1615615)中，便于快速创建。
