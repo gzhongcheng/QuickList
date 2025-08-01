@@ -46,14 +46,14 @@ Section(header: "自动换行", footer: nil) { section in
     section.column = 3
 
     // 自定义header或footer
-    /// 可以是自定义的UICollectionReusableView
+    /// 可以是自定义的UICollectionReusableView类型
     section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
         
     }
-    /// 高度计算方法
-    section.footer?.height = { section, estimateItemSize, scrollDirection in
-        return 40
-    }
+    /// 高度计算方法(如果不设置这个height属性，会使用自动布局的实际高度，需做好约束设置，建议固定高度的header/footer直接设置固定高度)
+    //section.footer?.height = { section, estimateItemSize, scrollDirection in
+    //    return 40
+    //}
 
     // 自定义装饰view
     section.decoration = SectionDecorationView<UICollectionReusableView> { view in
