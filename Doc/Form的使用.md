@@ -4,6 +4,8 @@ Form作为Section的集合容器，实现了Collection相关集合协议，支�
 
 ####  通用属性
 
+> **header**：列表的Header
+> **footer**：列表的Footer
 > **singleSelection**：是否单选
 > **selectedItemDecorationPosition**：选中item装饰view与item的图层关系，默认为below
 > **selectedItemDecoration**：列表通用的选中item的装饰view，通常展示在选中item图层之下，尺寸为item大小，设置后，列表将强制变成单选状态
