@@ -74,6 +74,29 @@ class ViewController: UIViewController {
         formlist.form.backgroundDecoration = UIView()
         formlist.form.backgroundDecoration?.backgroundColor = UIColor(white: 0.95, alpha: 1)
         
+        let header = FormHeaderFooterView()
+        header.useAutoLayout = true
+        header.backgroundColor = .red
+        
+        let testLabel = UILabel()
+        testLabel.text = "很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈"
+        testLabel.numberOfLines = 0
+        header.addSubview(testLabel)
+        testLabel.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(10)
+        }
+        formlist.form.header = header
+        
+        formlist.form.header?.height = { _, _ in
+            return 40
+        }
+        
+        formlist.form.footer = FormHeaderFooterView()
+        formlist.form.footer?.backgroundColor = .blue
+        formlist.form.footer?.height = { _, _ in
+            return 40
+        }
+        
         // MARK: - 创建完成后添加sections
         formlist.form +++ Section(header: "自动换行", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -82,19 +105,19 @@ class ViewController: UIViewController {
             section.column = 3
             /// 可以是自定义的UICollectionReusableView
             section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
-                
+                view.backgroundColor = .lightGray
             }
             /// 高度计算方法
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
-//            section.decoration = SectionDecorationView<UICollectionReusableView> { view in
-//                let imageView = UIImageView(image: UIImage(named: "E-1251692-C01A20FE"))
-//                view.addSubview(imageView)
-//                imageView.snp.makeConstraints { make in
-//                    make.edges.equalToSuperview()
-//                }
-//            }
+            section.decoration = SectionDecorationView<UICollectionReusableView> { view in
+                let imageView = UIImageView(image: UIImage(named: "E-1251692-C01A20FE"))
+                view.addSubview(imageView)
+                imageView.snp.makeConstraints { make in
+                    make.edges.equalToSuperview()
+                }
+            }
 //            section.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
 //            section.layout = QuickListFlowLayout()
             section.layout = RowEqualHeightLayout()
@@ -166,10 +189,11 @@ class ViewController: UIViewController {
                     vc.dismiss(animated: true)
                 })
             }
-        +++ Section("LineItem(分割线)") { section in
+        +++ Section(header:"LineItem(分割线)", footer: "分割线结束") { section in
             section.lineSpace = 0
             section.column = 1
             section.header?.shouldSuspension = true
+            section.footer?.shouldSuspension = true
         }
             <<< LineItem() { item in
                 item.contentInsets = UIEdgeInsets(top: 10, left: 15, bottom: 0, right: 15)
@@ -396,11 +420,13 @@ class ViewController: UIViewController {
         
         formlist.form +++ towColumSection
 
-        let threeColumSection = Section("自动大小三列图片") { section in
+        let threeColumSection = Section(header: "自动大小三列图片", footer: "没啦！") { section in
             section.column = 3
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 5
             section.itemSpace = 5
+            section.header?.shouldSuspension = true
+            section.footer?.shouldSuspension = true
         }
         for i in 0 ... 30 {
             threeColumSection <<< newImageItem(i, getRandomImage(), true)

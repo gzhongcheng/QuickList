@@ -54,9 +54,9 @@ TODO: Add long description of the pod here.
     ss.dependency 'KingfisherWebP'
   end
   
-  # s.subspec "SegmentPage" do |ss|
-  #   ss.source_files = 'QuickList/Classes/SegmentPage/**/*.{h,m,mm,swift}'
+   s.subspec "SegmentPage" do |ss|
+     ss.source_files = 'QuickList/Classes/SegmentPage/**/*.{h,m,mm,swift}'
 
-  #   ss.dependency 'QuickList/Base'
-  # end
+     ss.dependency 'QuickList/Base'
+   end
 end

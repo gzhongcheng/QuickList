@@ -9,6 +9,10 @@ import Foundation
 
 /// 展示列表对象的协议
 public protocol FormViewProtocol: UIScrollView {
+    /// 列表的header尺寸（扩展属性），用于支持添加header后的悬浮功能
+    var headerSize: CGSize { get set }
+    /// 列表的footer尺寸（扩展属性），用于支持添加footer后的悬浮功能
+    var footerSize: CGSize { get set }
     /// section的悬浮header的起始点（扩展属性），用于支持isFormHeader
     var suspensionStartPoint: CGPoint? { get set }
     
@@ -89,6 +93,8 @@ extension UICollectionView: FormViewProtocol {
         @UniqueAddress static var currentDecorationViewIdentifier
         @UniqueAddress static var currentBackgroundViewIdentifier
         @UniqueAddress static var suspensionStartPointIdentifier
+        @UniqueAddress static var headerSizeIdentifier
+        @UniqueAddress static var footerSizeIdentifier
     }
     
     /// section的悬浮header的起始点（扩展属性），用于支持isFormHeader
@@ -98,6 +104,26 @@ extension UICollectionView: FormViewProtocol {
         }
         set {
             objc_setAssociatedObject(self, AssociatedKey.suspensionStartPointIdentifier, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        }
+    }
+    
+    /// 列表的header尺寸（扩展属性），用于支持添加header后的悬浮功能
+    public var headerSize: CGSize {
+        get {
+            return objc_getAssociatedObject(self, AssociatedKey.headerSizeIdentifier) as? CGSize ?? .zero
+        }
+        set {
+            objc_setAssociatedObject(self, AssociatedKey.headerSizeIdentifier, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    /// 列表的footer尺寸（扩展属性），用于支持添加footer后的悬浮功能
+    public var footerSize: CGSize {
+        get {
+            return objc_getAssociatedObject(self, AssociatedKey.footerSizeIdentifier) as? CGSize ?? .zero
+        }
+        set {
+            objc_setAssociatedObject(self, AssociatedKey.footerSizeIdentifier, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
     

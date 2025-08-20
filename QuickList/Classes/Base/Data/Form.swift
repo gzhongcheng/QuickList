@@ -64,6 +64,11 @@ public final class Form: NSObject {
         }
     }
     
+    /// 列表的Header
+    public var header: FormHeaderFooterView?
+    /// 列表的Footer
+    public var footer: FormHeaderFooterView?
+    
     /// 所有Section的数组
     public private(set) var sections = [Section]()
     

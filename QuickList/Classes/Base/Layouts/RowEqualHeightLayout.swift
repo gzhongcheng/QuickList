@@ -44,24 +44,7 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         /// 当前计算位置
         var tempStart = currentStart
         // 添加header的位置
-        if let header = section.header {
-            let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.header.elementKind, with: IndexPath(item: 0, section: sectionIndex))
-            var frame: CGRect = .zero
-            if layout.scrollDirection == .vertical {
-                let headerHeight = header.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
-                frame = CGRect(x: formContentInset.left, y: tempStart.y, width: maxWidth, height: headerHeight)
-                tempStart.y += headerHeight
-                tempStart.x = formContentInset.left
-            } else {
-                let headerWidth = header.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
-                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: headerWidth, height: maxHeight)
-                tempStart.x += headerWidth
-                tempStart.y = formContentInset.top
-            }
-            headerAttributes.frame = frame
-            attribute.shouldSuspensionHeader = header.shouldSuspension
-            attribute.headerAttributes = headerAttributes
-        }
+        addHeaderAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
         /// item展示区域起点
         let itemStartPoint = CGPoint(x: tempStart.x + sectionContentInset.left, y: tempStart.y + sectionContentInset.top)
@@ -234,67 +217,16 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         }
         
         // 添加footer的位置
-        if let footer = section.footer {
-            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.footer.elementKind, with: IndexPath(item: 0, section: sectionIndex))
-            var frame: CGRect = .zero
-            if layout.scrollDirection == .vertical {
-                let footerHeight = footer.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
-                frame = CGRect(x: formContentInset.left + sectionContentInset.left, y: tempStart.y, width: maxWidth, height: footerHeight)
-                tempStart.y += footerHeight
-            } else {
-                let footerWidth = footer.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
-                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: footerWidth, height: maxHeight)
-                tempStart.x += footerWidth
-            }
-            footerAttributes.frame = frame
-            attribute.shouldSuspensionFooter = footer.shouldSuspension
-            attribute.footerAttributes = footerAttributes
-        }
+        addFooterAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
         // 设置endPoint
         attribute.endPoint = tempStart
         
         /// 添加decoration的位置
-        if section.decoration != nil {
-            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.decoration.elementKind, with: IndexPath(index: sectionIndex))
-            var frame: CGRect = .zero
-            if layout.scrollDirection == .vertical {
-                let startY = attribute.headerAttributes?.frame.maxY ?? attribute.startPoint.y
-                let endY = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.y
-                let startX = formContentInset.left
-                let viewHeight = endY - startY
-                frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
-            } else {
-                let startX = attribute.headerAttributes?.frame.maxX ?? attribute.startPoint.x
-                let endX = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.x
-                let startY = formContentInset.top
-                let viewWidth = endX - startX
-                frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
-            }
-            decorationAttributes.frame = frame
-            attribute.decorationAttributes = decorationAttributes
-        }
+        addDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         
         /// 添加suspensionDecoration的位置
-        if section.isFormHeader, section.suspensionDecoration != nil {
-            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.suspensionDecoration.elementKind, with: IndexPath(index: sectionIndex))
-            var frame: CGRect = .zero
-            if layout.scrollDirection == .vertical {
-                let startY = attribute.headerAttributes?.frame.minX ?? attribute.startPoint.y
-                let endY = attribute.footerAttributes?.frame.maxY ?? attribute.endPoint.y
-                let startX = formContentInset.left
-                let viewHeight = endY - startY
-                frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
-            } else {
-                let startX = attribute.headerAttributes?.frame.minX ?? attribute.startPoint.x
-                let endX = attribute.footerAttributes?.frame.maxY ?? attribute.endPoint.x
-                let startY = formContentInset.top
-                let viewWidth = endX - startX
-                frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
-            }
-            decorationAttributes.frame = frame
-            attribute.suspensionDecorationAttributes = decorationAttributes
-        }
+        addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         return attribute
     }
 }

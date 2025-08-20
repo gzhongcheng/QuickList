@@ -82,9 +82,48 @@ public class FormViewHandler: NSObject {
     }
     
     /// 更新背景控件
-    public func updateBackgroundDecoration() {
+    public func updateBackgroundDecoration(contentSize: CGSize) {
         formView?.addBackgroundViewIfNeeded(form.backgroundDecoration)
-        form.backgroundDecoration?.frame = CGRect(x: 0, y: 0, width: formView?.contentSize.width ?? 0, height: formView?.contentSize.height ?? 0)
+        form.backgroundDecoration?.frame = CGRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height)
+    }
+    
+    /// 更新header控件
+    /// 需在updateBackgroundDecoration之后调用
+    public func updateHeaderDecoration() {
+        guard
+            let header = form.header,
+            self.layout.headerSize.width > 0,
+            self.layout.headerSize.height > 0
+        else {
+            form.header?.isHidden = true
+            return
+        }
+        formView?.addDecorationViewIfNeeded(header)
+        header.frame = CGRect(origin: .zero, size: self.layout.headerSize)
+        header.isHidden = false
+    }
+    
+    /// 更新footer控件
+    /// 需在updateBackgroundDecoration之后调用
+    public func updateFooterDecoration(contentSize: CGSize) {
+        guard
+            let footer = form.footer,
+            self.layout.footerSize.width > 0,
+            self.layout.footerSize.height > 0
+        else {
+            form.footer?.isHidden = true
+            return
+        }
+        formView?.addDecorationViewIfNeeded(footer)
+        switch self.scrollDirection {
+        case .vertical:
+            footer.frame = CGRect(origin: CGPoint(x: 0, y: contentSize.height - self.layout.footerSize.height), size: self.layout.footerSize)
+        case .horizontal:
+            footer.frame = CGRect(origin: CGPoint(x: contentSize.width - self.layout.footerSize.width, y: 0), size: self.layout.footerSize)
+        @unknown default:
+            break
+        }
+        footer.isHidden = false
     }
     
     /// 更新选中状态

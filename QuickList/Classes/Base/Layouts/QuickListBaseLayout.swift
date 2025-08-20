@@ -122,4 +122,127 @@ open class QuickListBaseLayout {
             height: frame.height
         )
     }
+    
+    /// 添加Header的位置
+    func addHeaderAttributes(
+        to attribute: QuickListSectionAttribute,
+        layout: QuickListCollectionLayout,
+        section: Section,
+        sectionIndex: Int,
+        maxWidth: CGFloat,
+        maxHeight: CGFloat,
+        formContentInset: UIEdgeInsets,
+        tempStart: inout CGPoint
+    ) {
+        if let header = section.header {
+            let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.header.elementKind, with: IndexPath(item: 0, section: sectionIndex))
+            var frame: CGRect = .zero
+            if layout.scrollDirection == .vertical {
+                let headerHeight = header.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
+                frame = CGRect(x: formContentInset.left, y: tempStart.y, width: maxWidth, height: headerHeight)
+                tempStart.y += headerHeight
+                tempStart.x = formContentInset.left
+            } else {
+                let headerWidth = header.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
+                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: headerWidth, height: maxHeight)
+                tempStart.x += headerWidth
+                tempStart.y = formContentInset.top
+            }
+            headerAttributes.frame = frame
+            attribute.shouldSuspensionHeader = header.shouldSuspension
+            attribute.headerAttributes = headerAttributes
+        }
+    }
+    
+    /// 添加Footer的位置
+    func addFooterAttributes(
+        to attribute: QuickListSectionAttribute,
+        layout: QuickListCollectionLayout,
+        section: Section,
+        sectionIndex: Int,
+        maxWidth: CGFloat,
+        maxHeight: CGFloat,
+        formContentInset: UIEdgeInsets,
+        tempStart: inout CGPoint
+    ) {
+        if let footer = section.footer {
+            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.footer.elementKind, with: IndexPath(item: 0, section: sectionIndex))
+            var frame: CGRect = .zero
+            if layout.scrollDirection == .vertical {
+                let footerHeight = footer.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
+                frame = CGRect(x: formContentInset.left, y: tempStart.y, width: maxWidth, height: footerHeight)
+                tempStart.y += footerHeight
+            } else {
+                let footerWidth = footer.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
+                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: footerWidth, height: maxHeight)
+                tempStart.x += footerWidth
+            }
+            footerAttributes.frame = frame
+            attribute.shouldSuspensionFooter = footer.shouldSuspension
+            attribute.footerAttributes = footerAttributes
+        }
+    }
+    
+    /// 添加decoration的位置
+    func addDecorationAttributes(
+        to attribute: QuickListSectionAttribute,
+        layout: QuickListCollectionLayout,
+        section: Section,
+        sectionIndex: Int,
+        maxWidth: CGFloat,
+        maxHeight: CGFloat,
+        formContentInset: UIEdgeInsets
+    ) {
+        if section.decoration != nil {
+            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.decoration.elementKind, with: IndexPath(index: sectionIndex))
+            var frame: CGRect = .zero
+            if layout.scrollDirection == .vertical {
+                let startY = attribute.headerAttributes?.frame.maxY ?? attribute.startPoint.y
+                let endY = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.y
+                let startX = formContentInset.left
+                let viewHeight = endY - startY
+                frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
+            } else {
+                let startX = attribute.headerAttributes?.frame.maxX ?? attribute.startPoint.x
+                let endX = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.x
+                let startY = formContentInset.top
+                let viewWidth = endX - startX
+                frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
+            }
+            decorationAttributes.frame = frame
+            attribute.decorationAttributes = decorationAttributes
+        }
+    }
+    
+    /// 添加suspensionDecoration的布局属性
+    func addSuspensionDecorationAttributes(
+        to attribute: QuickListSectionAttribute,
+        layout: QuickListCollectionLayout,
+        section: Section,
+        sectionIndex: Int,
+        currentStart: CGPoint,
+        maxWidth: CGFloat,
+        maxHeight: CGFloat,
+        formContentInset: UIEdgeInsets
+    ) {
+        if section.isFormHeader, section.suspensionDecoration != nil {
+            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.suspensionDecoration.elementKind, with: IndexPath(index: sectionIndex))
+            var frame: CGRect = .zero
+            if layout.scrollDirection == .vertical {
+                let startY = attribute.headerAttributes?.frame.minY ?? attribute.startPoint.y
+                let endY = attribute.footerAttributes?.frame.maxY ?? attribute.endPoint.y
+                let startX = formContentInset.left
+                let viewHeight = endY - startY
+                frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
+            } else {
+                let startX = attribute.headerAttributes?.frame.minX ?? attribute.startPoint.x
+                let endX = attribute.footerAttributes?.frame.maxX ?? attribute.endPoint.x
+                let startY = formContentInset.top
+                let viewWidth = endX - startX
+                frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
+            }
+            decorationAttributes.frame = frame
+            attribute.suspensionDecorationAttributes = decorationAttributes
+        }
+    }
 }
