@@ -92,16 +92,23 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 var frame: CGRect = .zero
                 if self.scrollDirection == .vertical {
                     let height = header.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: 0, y: 0, width: collectionView.bounds.width, height: height)
+                    frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
                     currentOffset.y += height
                 } else {
                     let width = header.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: 0, y: 0, width: width, height: collectionView.bounds.height)
+                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: collectionView.bounds.height)
                     currentOffset.x += width
                 }
                 headerAttributes?.frame = frame
                 headerAttributes?.caculatedFrame = frame
             }
+            
+            if scrollDirection == .vertical {
+                currentOffset.y += form.contentInset.top
+            } else {
+                currentOffset.x += form.contentInset.left
+            }
+            
         } else {
             for (i, attr) in self.sectionAttributes {
                 if i < index {
@@ -216,11 +223,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     
     func resetData() {
         sectionAttributes = [:]
-        if self.scrollDirection == .vertical {
-            currentOffset = CGPoint(x: 0, y: form?.contentInset.top ?? 0)
-        } else {
-            currentOffset = CGPoint(x: form?.contentInset.left ?? 0, y: 0)
-        }
+        currentOffset = .zero
     }
     
     public override func prepare() {
@@ -505,20 +508,21 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         var inListSize: CGSize = size
         switch scrollDirection {
         case .vertical:
+            let offset = view.contentOffset.y + view.adjustedContentInset.top
             if let header = header as? FormCompressibleHeaderFooterReusable {
-                let offset = view.contentOffset.y > 0 ? view.contentOffset.y : 0
+                let newOffset = offset > 0 ? offset : 0
                 if let minSize = header.minSize {
-                    size = CGSize(width: view.bounds.width, height: max(size.height - offset , minSize.height))
+                    size = CGSize(width: view.bounds.width, height: max(size.height - newOffset , minSize.height))
                 } else {
-                    size = CGSize(width: view.bounds.width, height: size.height - offset)
+                    size = CGSize(width: view.bounds.width, height: size.height - newOffset)
                 }
                 if header.shouldSuspension {
                     /// 如果是悬浮header，返回压缩后的尺寸，非悬浮返回原始尺寸
                     inListSize = size
-                } else if offset >= 0 {
+                } else if newOffset >= 0 {
                     /// 非悬浮且压缩时，需要往下偏移
-                    if offset <= (inListSize.height - size.height) {
-                        y += offset
+                    if newOffset <= (inListSize.height - size.height) {
+                        y += newOffset
                     } else {
                         y += (inListSize.height - size.height)
                     }
@@ -526,21 +530,21 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             }
             switch header.displayType {
             case .stretch:
-                if view.contentOffset.y < 0 {
-                    y += view.contentOffset.y
-                    size.height -= view.contentOffset.y
+                if offset < 0 {
+                    y += offset
+                    size.height -= offset
                 }
             case .top:
-                if view.contentOffset.y < 0 {
-                    y = view.contentOffset.y
+                if offset < 0 {
+                    y = offset
                 }
             default:
                 break
             }
             if header.shouldSuspension {
                 headerAttributes.zIndex = 1127
-                if view.contentOffset.y > 0 {
-                    y += view.contentOffset.y
+                if offset > 0 {
+                    y += offset
                 }
             } else {
                 headerAttributes.zIndex = 600
@@ -782,17 +786,18 @@ extension QuickListSectionAttribute {
         with scrollDirection: UICollectionView.ScrollDirection
     ) {
         if scrollDirection == .vertical {
+            let offset = view.contentOffset.y + view.adjustedContentInset.top
             var frame = attributes.caculatedFrame ?? attributes.frame
-            if view.contentOffset.y > headerSize.height {
+            if offset > headerSize.height {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
-                frame.origin.y += view.contentOffset.y - headerSize.height
+                frame.origin.y += offset - headerSize.height
             }
             attributes.frame = frame
         } else {
             var frame = attributes.caculatedFrame ?? attributes.frame
             if view.contentOffset.x >= headerSize.width {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
-                frame.origin.x += view.contentOffset.y - headerSize.width
+                frame.origin.x += view.contentOffset.x - headerSize.width
             }
             attributes.frame = frame
         }
@@ -817,7 +822,7 @@ extension QuickListSectionAttribute {
         suspensionHeaderSectionSize: CGSize?,
         with scrollDirection: UICollectionView.ScrollDirection
     ) {
-        var offset = view.contentOffset
+        var offset = CGPoint(x: view.contentOffset.x, y: view.contentOffset.y + view.adjustedContentInset.top)
         if let suspensionHeaderSectionSize = suspensionHeaderSectionSize {
             if scrollDirection == .vertical {
                 if suspensionHeader {
@@ -915,7 +920,9 @@ extension QuickListSectionAttribute {
         with scrollDirection: UICollectionView.ScrollDirection
     ) {
         let offset = view.contentOffset
-        let footerSuspensionSize: CGSize = suspensionFooter ? footerSize : .zero
+        var footerSuspensionSize: CGSize = suspensionFooter ? footerSize : .zero
+        /// 添加底部安全区域尺寸（视为一直悬浮）
+        footerSuspensionSize.height += view.adjustedContentInset.bottom
         /// 还没有滚动到需要悬停的位置，直接返回原始的frame
         if scrollDirection == .vertical, endPoint.y < offset.y + view.bounds.height - footerSuspensionSize.height  {
             var frame = footerAttributes.frame

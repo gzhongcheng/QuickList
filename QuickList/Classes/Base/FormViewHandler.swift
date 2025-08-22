@@ -155,10 +155,6 @@ public class FormViewHandler: NSObject {
     
     // 添加长按事件
     func addLongTapIfNeeded() {
-        guard formView is FormViewLongTapProtorol else {
-            removeLongTap()
-            return
-        }
         addedLongTap = false
         for section in form.sections {
             if section is MultivalusedSection {

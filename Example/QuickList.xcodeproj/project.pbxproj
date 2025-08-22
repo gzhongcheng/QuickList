@@ -16,6 +16,8 @@
 		2DB1DE952E0262F200522BF4 /* Main.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE8B2E0262F200522BF4 /* Main.strings */; };
 		2DB1DE962E0262F200522BF4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE852E0262F200522BF4 /* Main.storyboard */; };
 		2DF0BCF32E58013100C4B327 /* CompressibleHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */; };
+		2DF0BD312E584BDF00C4B327 /* SegmentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BD302E584BDF00C4B327 /* SegmentViewController.swift */; };
+		2DF0BD352E584DE600C4B327 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BD342E584DE600C4B327 /* SceneDelegate.swift */; };
 		D98A4A588B6FC42F81484072 /* Pods_QuickList_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C460C83A6E213DEC76763B3A /* Pods_QuickList_Example.framework */; };
 /* End PBXBuildFile section */
 
@@ -38,6 +40,8 @@
 		2DB1DE8A2E0262F200522BF4 /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		2DB1DE8C2E0262F200522BF4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressibleHeaderView.swift; sourceTree = "<group>"; };
+		2DF0BD302E584BDF00C4B327 /* SegmentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentViewController.swift; sourceTree = "<group>"; };
+		2DF0BD342E584DE600C4B327 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* QuickList_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuickList_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		714AB878434C540217C842C8 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		A26AAB0F2A7EC4AE560EF0A2 /* Pods-QuickList_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QuickList_Example.release.xcconfig"; path = "Target Support Files/Pods-QuickList_Example/Pods-QuickList_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -68,6 +72,7 @@
 		2DB1DE8D2E0262F200522BF4 /* QuickList */ = {
 			isa = PBXGroup;
 			children = (
+				2DF0BD342E584DE600C4B327 /* SceneDelegate.swift */,
 				2DB1DE782E0262F200522BF4 /* AppDelegate.swift */,
 				2DB1DE792E0262F200522BF4 /* Images.xcassets */,
 				2DB1DE7B2E0262F200522BF4 /* ItemPresentViewController.swift */,
@@ -77,6 +82,7 @@
 				2DB1DE8B2E0262F200522BF4 /* Main.strings */,
 				2DB1DE8C2E0262F200522BF4 /* ViewController.swift */,
 				2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */,
+				2DF0BD302E584BDF00C4B327 /* SegmentViewController.swift */,
 			);
 			path = QuickList;
 			sourceTree = "<group>";
@@ -255,8 +261,10 @@
 			files = (
 				2DB1DE8E2E0262F200522BF4 /* ViewController.swift in Sources */,
 				2DB1DE8F2E0262F200522BF4 /* ItemPresentViewController.swift in Sources */,
+				2DF0BD312E584BDF00C4B327 /* SegmentViewController.swift in Sources */,
 				2DB1DE902E0262F200522BF4 /* AppDelegate.swift in Sources */,
 				2DF0BCF32E58013100C4B327 /* CompressibleHeaderView.swift in Sources */,
+				2DF0BD352E584DE600C4B327 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,7 +360,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -400,7 +408,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -420,7 +428,7 @@
 				CURRENT_PROJECT_VERSION = 0;
 				DEVELOPMENT_TEAM = 45K7R3R8HH;
 				INFOPLIST_FILE = QuickList/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				MODULE_NAME = ExampleApp;
@@ -444,7 +452,7 @@
 				DEVELOPMENT_TEAM = 45K7R3R8HH;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INFOPLIST_FILE = QuickList/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				MODULE_NAME = ExampleApp;

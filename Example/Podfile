@@ -4,7 +4,7 @@ use_frameworks!
 # 如果使用了依赖静态库的模块，导致pod install失败时，尝试使用下面的配置：
 # use_frameworks! :linkage => :static
 
-platform :ios, '12.0'
+platform :ios, '13.0'
 
 target 'QuickList_Example' do
   # QuickList本地依赖

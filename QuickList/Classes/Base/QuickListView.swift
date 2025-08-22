@@ -65,6 +65,10 @@ open class QuickListView: UICollectionView {
         }
     }
     
+    open override func adjustedContentInsetDidChange() {
+        self.handler.layout.reloadAll()
+    }
+    
     /// 滚动方向,默认为竖直方向滚动
     open var scrollDirection: UICollectionView.ScrollDirection = .vertical {
         didSet {
@@ -102,19 +106,11 @@ open class QuickListView: UICollectionView {
         handler.formView = self
         self.delegate = handler
         self.dataSource = handler
-        cancelAdjustsScrollView()
         
         handler.layout.didFinishLayout = { [weak self] layout in
             if let block = self?.listSizeChangedBlock {
                 block(layout.collectionViewContentSize)
             }
-        }
-    }
-    
-    /// 去除顶部留白
-    public func cancelAdjustsScrollView() {
-        if #available(iOS 11.0, *) {
-            contentInsetAdjustmentBehavior = .never
         }
     }
     

@@ -61,14 +61,15 @@ class ViewController: UIViewController {
         let formlist = QuickListView()
         self.view.addSubview(formlist)
         
-        formlist.listSizeChangedBlock = { newSize in
-            formlist.snp.updateConstraints { make in
-                make.height.equalTo(min(self.view.bounds.height, newSize.height))
-            }
-        }
+        /// 内容尺寸变化的回调
+//        formlist.listSizeChangedBlock = { newSize in
+//            formlist.snp.remakeConstraints { make in
+//                make.leading.top.trailing.equalToSuperview()
+//                make.height.equalTo(min(self.view.bounds.height, newSize.height))
+//            }
+//        }
         formlist.snp.makeConstraints { make in
-            make.leading.top.trailing.equalToSuperview()
-            make.height.equalTo(0)
+            make.edges.equalToSuperview()
         }
         
         formlist.form.backgroundDecoration = UIView()
@@ -84,7 +85,7 @@ class ViewController: UIViewController {
             80
         }
         /// 设置拉伸时的逻辑
-        formHeader.displayType = .stretch
+        formHeader.displayType = .normal
         formlist.form.header = formHeader
         
 //        formlist.form.footer = FormDecorationView<UICollectionReusableView> { view in
@@ -105,7 +106,7 @@ class ViewController: UIViewController {
             80
         }
         /// 设置拉伸时的逻辑
-        formFooter.displayType = .stretch
+        formFooter.displayType = .normal
 
         formlist.form.footer = formFooter
         
