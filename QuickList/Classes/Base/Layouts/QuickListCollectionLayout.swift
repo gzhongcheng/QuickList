@@ -50,6 +50,8 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     /// 整个form的Header和Footer的尺寸
     var headerAttributes: UICollectionViewLayoutAttributes?
     var footerAttributes: UICollectionViewLayoutAttributes?
+    /// 悬浮headerSection的尺寸，用于支持isFormHeader，如果isFormHeader为false，则该值为nil
+    var suspensionHeaderSectionSize: CGSize?
     /// 存放各section位置等数据的数组
     var sectionAttributes: [Int: QuickListSectionAttribute] = [:]
     /// 存放各section位置等数据的数组
@@ -258,9 +260,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             if sectionIndex == 0 {
                 if section.isFormHeader {
                     if self.scrollDirection == .vertical {
-                        collectionView.suspensionStartPoint = CGPoint(x: 0, y: sectionAttr.endPoint.y)
+                        self.suspensionHeaderSectionSize = CGSize(width: collectionView.bounds.width, height: sectionAttr.endPoint.y - sectionAttr.startPoint.y)
                     } else {
-                        collectionView.suspensionStartPoint = CGPoint(x: sectionAttr.endPoint.x, y: 0)
+                        self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: collectionView.bounds.height)
                     }
                     /// 记录初始位置
                     sectionAttr.headerAttributes?.caculatedFrame = sectionAttr.headerAttributes?.frame
@@ -269,7 +271,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
                     sectionAttr.itemAttributes.forEach { $0.caculatedFrame = $0.frame }
                 } else {
-                    collectionView.suspensionStartPoint = nil
+                    self.suspensionHeaderSectionSize = nil
                     sectionAttr.headerAttributes?.zIndex = 502
                     sectionAttr.footerAttributes?.zIndex = 501
                     sectionAttr.decorationAttributes?.zIndex = 498
@@ -352,7 +354,16 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         
         for sectionAttr in sectionAttributes.values {
             /// 添加item位置
-            resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(in: rect, for: formView, headerSize: headerSize, suspensionHeader: suspensionHeader, footerSize: footerSize, suspensionFooter: suspensionFooter, scrollDirection: self.scrollDirection) ?? [])
+            resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(
+                in: rect,
+                for: formView,
+                headerSize: headerSize,
+                suspensionHeader: suspensionHeader,
+                suspensionHeaderSectionSize: self.suspensionHeaderSectionSize,
+                footerSize: footerSize,
+                suspensionFooter: suspensionFooter,
+                scrollDirection: self.scrollDirection
+            ) ?? [])
             
             /// 如果有装饰view，也需要悬浮
             if
@@ -501,8 +512,18 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 } else {
                     size = CGSize(width: view.bounds.width, height: size.height - offset)
                 }
+                if header.shouldSuspension {
+                    /// 如果是悬浮header，返回压缩后的尺寸，非悬浮返回原始尺寸
+                    inListSize = size
+                } else if offset >= 0 {
+                    /// 非悬浮且压缩时，需要往下偏移
+                    if offset <= (inListSize.height - size.height) {
+                        y += offset
+                    } else {
+                        y += (inListSize.height - size.height)
+                    }
+                }
             }
-            inListSize = CGSize(width: size.width, height: size.height)
             switch header.displayType {
             case .stretch:
                 if view.contentOffset.y < 0 {
@@ -514,7 +535,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     y = view.contentOffset.y
                 }
             default:
-                y = 0
+                break
             }
             if header.shouldSuspension {
                 headerAttributes.zIndex = 1127
@@ -532,8 +553,18 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 } else {
                     size = CGSize(width: size.width - offset, height: view.bounds.height)
                 }
+                if header.shouldSuspension {
+                    /// 如果是悬浮header，返回压缩后的尺寸，非悬浮返回原始尺寸
+                    inListSize = size
+                } else if offset > 0 {
+                    /// 非悬浮且压缩时，需要往右偏移
+                    if offset <= (inListSize.width - size.width) {
+                        x += offset
+                    } else {
+                        x += (inListSize.width - size.width)
+                    }
+                }
             }
-            inListSize = CGSize(width: size.width, height: size.height)
             switch header.displayType {
             case .stretch:
                 if view.contentOffset.x < 0 {
@@ -641,12 +672,24 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
 
 // MARK: - QuickListSectionAttribute位置获取扩展
 extension QuickListSectionAttribute {
-    /// 获取指定范围内的attribute数组
+    /**
+    获取section内所有元素的布局属性
+    - Parameters:
+        - rect: 需要获取的范围
+        - view: QuickListView实例
+        - headerSize: form header的尺寸
+        - suspensionHeader: 是否悬停form header
+        - suspensionHeaderSectionSize: 悬停的header section尺寸
+        - footerSize: form footer的尺寸
+        - suspensionFooter: 是否悬停form footer
+        - scrollDirection: 滚动方向
+     */
     func layoutAttributesForElements(
         in rect: CGRect,
         for view: QuickListView,
         headerSize: CGSize,
         suspensionHeader: Bool,
+        suspensionHeaderSectionSize: CGSize?,
         footerSize: CGSize,
         suspensionFooter: Bool,
         scrollDirection: UICollectionView.ScrollDirection
@@ -661,24 +704,24 @@ extension QuickListSectionAttribute {
         if self.isFormHeader {
             /// 设置整个section悬停
             if var headerAttributes = self.headerAttributes {
-                suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(headerAttributes)
             }
             if var footerAttributes = self.footerAttributes {
-                suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(footerAttributes)
             }
             for itemAttr in self.itemAttributes {
                 var itemAttr = itemAttr
-                suspensionAttributes(&itemAttr, zIndex: 1024, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                suspensionAttributes(&itemAttr, zIndex: 1024, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(itemAttr)
             }
             if var decorationAttributes = self.decorationAttributes {
-                suspensionAttributes(&decorationAttributes, zIndex: 1022, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                suspensionAttributes(&decorationAttributes, zIndex: 1022, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(decorationAttributes)
             }
             if var suspensionDecorationAttributes = self.suspensionDecorationAttributes {
-                suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, headerSize: headerSize, with: scrollDirection)
                 switch scrollDirection {
                 case .horizontal:
                     suspensionDecorationAttributes.alpha = view.contentOffset.x > headerSize.width ? 1 : 0
@@ -692,7 +735,7 @@ extension QuickListSectionAttribute {
         } else if rect.intersects(sectionArea) {
             if var headerAttributes = self.headerAttributes {
                 if self.shouldSuspensionHeader {
-                    suspensionHeaderAttributes(&headerAttributes, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
+                    suspensionHeaderAttributes(&headerAttributes, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, suspensionHeaderSectionSize: suspensionHeaderSectionSize, with: scrollDirection)
                     resultAttrs.append(headerAttributes)
                 } else if rect.intersects(headerAttributes.frame) {
                     headerAttributes.zIndex = 503
@@ -722,36 +765,31 @@ extension QuickListSectionAttribute {
         return resultAttrs
     }
     
-    /// 设置整个section悬停
+    /**
+     设置整个section悬停
+        - Parameters:
+            - attributes: 布局属性
+            - zIndex: zIndex值
+            - view: QuickListView实例
+            - headerSize: form header的尺寸
+            - scrollDirection: 滚动方向
+     */
     func suspensionAttributes(
         _ attributes: inout UICollectionViewLayoutAttributes,
         zIndex: Int,
         for view: QuickListView,
         headerSize: CGSize,
-        suspensionHeader: Bool,
         with scrollDirection: UICollectionView.ScrollDirection
     ) {
         if scrollDirection == .vertical {
             var frame = attributes.caculatedFrame ?? attributes.frame
-            if suspensionHeader {
-                /// 如果悬停header且offset大于0，直接在header下方悬停
-                if view.contentOffset.y > 0 {
-                    frame.origin.y += view.contentOffset.y
-                }
-            } else
-            if view.contentOffset.y >= headerSize.height {
+            if view.contentOffset.y > headerSize.height {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
                 frame.origin.y += view.contentOffset.y - headerSize.height
             }
             attributes.frame = frame
         } else {
             var frame = attributes.caculatedFrame ?? attributes.frame
-            if suspensionHeader {
-                /// 如果悬停header且offset大于0，直接在header下方悬停
-                if view.contentOffset.x > 0 {
-                    frame.origin.x += view.contentOffset.x
-                }
-            } else
             if view.contentOffset.x >= headerSize.width {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
                 frame.origin.x += view.contentOffset.y - headerSize.width
@@ -761,27 +799,37 @@ extension QuickListSectionAttribute {
         attributes.zIndex = zIndex
     }
     
-    /// 设置header悬停
+    /**
+    设置header悬停
+    - Parameters:
+        - headerAttributes: header的布局属性
+        - view: QuickListView实例
+        - headerSize: form header的尺寸
+        - suspensionHeader: 是否悬停form header
+        - suspensionHeaderSectionSize: 悬停的header section尺寸
+        - scrollDirection: 滚动方向
+    */
     func suspensionHeaderAttributes(
         _ headerAttributes: inout UICollectionViewLayoutAttributes,
         for view: QuickListView,
         headerSize: CGSize,
         suspensionHeader: Bool,
+        suspensionHeaderSectionSize: CGSize?,
         with scrollDirection: UICollectionView.ScrollDirection
     ) {
         var offset = view.contentOffset
-        if let suspensionStartPoint = view.suspensionStartPoint {
+        if let suspensionHeaderSectionSize = suspensionHeaderSectionSize {
             if scrollDirection == .vertical {
                 if suspensionHeader {
-                    offset.y += suspensionStartPoint.y
+                    offset.y += suspensionHeaderSectionSize.height + headerSize.height
                 } else {
-                    offset.y += suspensionStartPoint.y - headerSize.height
+                    offset.y += suspensionHeaderSectionSize.height
                 }
             } else {
                 if suspensionHeader {
-                    offset.x += suspensionStartPoint.x
+                    offset.x += suspensionHeaderSectionSize.width + headerSize.width
                 } else {
-                    offset.x += suspensionStartPoint.x - headerSize.width
+                    offset.x += suspensionHeaderSectionSize.width
                 }
             }
         } else {
@@ -850,7 +898,15 @@ extension QuickListSectionAttribute {
         }
     }
     
-    /// 设置footer悬停
+    /**
+     设置footer悬停
+        - Parameters:
+            - footerAttributes: footer的布局属性
+            - view: QuickListView实例
+            - footerSize: form footer的尺寸
+            - suspensionFooter: 是否悬停form footer
+            - scrollDirection: 滚动方向
+     */
     func suspensionFooterAttributes(
         _ footerAttributes: inout UICollectionViewLayoutAttributes,
         for view: QuickListView,

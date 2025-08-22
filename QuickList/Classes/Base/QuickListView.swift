@@ -9,8 +9,6 @@ import UIKit
 import SnapKit
 
 open class QuickListView: UICollectionView {
-    /// section的悬浮header的起始点（扩展属性），用于支持isFormHeader
-    public var suspensionStartPoint: CGPoint?
     /// 当前装饰控件（扩展属性）
     var currentDecorationView: UIView?
     /// 当前全局背景（扩展属性)

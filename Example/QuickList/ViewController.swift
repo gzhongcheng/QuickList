@@ -76,7 +76,7 @@ class ViewController: UIViewController {
         
         let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
         /// 设置悬浮
-        formHeader.shouldSuspension = true
+        formHeader.shouldSuspension = false
         /// 设置压缩
         formHeader.minSize = CGSize(width: 40, height: 40)
         /// 设置默认尺寸
@@ -84,7 +84,7 @@ class ViewController: UIViewController {
             80
         }
         /// 设置拉伸时的逻辑
-        formHeader.displayType = .top
+        formHeader.displayType = .stretch
         formlist.form.header = formHeader
         
 //        formlist.form.footer = FormDecorationView<UICollectionReusableView> { view in
@@ -97,7 +97,7 @@ class ViewController: UIViewController {
         
         let formFooter = FormCompressibleDecorationView<CompressibleHeaderView>()
         /// 设置悬浮
-        formFooter.shouldSuspension = true
+        formFooter.shouldSuspension = false
         /// 设置压缩
         formFooter.minSize = CGSize(width: 40, height: 40)
         /// 设置默认尺寸
@@ -105,7 +105,7 @@ class ViewController: UIViewController {
             80
         }
         /// 设置拉伸时的逻辑
-        formFooter.displayType = .bottom
+        formFooter.displayType = .stretch
 
         formlist.form.footer = formFooter
         
