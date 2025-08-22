@@ -48,8 +48,8 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     /// 更新类型
     var dataChangeType: QuickListDataChangeType = .all
     /// 整个form的Header和Footer的尺寸
-    var headerSize: CGSize = .zero
-    var footerSize: CGSize = .zero
+    var headerAttributes: UICollectionViewLayoutAttributes?
+    var footerAttributes: UICollectionViewLayoutAttributes?
     /// 存放各section位置等数据的数组
     var sectionAttributes: [Int: QuickListSectionAttribute] = [:]
     /// 存放各section位置等数据的数组
@@ -78,6 +78,28 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         
         if index == 0 {
             resetData()
+            /// 计算整个列表的Header
+            if
+                let collectionView = self.collectionView,
+                let header = form.header
+            {
+                headerAttributes = UICollectionViewLayoutAttributes(
+                    forSupplementaryViewOfKind: QuickListReusableType.formHeader.elementKind,
+                    with: IndexPath(item: 0, section: 0)
+                )
+                var frame: CGRect = .zero
+                if self.scrollDirection == .vertical {
+                    let height = header.height(form, collectionView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: 0, y: 0, width: collectionView.bounds.width, height: height)
+                    currentOffset.y += height
+                } else {
+                    let width = header.height(form, collectionView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: 0, y: 0, width: width, height: collectionView.bounds.height)
+                    currentOffset.x += width
+                }
+                headerAttributes?.frame = frame
+                headerAttributes?.caculatedFrame = frame
+            }
         } else {
             for (i, attr) in self.sectionAttributes {
                 if i < index {
@@ -104,6 +126,35 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             return section1.endPoint.y < section2.endPoint.y
         })?.endPoint {
             currentOffset = maxPoint
+        }
+        
+        /// 添加尾部间距
+        if self.scrollDirection == .vertical {
+            currentOffset.y += form.contentInset.bottom
+        } else {
+            currentOffset.x += form.contentInset.right
+        }
+        
+        /// 计算整个列表的Footer
+        if let collectionView = self.collectionView {
+            if let footer = form.footer {
+                footerAttributes = UICollectionViewLayoutAttributes(
+                    forSupplementaryViewOfKind: QuickListReusableType.formFooter.elementKind,
+                    with: IndexPath(item: 0, section: 0)
+                )
+                var frame: CGRect = .zero
+                if self.scrollDirection == .vertical {
+                    let height = footer.height(form, collectionView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
+                    currentOffset.y += height
+                } else {
+                    let width = footer.height(form, collectionView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: collectionView.bounds.height)
+                    currentOffset.x += width
+                }
+                footerAttributes?.frame = frame
+                footerAttributes?.caculatedFrame = frame
+            }
         }
         
         if form.needCenterIfNotFull {
@@ -150,20 +201,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 if self.form?.backgroundDecoration != nil {
                     handler.updateBackgroundDecoration(contentSize: contentSize)
                 }
-                if self.form?.header != nil {
-                    handler.updateHeaderDecoration()
-                }
-                if self.form?.footer != nil {
-                    handler.updateFooterDecoration(contentSize: contentSize)
-                }
                 if self.form?.selectedItemDecoration != nil {
                     handler.updateSelectedItemDecorationIfNeeded()
                 }
-//                for section in self.sectionAttributes.values {
-//                    if section.isFormHeader {
-//                        
-//                    }
-//                }
             }
         }
         
@@ -173,56 +213,11 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
     
     func resetData() {
-        /// 计算整个列表的Header和Footer位置
-        if let collectionView = self.collectionView {
-            if let header = form?.header {
-                if header.useAutoLayout {
-                    switch scrollDirection {
-                    case .vertical:
-                        header.snp.makeConstraints { make in
-                            make.width.equalTo(collectionView.bounds.width)
-                        }
-                    case .horizontal:
-                        header.snp.makeConstraints { make in
-                            make.height.equalTo(collectionView.bounds.height)
-                        }
-                    @unknown default:
-                        break
-                    }
-                    self.headerSize = header.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-                } else {
-                    let headerHeight = header.height?(collectionView.bounds.size, scrollDirection) ?? 0
-                    self.headerSize = CGSize(width: collectionView.bounds.width, height: headerHeight)
-                }
-            }
-            if let footer = form?.footer {
-                if footer.useAutoLayout {
-                    switch scrollDirection {
-                    case .vertical:
-                        footer.snp.makeConstraints { make in
-                            make.width.equalTo(collectionView.bounds.width)
-                        }
-                    case .horizontal:
-                        footer.snp.makeConstraints { make in
-                            make.height.equalTo(collectionView.bounds.height)
-                        }
-                    @unknown default:
-                        break
-                    }
-                    self.footerSize = footer.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-                } else {
-                    let footerHeight = footer.height?(collectionView.bounds.size, scrollDirection) ?? 0
-                    self.footerSize = CGSize(width: collectionView.bounds.width, height: footerHeight)
-                }
-            }
-        }
-        form?.delegate?.formView?.headerSize = self.headerSize
-        form?.delegate?.formView?.footerSize = self.footerSize
         sectionAttributes = [:]
         if self.scrollDirection == .vertical {
-            currentOffset = CGPoint(x: 0, y: self.headerSize.height + (form?.contentInset.top ?? 0))
+            currentOffset = CGPoint(x: 0, y: form?.contentInset.top ?? 0)
         } else {
-            currentOffset = CGPoint(x: self.headerSize.width + (form?.contentInset.left ?? 0), y: 0)
+            currentOffset = CGPoint(x: form?.contentInset.left ?? 0, y: 0)
         }
     }
     
@@ -253,16 +248,19 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
     
     func addSection(section: Section, isFirst: Bool) {
-        guard let sectionIndex = section.index else { return }
+        guard
+            let sectionIndex = section.index,
+            let collectionView = self.collectionView as? QuickListView
+        else { return }
         
         let layoutExecute = { (layout: QuickListBaseLayout) in
             let sectionAttr = layout.getAttsWithLayout(self, section: section, currentStart: self.currentOffset, isFirstSection: isFirst)
             if sectionIndex == 0 {
                 if section.isFormHeader {
                     if self.scrollDirection == .vertical {
-                        self.collectionView?.suspensionStartPoint = CGPoint(x: 0, y: sectionAttr.endPoint.y)
+                        collectionView.suspensionStartPoint = CGPoint(x: 0, y: sectionAttr.endPoint.y)
                     } else {
-                        self.collectionView?.suspensionStartPoint = CGPoint(x: sectionAttr.endPoint.x, y: 0)
+                        collectionView.suspensionStartPoint = CGPoint(x: sectionAttr.endPoint.x, y: 0)
                     }
                     /// 记录初始位置
                     sectionAttr.headerAttributes?.caculatedFrame = sectionAttr.headerAttributes?.frame
@@ -271,7 +269,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
                     sectionAttr.itemAttributes.forEach { $0.caculatedFrame = $0.frame }
                 } else {
-                    self.collectionView?.suspensionStartPoint = nil
+                    collectionView.suspensionStartPoint = nil
                     sectionAttr.headerAttributes?.zIndex = 502
                     sectionAttr.footerAttributes?.zIndex = 501
                     sectionAttr.decorationAttributes?.zIndex = 498
@@ -324,9 +322,37 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
         /// 获取位置数组
         var resultAttrs: [UICollectionViewLayoutAttributes] = []
+        /// 整体的header和footer
+        var headerSize: CGSize = .zero
+        var footerSize: CGSize = .zero
+        var suspensionHeader: Bool = false
+        var suspensionFooter: Bool = false
+        if let header = form?.header {
+            let (headerAttr, size) = getFormHeaderAttributes(header, for: formView, with: scrollDirection)
+            if let headerAttr = headerAttr {
+                resultAttrs.append(headerAttr)
+                if let header = header as? FormCompressibleHeaderFooterReusable {
+                    header.didChangeDispalySize(to: headerAttr.frame.size)
+                }
+            }
+            headerSize = size
+            suspensionHeader = header.shouldSuspension
+        }
+        if let footer = form?.footer {
+            let (footerAttr, size) = getFormFooterAttributes(footer, for: formView, with: scrollDirection)
+            if let footerAttr = footerAttr {
+                resultAttrs.append(footerAttr)
+                if let footer = footer as? FormCompressibleHeaderFooterReusable {
+                    footer.didChangeDispalySize(to: footerAttr.frame.size)
+                }
+            }
+            footerSize = size
+            suspensionFooter = footer.shouldSuspension
+        }
+        
         for sectionAttr in sectionAttributes.values {
             /// 添加item位置
-            resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(in: rect, for: formView, scrollDirection: self.scrollDirection) ?? [])
+            resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(in: rect, for: formView, headerSize: headerSize, suspensionHeader: suspensionHeader, footerSize: footerSize, suspensionFooter: suspensionFooter, scrollDirection: self.scrollDirection) ?? [])
             
             /// 如果有装饰view，也需要悬浮
             if
@@ -370,22 +396,28 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
     
     public override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        if elementKind == QuickListReusableType.formHeader.elementKind {
+            return headerAttributes
+        }
+        if elementKind == QuickListReusableType.formFooter.elementKind {
+            return footerAttributes
+        }
         guard
             let sectionIndex = indexPath.safeSection(),
             let section = sectionAttributes[sectionIndex]
         else {
             return nil
         }
-        if elementKind == SectionReusableType.header.elementKind {
+        if elementKind == QuickListReusableType.sectionHeader.elementKind {
             return section.headerAttributes
         }
-        if elementKind == SectionReusableType.footer.elementKind {
+        if elementKind == QuickListReusableType.sectionFooter.elementKind {
             return section.footerAttributes
         }
-        if elementKind == SectionReusableType.decoration.elementKind {
+        if elementKind == QuickListReusableType.decoration.elementKind {
             return section.decorationAttributes
         }
-        if elementKind == SectionReusableType.suspensionDecoration.elementKind {
+        if elementKind == QuickListReusableType.suspensionDecoration.elementKind {
             return section.suspensionDecorationAttributes
         }
         return nil
@@ -409,16 +441,16 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         else {
             return nil
         }
-        if elementKind == SectionReusableType.header.elementKind {
+        if elementKind == QuickListReusableType.sectionHeader.elementKind {
             return section.headerAttributes
         }
-        if elementKind == SectionReusableType.footer.elementKind {
+        if elementKind == QuickListReusableType.sectionFooter.elementKind {
             return section.footerAttributes
         }
-        if elementKind == SectionReusableType.decoration.elementKind {
+        if elementKind == QuickListReusableType.decoration.elementKind {
             return section.decorationAttributes
         }
-        if elementKind == SectionReusableType.suspensionDecoration.elementKind {
+        if elementKind == QuickListReusableType.suspensionDecoration.elementKind {
             return section.suspensionDecorationAttributes
         }
         return nil
@@ -428,13 +460,13 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         switch scrollDirection {
         case .horizontal:
             return CGSize(
-                width: currentOffset.x + (form?.contentInset.right ?? 0) + footerSize.width,
+                width: currentOffset.x,
                 height: max(currentOffset.y, self.form?.delegate?.formView?.bounds.height ?? 0)
             )
         case .vertical:
             return CGSize(
                 width: max(currentOffset.x, self.form?.delegate?.formView?.bounds.width ?? 0),
-                height: currentOffset.y + (form?.contentInset.bottom ?? 0) + footerSize.height
+                height: currentOffset.y
             )
         @unknown default:
             return .zero
@@ -453,12 +485,172 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
         return false
     }
+    
+    func getFormHeaderAttributes(_ header: FormHeaderFooterReusable, for view: QuickListView, with scrollDirection: UICollectionView.ScrollDirection) -> (UICollectionViewLayoutAttributes?, CGSize) {
+        guard let headerAttributes = headerAttributes else { return (nil, .zero) }
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var size: CGSize = headerAttributes.caculatedFrame?.size ?? headerAttributes.frame.size
+        var inListSize: CGSize = size
+        switch scrollDirection {
+        case .vertical:
+            if let header = header as? FormCompressibleHeaderFooterReusable {
+                let offset = view.contentOffset.y > 0 ? view.contentOffset.y : 0
+                if let minSize = header.minSize {
+                    size = CGSize(width: view.bounds.width, height: max(size.height - offset , minSize.height))
+                } else {
+                    size = CGSize(width: view.bounds.width, height: size.height - offset)
+                }
+            }
+            inListSize = CGSize(width: size.width, height: size.height)
+            switch header.displayType {
+            case .stretch:
+                if view.contentOffset.y < 0 {
+                    y += view.contentOffset.y
+                    size.height -= view.contentOffset.y
+                }
+            case .top:
+                if view.contentOffset.y < 0 {
+                    y = view.contentOffset.y
+                }
+            default:
+                y = 0
+            }
+            if header.shouldSuspension {
+                headerAttributes.zIndex = 1127
+                if view.contentOffset.y > 0 {
+                    y += view.contentOffset.y
+                }
+            } else {
+                headerAttributes.zIndex = 600
+            }
+        case .horizontal:
+            if let header = header as? FormCompressibleHeaderFooterReusable {
+                let offset = view.contentOffset.x > 0 ? view.contentOffset.x : 0
+                if let minSize = header.minSize {
+                    size = CGSize(width: max(size.width - offset, minSize.width), height: view.bounds.height)
+                } else {
+                    size = CGSize(width: size.width - offset, height: view.bounds.height)
+                }
+            }
+            inListSize = CGSize(width: size.width, height: size.height)
+            switch header.displayType {
+            case .stretch:
+                if view.contentOffset.x < 0 {
+                    x += view.contentOffset.x
+                    size.width -= view.contentOffset.x
+                }
+            case .top:
+                if view.contentOffset.x < 0 {
+                    x = view.contentOffset.x
+                }
+            default:
+                break
+            }
+            if header.shouldSuspension {
+                headerAttributes.zIndex = 1127
+                if view.contentOffset.x > 0 {
+                    x += view.contentOffset.x
+                }
+            } else {
+                headerAttributes.zIndex = 600
+            }
+        default:
+            break
+        }
+        headerAttributes.frame = CGRect(x: x, y: y, width: size.width, height: size.height)
+        return (headerAttributes, inListSize)
+    }
+    
+    func getFormFooterAttributes(_ footer: FormHeaderFooterReusable, for view: QuickListView, with scrollDirection: UICollectionView.ScrollDirection) -> (UICollectionViewLayoutAttributes?, CGSize) {
+        guard let footerAttributes = footerAttributes else { return (nil, .zero) }
+        var x: CGFloat = footerAttributes.caculatedFrame?.minX ?? footerAttributes.frame.minX
+        var y: CGFloat = footerAttributes.caculatedFrame?.minY ?? footerAttributes.frame.minY
+        var size: CGSize = footerAttributes.caculatedFrame?.size ?? footerAttributes.frame.size
+        var inListSize: CGSize = size
+        switch scrollDirection {
+        case .vertical:
+            if let footer = footer as? FormCompressibleHeaderFooterReusable {
+                var offset = view.contentSize.height - view.contentOffset.y - view.bounds.height
+                offset = offset > 0 ? offset : 0
+                if let minSize = footer.minSize {
+                    size = CGSize(width: view.bounds.width, height: max(size.height - offset, minSize.height))
+                } else {
+                    size = CGSize(width: view.bounds.width, height: size.height - offset)
+                }
+            }
+            inListSize = CGSize(width: size.width, height: size.height)
+            switch footer.displayType {
+            case .stretch:
+                if view.contentOffset.y + view.bounds.height > view.contentSize.height {
+                    size.height += view.contentOffset.y + view.bounds.height - view.contentSize.height
+                }
+            case .bottom:
+                if view.contentOffset.y + view.bounds.height > view.contentSize.height {
+                    y += view.contentOffset.y + view.bounds.height - view.contentSize.height
+                }
+            default:
+                break
+            }
+            if footer.shouldSuspension {
+                footerAttributes.zIndex = 1127
+                if view.contentOffset.y < view.contentSize.height - view.bounds.height {
+                    y = view.contentOffset.y + view.bounds.height - size.height
+                }
+            } else {
+                footerAttributes.zIndex = 600
+            }
+        case .horizontal:
+            if let footer = footer as? FormCompressibleHeaderFooterReusable {
+                var offset = view.contentSize.width - view.contentOffset.x - view.bounds.width
+                offset = offset > 0 ? offset : 0
+                if let minSize = footer.minSize {
+                    size = CGSize(width: max(size.width - offset, minSize.width), height: view.bounds.height)
+                } else {
+                    size = CGSize(width: size.width - offset, height: view.bounds.height)
+                }
+            }
+            inListSize = CGSize(width: size.width, height: size.height)
+            switch footer.displayType {
+            case .stretch:
+                if view.contentOffset.x + view.bounds.width > view.contentSize.width {
+                    size.width += view.contentOffset.x + view.bounds.width - view.contentSize.width
+                }
+            case .bottom:
+                if view.contentOffset.x + view.bounds.width > view.contentSize.width {
+                    x += view.contentOffset.x + view.bounds.width - view.contentSize.width
+                }
+            default:
+                break
+            }
+            if footer.shouldSuspension {
+                footerAttributes.zIndex = 1127
+                if view.contentOffset.x < view.contentSize.width - view.bounds.width {
+                    x = view.contentOffset.x + view.bounds.width - size.width
+                }
+            } else {
+                footerAttributes.zIndex = 600
+            }
+        default:
+            break
+        }
+        footerAttributes.frame = CGRect(x: x, y: y, width: size.width, height: size.height)
+        return (footerAttributes, inListSize)
+    }
 }
 
 // MARK: - QuickListSectionAttribute位置获取扩展
 extension QuickListSectionAttribute {
     /// 获取指定范围内的attribute数组
-    func layoutAttributesForElements(in rect: CGRect, for view: FormViewProtocol, scrollDirection: UICollectionView.ScrollDirection) -> [UICollectionViewLayoutAttributes]? {
+    func layoutAttributesForElements(
+        in rect: CGRect,
+        for view: QuickListView,
+        headerSize: CGSize,
+        suspensionHeader: Bool,
+        footerSize: CGSize,
+        suspensionFooter: Bool,
+        scrollDirection: UICollectionView.ScrollDirection
+    ) -> [UICollectionViewLayoutAttributes]? {
         var resultAttrs: [UICollectionViewLayoutAttributes] = []
         var sectionArea: CGRect
         if scrollDirection == .vertical {
@@ -469,29 +661,29 @@ extension QuickListSectionAttribute {
         if self.isFormHeader {
             /// 设置整个section悬停
             if var headerAttributes = self.headerAttributes {
-                suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, with: scrollDirection)
+                suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                 resultAttrs.append(headerAttributes)
             }
             if var footerAttributes = self.footerAttributes {
-                suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, with: scrollDirection)
+                suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                 resultAttrs.append(footerAttributes)
             }
             for itemAttr in self.itemAttributes {
                 var itemAttr = itemAttr
-                suspensionAttributes(&itemAttr, zIndex: 1024, for: view, with: scrollDirection)
+                suspensionAttributes(&itemAttr, zIndex: 1024, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                 resultAttrs.append(itemAttr)
             }
             if var decorationAttributes = self.decorationAttributes {
-                suspensionAttributes(&decorationAttributes, zIndex: 1022, for: view, with: scrollDirection)
+                suspensionAttributes(&decorationAttributes, zIndex: 1022, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                 resultAttrs.append(decorationAttributes)
             }
             if var suspensionDecorationAttributes = self.suspensionDecorationAttributes {
-                suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, with: scrollDirection)
+                suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                 switch scrollDirection {
                 case .horizontal:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.x > view.headerSize.width ? 1 : 0
+                    suspensionDecorationAttributes.alpha = view.contentOffset.x > headerSize.width ? 1 : 0
                 case .vertical:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.y > view.headerSize.height ? 1 : 0
+                    suspensionDecorationAttributes.alpha = view.contentOffset.y > headerSize.height ? 1 : 0
                 @unknown default:
                     break
                 }
@@ -500,7 +692,7 @@ extension QuickListSectionAttribute {
         } else if rect.intersects(sectionArea) {
             if var headerAttributes = self.headerAttributes {
                 if self.shouldSuspensionHeader {
-                    suspensionHeaderAttributes(&headerAttributes, for: view, with: scrollDirection)
+                    suspensionHeaderAttributes(&headerAttributes, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, with: scrollDirection)
                     resultAttrs.append(headerAttributes)
                 } else if rect.intersects(headerAttributes.frame) {
                     headerAttributes.zIndex = 503
@@ -509,7 +701,7 @@ extension QuickListSectionAttribute {
             }
             if var footerAttributes = self.footerAttributes {
                 if self.shouldSuspensionFooter {
-                    suspensionFooterAttributes(&footerAttributes, for: view, with: scrollDirection)
+                    suspensionFooterAttributes(&footerAttributes, for: view, footerSize: headerSize, suspensionFooter: suspensionFooter, with: scrollDirection)
                     resultAttrs.append(footerAttributes)
                 } else if rect.intersects(footerAttributes.frame) {
                     footerAttributes.zIndex = 502
@@ -531,19 +723,38 @@ extension QuickListSectionAttribute {
     }
     
     /// 设置整个section悬停
-    func suspensionAttributes(_ attributes: inout UICollectionViewLayoutAttributes, zIndex: Int, for view: FormViewProtocol, with scrollDirection: UICollectionView.ScrollDirection) {
+    func suspensionAttributes(
+        _ attributes: inout UICollectionViewLayoutAttributes,
+        zIndex: Int,
+        for view: QuickListView,
+        headerSize: CGSize,
+        suspensionHeader: Bool,
+        with scrollDirection: UICollectionView.ScrollDirection
+    ) {
         if scrollDirection == .vertical {
             var frame = attributes.caculatedFrame ?? attributes.frame
-            if view.contentOffset.y >= view.headerSize.height {
+            if suspensionHeader {
+                /// 如果悬停header且offset大于0，直接在header下方悬停
+                if view.contentOffset.y > 0 {
+                    frame.origin.y += view.contentOffset.y
+                }
+            } else
+            if view.contentOffset.y >= headerSize.height {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
-                frame.origin.y += view.contentOffset.y - view.headerSize.height
+                frame.origin.y += view.contentOffset.y - headerSize.height
             }
             attributes.frame = frame
         } else {
             var frame = attributes.caculatedFrame ?? attributes.frame
-            if view.contentOffset.x >= view.headerSize.width {
+            if suspensionHeader {
+                /// 如果悬停header且offset大于0，直接在header下方悬停
+                if view.contentOffset.x > 0 {
+                    frame.origin.x += view.contentOffset.x
+                }
+            } else
+            if view.contentOffset.x >= headerSize.width {
                 /// 如果还没有滚动到悬停位置，直接返回原始的frame
-                frame.origin.x += view.contentOffset.y - view.headerSize.width
+                frame.origin.x += view.contentOffset.y - headerSize.width
             }
             attributes.frame = frame
         }
@@ -551,13 +762,35 @@ extension QuickListSectionAttribute {
     }
     
     /// 设置header悬停
-    func suspensionHeaderAttributes(_ headerAttributes: inout UICollectionViewLayoutAttributes, for view: FormViewProtocol, with scrollDirection: UICollectionView.ScrollDirection) {
+    func suspensionHeaderAttributes(
+        _ headerAttributes: inout UICollectionViewLayoutAttributes,
+        for view: QuickListView,
+        headerSize: CGSize,
+        suspensionHeader: Bool,
+        with scrollDirection: UICollectionView.ScrollDirection
+    ) {
         var offset = view.contentOffset
         if let suspensionStartPoint = view.suspensionStartPoint {
             if scrollDirection == .vertical {
-                offset.y += suspensionStartPoint.y - view.headerSize.height
+                if suspensionHeader {
+                    offset.y += suspensionStartPoint.y
+                } else {
+                    offset.y += suspensionStartPoint.y - headerSize.height
+                }
             } else {
-                offset.x += suspensionStartPoint.x - view.headerSize.width
+                if suspensionHeader {
+                    offset.x += suspensionStartPoint.x
+                } else {
+                    offset.x += suspensionStartPoint.x - headerSize.width
+                }
+            }
+        } else {
+            if suspensionHeader {
+                if scrollDirection == .vertical {
+                    offset.y += headerSize.height
+                } else {
+                    offset.x += headerSize.width
+                }
             }
         }
         /// 还没有滚动到需要悬停的位置，直接返回原始的frame
@@ -618,16 +851,23 @@ extension QuickListSectionAttribute {
     }
     
     /// 设置footer悬停
-    func suspensionFooterAttributes(_ footerAttributes: inout UICollectionViewLayoutAttributes, for view: FormViewProtocol, with scrollDirection: UICollectionView.ScrollDirection) {
+    func suspensionFooterAttributes(
+        _ footerAttributes: inout UICollectionViewLayoutAttributes,
+        for view: QuickListView,
+        footerSize: CGSize,
+        suspensionFooter: Bool,
+        with scrollDirection: UICollectionView.ScrollDirection
+    ) {
         let offset = view.contentOffset
+        let footerSuspensionSize: CGSize = suspensionFooter ? footerSize : .zero
         /// 还没有滚动到需要悬停的位置，直接返回原始的frame
-        if scrollDirection == .vertical, endPoint.y < offset.y + view.bounds.height  {
+        if scrollDirection == .vertical, endPoint.y < offset.y + view.bounds.height - footerSuspensionSize.height  {
             var frame = footerAttributes.frame
             frame.origin.y = endPoint.y - footerAttributes.size.height
             footerAttributes.frame = frame
             return
         }
-        if scrollDirection == .horizontal, endPoint.x < offset.x + view.bounds.width  {
+        if scrollDirection == .horizontal, endPoint.x < offset.x + view.bounds.width - footerSuspensionSize.width  {
             var frame = footerAttributes.frame
             frame.origin.x = endPoint.x - footerAttributes.size.width
             footerAttributes.frame = frame
@@ -639,10 +879,10 @@ extension QuickListSectionAttribute {
             lastAttrPosition = CGPoint(x: headerFrame.maxX, y: headerFrame.maxY)
         } else
         /// 已经滚动到上一个section，跳过
-        if scrollDirection == .vertical, lastAttrPosition.y > offset.y + view.bounds.height {
+        if scrollDirection == .vertical, lastAttrPosition.y > offset.y + view.bounds.height - footerSuspensionSize.height {
             return
         }
-        if scrollDirection == .horizontal, lastAttrPosition.x > offset.x + view.bounds.width {
+        if scrollDirection == .horizontal, lastAttrPosition.x > offset.x + view.bounds.width - footerSuspensionSize.width {
             return
         }
         /// 设置footer悬浮位置
@@ -650,7 +890,7 @@ extension QuickListSectionAttribute {
             let width = footerAttributes.frame.width
             let height = footerAttributes.frame.height
             let x: CGFloat = footerAttributes.frame.minX
-            let offsetY = offset.y + view.bounds.height
+            let offsetY = offset.y + view.bounds.height - footerSuspensionSize.height
             var y = offsetY - height
             let last = lastAttrPosition.y
             if
@@ -664,7 +904,7 @@ extension QuickListSectionAttribute {
             let width = footerAttributes.frame.width
             let height = footerAttributes.frame.height
             let y: CGFloat = footerAttributes.frame.minY
-            let offsetX = offset.x + view.bounds.width
+            let offsetX = offset.x + view.bounds.width - footerSuspensionSize.width
             var x = offsetX - width
             let last = lastAttrPosition.x
             if

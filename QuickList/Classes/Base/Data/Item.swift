@@ -24,7 +24,7 @@ public protocol ItemViewRepresentable {
     var identifier: String { get }
     
     /// 调用此方法来注册
-    func regist(to view: FormViewProtocol)
+    func regist(to view: QuickListView)
 
     /**
      调用此方法来获取指定item相对应的cell
@@ -35,7 +35,7 @@ public protocol ItemViewRepresentable {
      
      - returns: 对应的cell
      */
-    func viewForItem(_ item: Item, in view: FormViewProtocol, for indexPath: IndexPath) -> UICollectionViewCell?
+    func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell?
     
     /// 调用此方法计算尺寸
     /// - parameter estimateItemSize: 预估尺寸，根据配置预估的一个正方形尺寸
@@ -44,7 +44,7 @@ public protocol ItemViewRepresentable {
     ///             QuickYogaLayout下, estimateItemSize返回的是item可绘制区域（即扣除formView.contentInset和section.contentInset的两边间距后的剩余宽度）的正方形尺寸
     /// - parameter view:    所在的view
     /// - parameter layoutType: 布局方式，QuickYogaLayout下值为free，其他布局下根据滚动方向设置为对应的布局方式
-    func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize?
+    func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize?
 }
 
 /// 绑定了cell类型的item
@@ -65,7 +65,7 @@ open class ItemOf<Cell: ItemCell>: Item, ItemViewRepresentable {
         }
     }
     
-    public func regist(to view: any FormViewProtocol) {
+    public func regist(to view: QuickListView) {
         if let fromNib = self.fromNib {
             view.register(fromNib, forCellWithReuseIdentifier: identifier)
         } else {
@@ -73,7 +73,7 @@ open class ItemOf<Cell: ItemCell>: Item, ItemViewRepresentable {
         }
     }
     
-    public func viewForItem(_ item: Item, in view: any FormViewProtocol, for indexPath: IndexPath) -> UICollectionViewCell? {
+    public func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell? {
         let cell = view.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? Cell
         if let cell = cell {
             onCreated?(item, cell)
@@ -81,7 +81,7 @@ open class ItemOf<Cell: ItemCell>: Item, ItemViewRepresentable {
         return cell
     }
     
-    open func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
+    open func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         assertionFailure("需要重写此方法来设置尺寸")
         return nil
     }
@@ -99,7 +99,7 @@ public protocol ItemViewBinderRepresentable: ItemViewRepresentable {
 /// cell与item的绑定器
 public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentable {
     public typealias ViewCreatedBlock = ((_ item: I, _ view: Cell) -> Void)
-    public typealias SizeBlock = ((_ item: I, _ estimateItemSize: CGSize, _ view: FormViewProtocol, _ layoutType: ItemCellLayoutType) -> CGSize)
+    public typealias SizeBlock = ((_ item: I, _ estimateItemSize: CGSize, _ view: QuickListView, _ layoutType: ItemCellLayoutType) -> CGSize)
     
     /// 从xib创建的对象传入对应的xib（将影响注册逻辑）
     private var fromNib: UINib?
@@ -121,7 +121,7 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
     }
     
     /// 调用此方法来注册
-    public func regist(to view: FormViewProtocol) {
+    public func regist(to view: QuickListView) {
         if let fromNib = self.fromNib {
             view.register(fromNib, forCellWithReuseIdentifier: identifier)
         } else {
@@ -141,7 +141,7 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
      
      - returns: 对应的cell
      */
-    public func viewForItem(_ item: Item, in view: FormViewProtocol, for indexPath: IndexPath) -> UICollectionViewCell? {
+    public func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell? {
         guard let item = item as? I else { return nil }
         let cell = view.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? Cell
         if let cell = cell {
@@ -151,7 +151,7 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
     }
     
     /// 调用此方法计算尺寸
-    public func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
+    public func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard let item = item as? I else { return nil }
         return onSizeGet(item, estimateItemSize, view, layoutType)
     }

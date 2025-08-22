@@ -15,6 +15,7 @@
 		2DB1DE942E0262F200522BF4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE792E0262F200522BF4 /* Images.xcassets */; };
 		2DB1DE952E0262F200522BF4 /* Main.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE8B2E0262F200522BF4 /* Main.strings */; };
 		2DB1DE962E0262F200522BF4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE852E0262F200522BF4 /* Main.storyboard */; };
+		2DF0BCF32E58013100C4B327 /* CompressibleHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */; };
 		D98A4A588B6FC42F81484072 /* Pods_QuickList_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C460C83A6E213DEC76763B3A /* Pods_QuickList_Example.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 		2DB1DE892E0262F200522BF4 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		2DB1DE8A2E0262F200522BF4 /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		2DB1DE8C2E0262F200522BF4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressibleHeaderView.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* QuickList_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QuickList_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		714AB878434C540217C842C8 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		A26AAB0F2A7EC4AE560EF0A2 /* Pods-QuickList_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QuickList_Example.release.xcconfig"; path = "Target Support Files/Pods-QuickList_Example/Pods-QuickList_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -74,6 +76,7 @@
 				2DB1DE852E0262F200522BF4 /* Main.storyboard */,
 				2DB1DE8B2E0262F200522BF4 /* Main.strings */,
 				2DB1DE8C2E0262F200522BF4 /* ViewController.swift */,
+				2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */,
 			);
 			path = QuickList;
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 				2DB1DE8E2E0262F200522BF4 /* ViewController.swift in Sources */,
 				2DB1DE8F2E0262F200522BF4 /* ItemPresentViewController.swift in Sources */,
 				2DB1DE902E0262F200522BF4 /* AppDelegate.swift in Sources */,
+				2DF0BCF32E58013100C4B327 /* CompressibleHeaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

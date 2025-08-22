@@ -30,7 +30,7 @@ open class AutolayoutItemOf<Cell: ItemCell>: ItemOf<Cell> {
         return false
     }
     
-    open override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
+    open override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             needReSize,
             item == self
@@ -70,6 +70,7 @@ open class AutolayoutItemOf<Cell: ItemCell>: ItemOf<Cell> {
             self.updateCellData(cell)
         }
         self.cellSize = cell.contentView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        cell.contentView.snp.removeConstraints()
         return self.cellSize
     }
     

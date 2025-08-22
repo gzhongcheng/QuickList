@@ -187,7 +187,7 @@ public final class HtmlInfoItem: ItemOf<CollectionHtmlInfoCell>, ItemType{
         }
     }
     
-    public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
+    public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self
         else {
@@ -262,8 +262,10 @@ extension HtmlInfoItem: WKNavigationDelegate {
             guard let ratio = value as? CGFloat else {
                 return
             }
-            self?.actualRatio = ratio
-            self?.updateLayout()
+            DispatchQueue.main.async {
+                self?.actualRatio = ratio
+                self?.updateLayout()
+            }
         }
     }
 }

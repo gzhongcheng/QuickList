@@ -9,6 +9,28 @@ import UIKit
 import SnapKit
 
 public class QuickSegmentSection: Section {
+    /// 阻尼效果
+    enum BouncesType {
+        /// 总列表
+        case list
+        /// 子页面
+        case page
+    }
+    
+    /// 菜单高度
+    var menuHeight: CGFloat = 44 {
+        didSet {
+            self.header?.height = { [weak self] _, _, _ in
+                return self?.menuHeight ?? 44
+            }
+        }
+    }
+    /// 菜单列表的边距
+    var menuListInsets: UIEdgeInsets = .zero {
+        didSet {
+            self.menuTabList.form.contentInset = menuListInsets
+        }
+    }
     /// 菜单Item间距
     var menuItemSpace: CGFloat = 30
     /// 菜单Item列表
@@ -22,9 +44,9 @@ public class QuickSegmentSection: Section {
     var pageViewControllers: [QuickSegmentPageViewDelegate] = []
     
     convenience init(
-        menuHeight: CGFloat,
-        menuItemSpace: CGFloat,
-        menuListInsets: UIEdgeInsets,
+        menuHeight: CGFloat = 44,
+        menuItemSpace: CGFloat = 30,
+        menuListInsets: UIEdgeInsets = .zero,
         menuBackgroundDecoration: UIView? = nil,
         menuSelectedItemDecoration: UIView? = nil,
         menuItems: [Item],
@@ -36,6 +58,7 @@ public class QuickSegmentSection: Section {
         
         self.menuTabList.form.selectedItemDecoration = menuSelectedItemDecoration
         self.menuTabList.form.backgroundDecoration = menuBackgroundDecoration
+        self.menuTabList.form.contentInset = menuListInsets
         self.header = SectionHeaderFooterView<UICollectionReusableView>({[weak self] view, section in
             guard let self = self else { return }
             view.addSubview(self.menuTabList)
@@ -44,7 +67,7 @@ public class QuickSegmentSection: Section {
             }
         })
         self.header?.shouldSuspension = true
-        self.header?.height = { [weak self] _, _, _ in
+        self.header?.height = { _, _, _ in
             menuHeight
         }
         self.menuItemSpace = menuItemSpace

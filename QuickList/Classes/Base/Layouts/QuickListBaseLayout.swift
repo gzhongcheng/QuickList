@@ -135,7 +135,7 @@ open class QuickListBaseLayout {
         tempStart: inout CGPoint
     ) {
         if let header = section.header {
-            let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.header.elementKind, with: IndexPath(item: 0, section: sectionIndex))
+            let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.sectionHeader.elementKind, with: IndexPath(item: 0, section: sectionIndex))
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let headerHeight = header.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
@@ -166,7 +166,7 @@ open class QuickListBaseLayout {
         tempStart: inout CGPoint
     ) {
         if let footer = section.footer {
-            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.footer.elementKind, with: IndexPath(item: 0, section: sectionIndex))
+            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.sectionFooter.elementKind, with: IndexPath(item: 0, section: sectionIndex))
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let footerHeight = footer.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
@@ -194,7 +194,7 @@ open class QuickListBaseLayout {
         formContentInset: UIEdgeInsets
     ) {
         if section.decoration != nil {
-            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.decoration.elementKind, with: IndexPath(index: sectionIndex))
+            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.decoration.elementKind, with: IndexPath(index: sectionIndex))
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let startY = attribute.headerAttributes?.frame.maxY ?? attribute.startPoint.y
@@ -226,7 +226,7 @@ open class QuickListBaseLayout {
         formContentInset: UIEdgeInsets
     ) {
         if section.isFormHeader, section.suspensionDecoration != nil {
-            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: SectionReusableType.suspensionDecoration.elementKind, with: IndexPath(index: sectionIndex))
+            let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.suspensionDecoration.elementKind, with: IndexPath(index: sectionIndex))
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let startY = attribute.headerAttributes?.frame.minY ?? attribute.startPoint.y

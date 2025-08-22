@@ -26,7 +26,7 @@ public class FormViewHandler: NSObject {
         }
     }
     
-    public weak var formView: (any FormViewProtocol)?
+    public weak var formView: QuickListView?
     
     public private(set) var layout: QuickListCollectionLayout = QuickListCollectionLayout()
     
@@ -58,13 +58,13 @@ public class FormViewHandler: NSObject {
         layout.form = form
     }
     
-    public convenience init(_ collectionView: UICollectionView, _ delegate: FormViewHandlerDelegate? = nil) {
+    public convenience init(_ view: QuickListView, _ delegate: FormViewHandlerDelegate? = nil) {
         self.init()
-        collectionView.collectionViewLayout = self.layout
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "UICollectionViewCell")
-        self.formView = collectionView
+        view.collectionViewLayout = self.layout
+        view.delegate = self
+        view.dataSource = self
+        view.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "UICollectionViewCell")
+        self.formView = view
         self.delegate = delegate
     }
     
@@ -85,45 +85,6 @@ public class FormViewHandler: NSObject {
     public func updateBackgroundDecoration(contentSize: CGSize) {
         formView?.addBackgroundViewIfNeeded(form.backgroundDecoration)
         form.backgroundDecoration?.frame = CGRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height)
-    }
-    
-    /// 更新header控件
-    /// 需在updateBackgroundDecoration之后调用
-    public func updateHeaderDecoration() {
-        guard
-            let header = form.header,
-            self.layout.headerSize.width > 0,
-            self.layout.headerSize.height > 0
-        else {
-            form.header?.isHidden = true
-            return
-        }
-        formView?.addDecorationViewIfNeeded(header)
-        header.frame = CGRect(origin: .zero, size: self.layout.headerSize)
-        header.isHidden = false
-    }
-    
-    /// 更新footer控件
-    /// 需在updateBackgroundDecoration之后调用
-    public func updateFooterDecoration(contentSize: CGSize) {
-        guard
-            let footer = form.footer,
-            self.layout.footerSize.width > 0,
-            self.layout.footerSize.height > 0
-        else {
-            form.footer?.isHidden = true
-            return
-        }
-        formView?.addDecorationViewIfNeeded(footer)
-        switch self.scrollDirection {
-        case .vertical:
-            footer.frame = CGRect(origin: CGPoint(x: 0, y: contentSize.height - self.layout.footerSize.height), size: self.layout.footerSize)
-        case .horizontal:
-            footer.frame = CGRect(origin: CGPoint(x: contentSize.width - self.layout.footerSize.width, y: 0), size: self.layout.footerSize)
-        @unknown default:
-            break
-        }
-        footer.isHidden = false
     }
     
     /// 更新选中状态
@@ -414,7 +375,8 @@ extension FormViewHandler: UICollectionViewDataSource {
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard
             let item = form[indexPath],
-            let representableItem = representableItem(from: item, at: indexPath)
+            let representableItem = representableItem(from: item, at: indexPath),
+            let collectionView = collectionView as? QuickListView
         else {
             return emptyCell(collectionView, cellForItemAt: indexPath)
         }
@@ -439,12 +401,40 @@ extension FormViewHandler: UICollectionViewDataSource {
     }
     
     public func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard 
-            collectionView == self.formView,
+        guard
+            let collectionView = collectionView as? QuickListView,
             let sectionIndex = indexPath.safeSection()
         else { return UICollectionReusableView() }
+        if kind == QuickListReusableType.formHeader.elementKind {
+            guard let header = form.header else {
+                return UICollectionReusableView()
+            }
+            let identifier = header.identifier
+            // 未注册先注册
+            if !registedHeaderIdentifier.contains(identifier) {
+                header.regist(to: collectionView, for: .formHeader)
+                registedHeaderIdentifier.append(identifier)
+            }
+            guard let headerView = header.view(for: .formHeader, in: collectionView) else { return UICollectionReusableView() }
+            headerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 503)
+            return headerView
+        }
+        if kind == QuickListReusableType.formFooter.elementKind {
+            guard let footer = form.footer else {
+                return UICollectionReusableView()
+            }
+            let identifier = footer.identifier
+            // 未注册先注册
+            if !registedFooterIdentifier.contains(identifier) {
+                footer.regist(to: collectionView, for: .formFooter)
+                registedFooterIdentifier.append(identifier)
+            }
+            guard let footerView = footer.view(for: .formFooter, in: collectionView) else { return UICollectionReusableView() }
+            footerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 500)
+            return footerView
+        }
         let section: Section = form[sectionIndex]
-        if kind == SectionReusableType.header.elementKind {
+        if kind == QuickListReusableType.sectionHeader.elementKind {
             guard
                 let header = section.header
             else {
@@ -453,14 +443,14 @@ extension FormViewHandler: UICollectionViewDataSource {
             let identifier = header.identifier
             // 未注册先注册
             if !registedHeaderIdentifier.contains(identifier) {
-                header.regist(to: collectionView, for: .header)
+                header.regist(to: collectionView, for: .sectionHeader)
                 registedHeaderIdentifier.append(identifier)
             }
-            guard let headerView = header.viewForSection(section, in: collectionView, type: .header, for: indexPath) else { return UICollectionReusableView() }
+            guard let headerView = header.viewForSection(section, in: collectionView, type: .sectionHeader, for: indexPath) else { return UICollectionReusableView() }
             headerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 502)
             return headerView
         }
-        if kind == SectionReusableType.footer.elementKind {
+        if kind == QuickListReusableType.sectionFooter.elementKind {
             guard
                 let footer = section.footer
             else {
@@ -469,14 +459,14 @@ extension FormViewHandler: UICollectionViewDataSource {
             let identifier = footer.identifier
             // 未注册先注册
             if !registedFooterIdentifier.contains(identifier) {
-                footer.regist(to: collectionView, for: .footer)
+                footer.regist(to: collectionView, for: .sectionFooter)
                 registedFooterIdentifier.append(identifier)
             }
-            guard let footerView = footer.viewForSection(section, in: collectionView, type: .footer, for: indexPath) else { return UICollectionReusableView() }
+            guard let footerView = footer.viewForSection(section, in: collectionView, type: .sectionFooter, for: indexPath) else { return UICollectionReusableView() }
             footerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 501)
             return footerView
         }
-        if kind == SectionReusableType.decoration.elementKind {
+        if kind == QuickListReusableType.decoration.elementKind {
             guard
                 let decoration = section.decoration
             else {
@@ -492,7 +482,7 @@ extension FormViewHandler: UICollectionViewDataSource {
             decorationView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 498)
             return decorationView
         }
-        if kind == SectionReusableType.suspensionDecoration.elementKind {
+        if kind == QuickListReusableType.suspensionDecoration.elementKind {
             guard
                 let decoration = section.suspensionDecoration
             else {

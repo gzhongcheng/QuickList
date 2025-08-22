@@ -67,7 +67,7 @@
 		2CF1AA71A87D4A0D64228F8BA1A8D123 /* bit_writer_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 83E3A66CD23270134E402EF5C1888AA1 /* bit_writer_utils.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		2CF4938D6F480D69C93A95E60D80FBFC /* rescaler_neon.c in Sources */ = {isa = PBXBuildFile; fileRef = 3B18CA45C26105199C4C3FA0A719290C /* rescaler_neon.c */; settings = {COMPILER_FLAGS = "-D_THREAD_SAFE -fno-objc-arc"; }; };
 		2D018173D02E5260487B2259633F50D7 /* KingfisherError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A67438C16401FC6FFACEB5FA5A60DE7 /* KingfisherError.swift */; };
-		2DC799CE2E559AE700D047B3 /* FormHeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC799CD2E559AE700D047B3 /* FormHeaderFooterView.swift */; };
+		2DC799CE2E559AE700D047B3 /* FormCompressibleHeaderFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DC799CD2E559AE700D047B3 /* FormCompressibleHeaderFooterView.swift */; };
 		2DD9C038F7982942BD8728CD4F5EAA82 /* palette.h in Headers */ = {isa = PBXBuildFile; fileRef = DE676AE98A65C97527A69FF1660B1D56 /* palette.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		2E2CFE5CFE3FDD87B2A6CB8CF2DF413D /* bit_reader_inl_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 73A435510F95500022B139A6820BABB3 /* bit_reader_inl_utils.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		2E96D6D1A0AA1DB783029A6FBF199CB1 /* LineItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8742787A72CCEC72D6818D6A09ABBD /* LineItem.swift */; };
@@ -324,7 +324,7 @@
 		EB1F11FADC21D614A728D7F774B0858A /* upsampling_mips_dsp_r2.c in Sources */ = {isa = PBXBuildFile; fileRef = 197DB173F63F9ECB0CC3C07A2A77060D /* upsampling_mips_dsp_r2.c */; settings = {COMPILER_FLAGS = "-D_THREAD_SAFE -fno-objc-arc"; }; };
 		EB3708AD569A9127EAAF342F4CD4B377 /* Kingfisher-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = FD137218DFD796584308989A9849128D /* Kingfisher-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		EB67FE3AA6099CF51AA0004AE8642EBE /* RedirectHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B0EAB4234106FAE634DB36C7299B077 /* RedirectHandler.swift */; };
-		ECAC7EEB7556B6ACFA478C957D2DC04D /* SectionReusable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FFCE3BF2CD2BBCF6303C354EEDFE104 /* SectionReusable.swift */; };
+		ECAC7EEB7556B6ACFA478C957D2DC04D /* QuickListReusable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FFCE3BF2CD2BBCF6303C354EEDFE104 /* QuickListReusable.swift */; };
 		ECC41DE4601277B8422C46FCF377D403 /* ItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16D30D8211667C8527FE5AD3F08E8AF4 /* ItemCell.swift */; };
 		ECFE5E33B83F4CB59ADF421AE0876459 /* KingfisherWebP-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 197ED5B0F1C10C91D06333629F5545DC /* KingfisherWebP-dummy.m */; };
 		EEC5203C2354D75383868FAA8320A595 /* FormatIndicatedCacheSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E75DCAA1CDBB1F0B96CC7FA1C3EF15 /* FormatIndicatedCacheSerializer.swift */; };
@@ -527,7 +527,7 @@
 		2CE2017E79A86AAB3CB43F02DDEEAA33 /* webpi_dec.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = webpi_dec.h; path = src/dec/webpi_dec.h; sourceTree = "<group>"; };
 		2D5B293A465E11F4B5B6E0205D858464 /* anim_encode.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = anim_encode.c; path = src/mux/anim_encode.c; sourceTree = "<group>"; };
 		2D65A707028A1867BE02A8EC49183F90 /* near_lossless_enc.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = near_lossless_enc.c; path = src/enc/near_lossless_enc.c; sourceTree = "<group>"; };
-		2DC799CD2E559AE700D047B3 /* FormHeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormHeaderFooterView.swift; sourceTree = "<group>"; };
+		2DC799CD2E559AE700D047B3 /* FormCompressibleHeaderFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormCompressibleHeaderFooterView.swift; sourceTree = "<group>"; };
 		2FAA9FEBA103FDCFE2C777C0C1787DE5 /* RequestModifier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RequestModifier.swift; path = Sources/Networking/RequestModifier.swift; sourceTree = "<group>"; };
 		2FC7D0890A2DCAA85AFA92E9014FBB85 /* KingfisherWebP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KingfisherWebP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FDC1B0DE60F9E3D938494752EA23052 /* decode.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = decode.h; path = src/webp/decode.h; sourceTree = "<group>"; };
@@ -600,7 +600,7 @@
 		5E4674603A5D5B9215FFA0F8E69F8B71 /* libwebp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libwebp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EE73D05487D49163F282F17736EE635 /* libwebp.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = libwebp.modulemap; sourceTree = "<group>"; };
 		5F2A29A77F93C7C60804FDA2E026A9AE /* Indicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Indicator.swift; path = Sources/Views/Indicator.swift; sourceTree = "<group>"; };
-		5FFCE3BF2CD2BBCF6303C354EEDFE104 /* SectionReusable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SectionReusable.swift; sourceTree = "<group>"; };
+		5FFCE3BF2CD2BBCF6303C354EEDFE104 /* QuickListReusable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickListReusable.swift; sourceTree = "<group>"; };
 		604ED1C45F1BA2669C51E1714A24D674 /* KingfisherWebP.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = KingfisherWebP.debug.xcconfig; sourceTree = "<group>"; };
 		60969AC8093F97588A34F9D556D88F9F /* Storage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Storage.swift; path = Sources/Cache/Storage.swift; sourceTree = "<group>"; };
 		60D5C49D5B1BA7F99923065BB9F3BDE2 /* dec_neon.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = dec_neon.c; path = src/dsp/dec_neon.c; sourceTree = "<group>"; };
@@ -1038,14 +1038,14 @@
 				7A5D32AF8839084CE07E513E9807C201 /* AutolayoutItem.swift */,
 				8CC9207A70E85FE913E91AE2CB43037F /* Form.swift */,
 				63FA9274E994173E87455FCEA372831E /* FormViewProtocol.swift */,
-				2DC799CD2E559AE700D047B3 /* FormHeaderFooterView.swift */,
+				2DC799CD2E559AE700D047B3 /* FormCompressibleHeaderFooterView.swift */,
 				AC887D7FBC37E833EAC1505E0E554208 /* InlineItem.swift */,
 				185382F9645B3BF3B1129F439EF1B01F /* Item.swift */,
 				16D30D8211667C8527FE5AD3F08E8AF4 /* ItemCell.swift */,
 				CD3B0BDD168DD1F6EF78F556115741D5 /* MultivalusedSection.swift */,
 				A91A355804CA422F6493D947B567F569 /* PresentationMode.swift */,
 				386892D8557CD84AC27BB929AA4CB0F3 /* Section.swift */,
-				5FFCE3BF2CD2BBCF6303C354EEDFE104 /* SectionReusable.swift */,
+				5FFCE3BF2CD2BBCF6303C354EEDFE104 /* QuickListReusable.swift */,
 			);
 			name = Data;
 			path = QuickList/Classes/Base/Data;
@@ -2226,7 +2226,7 @@
 				2E96D6D1A0AA1DB783029A6FBF199CB1 /* LineItem.swift in Sources */,
 				13B1AE4DB253DD584C58EBA9AB51D6B8 /* MultivalusedSection.swift in Sources */,
 				F17D408D941B88DC1B95BD549AA37841 /* Operators.swift in Sources */,
-				2DC799CE2E559AE700D047B3 /* FormHeaderFooterView.swift in Sources */,
+				2DC799CE2E559AE700D047B3 /* FormCompressibleHeaderFooterView.swift in Sources */,
 				94A30394BC9143503E8FCED9CB79F4B5 /* PlaceholderTextView.swift in Sources */,
 				5E9C320BE9521189631F519C2A587FD2 /* PresentationMode.swift in Sources */,
 				B18612450696A7A89F743A968BA36430 /* QuickList-dummy.m in Sources */,
@@ -2241,7 +2241,7 @@
 				D61A982819D570D7A7B350FAC51A8FA6 /* QuickYogaLayout.swift in Sources */,
 				9BBB12FC6FD23A01EC50F5645A64767A /* RowEqualHeightLayout.swift in Sources */,
 				5EE50DF7751C51B6E5543665AC50D58F /* Section.swift in Sources */,
-				ECAC7EEB7556B6ACFA478C957D2DC04D /* SectionReusable.swift in Sources */,
+				ECAC7EEB7556B6ACFA478C957D2DC04D /* QuickListReusable.swift in Sources */,
 				E73EC8B0DBB633892FB1FD4378395F99 /* String+Limit.swift in Sources */,
 				D6F463646F8441D1D4C4BBD679126625 /* SwitchItem.swift in Sources */,
 				643D317A27191EE5624EC8447919EC6E /* SwitchView.swift in Sources */,

@@ -9,6 +9,45 @@ import UIKit
 import SnapKit
 
 open class QuickListView: UICollectionView {
+    /// section的悬浮header的起始点（扩展属性），用于支持isFormHeader
+    public var suspensionStartPoint: CGPoint?
+    /// 当前装饰控件（扩展属性）
+    var currentDecorationView: UIView?
+    /// 当前全局背景（扩展属性)
+    var currentBackgroundView: UIView?
+    
+    /// 添加全局装饰控件到全局背景之上，如果没有全局背景，则放在最底层
+    public func addDecorationViewIfNeeded(_ view: UIView) {
+        if currentDecorationView != nil, currentDecorationView == view {
+            return
+        }
+        if currentDecorationView != view {
+            currentDecorationView?.removeFromSuperview()
+        }
+        addSubview(view)
+    }
+    
+    /// 添加全局背景到最底层
+    public func addBackgroundViewIfNeeded(_ view: UIView?) {
+        if currentBackgroundView != nil, currentBackgroundView == view {
+            return
+        }
+        if currentBackgroundView != view {
+            currentBackgroundView?.removeFromSuperview()
+        }
+        guard let view = view else { return }
+        view.layer.zPosition = 0
+        addSubview(view)
+    }
+    
+    public func displaySize() -> CGSize {
+        self.bounds.size
+    }
+    
+    public func scrollToItem(_ item: Item, at scrollPosition: UICollectionView.ScrollPosition, animation: Bool) {
+        guard let indexPath = item.indexPath else { return }
+        self.scrollToItem(at: indexPath, at: scrollPosition, animated: animation)
+    }
     
     // handler代理, 包括cell的value改变回调以及scrollviewDelegate相关方法
     public weak var handerDelegate: FormViewHandlerDelegate? {

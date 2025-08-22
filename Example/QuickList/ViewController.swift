@@ -74,28 +74,40 @@ class ViewController: UIViewController {
         formlist.form.backgroundDecoration = UIView()
         formlist.form.backgroundDecoration?.backgroundColor = UIColor(white: 0.95, alpha: 1)
         
-        let header = FormHeaderFooterView()
-        header.useAutoLayout = true
-        header.backgroundColor = .red
-        
-        let testLabel = UILabel()
-        testLabel.text = "很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈很长很长的文案，测试是否能自动高度，哈哈哈哈"
-        testLabel.numberOfLines = 0
-        header.addSubview(testLabel)
-        testLabel.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(10)
+        let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
+        /// 设置悬浮
+        formHeader.shouldSuspension = true
+        /// 设置压缩
+        formHeader.minSize = CGSize(width: 40, height: 40)
+        /// 设置默认尺寸
+        formHeader.height = { _, _, _ in
+            80
         }
-        formlist.form.header = header
+        /// 设置拉伸时的逻辑
+        formHeader.displayType = .top
+        formlist.form.header = formHeader
         
-        formlist.form.header?.height = { _, _ in
-            return 40
-        }
+//        formlist.form.footer = FormDecorationView<UICollectionReusableView> { view in
+//            view.backgroundColor = .yellow
+//        }
+//        formlist.form.footer?.height = { _,_,_ in
+//            return 40
+//        }
         
-        formlist.form.footer = FormHeaderFooterView()
-        formlist.form.footer?.backgroundColor = .blue
-        formlist.form.footer?.height = { _, _ in
-            return 40
+        
+        let formFooter = FormCompressibleDecorationView<CompressibleHeaderView>()
+        /// 设置悬浮
+        formFooter.shouldSuspension = true
+        /// 设置压缩
+        formFooter.minSize = CGSize(width: 40, height: 40)
+        /// 设置默认尺寸
+        formFooter.height = { _, _, _ in
+            80
         }
+        /// 设置拉伸时的逻辑
+        formFooter.displayType = .bottom
+
+        formlist.form.footer = formFooter
         
         // MARK: - 创建完成后添加sections
         formlist.form +++ Section(header: "自动换行", footer: nil) { section in
@@ -111,7 +123,7 @@ class ViewController: UIViewController {
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
-            section.decoration = SectionDecorationView<UICollectionReusableView> { view in
+            section.decoration = SectionDecorationView<UICollectionReusableView> { view, _  in
                 let imageView = UIImageView(image: UIImage(named: "E-1251692-C01A20FE"))
                 view.addSubview(imageView)
                 imageView.snp.makeConstraints { make in
@@ -121,7 +133,7 @@ class ViewController: UIViewController {
 //            section.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
 //            section.layout = QuickListFlowLayout()
             section.layout = RowEqualHeightLayout()
-            section.isFormHeader = true
+//            section.isFormHeader = true
         }
             <<< newTagItem("标签")
             <<< newTagItem("标签标签")
@@ -292,7 +304,6 @@ class ViewController: UIViewController {
                 item.switchOffIndicatorTextColor = .darkGray
                 item.switchOnIndicatorTextColor = .white
             }
-            
         +++ Section("TextFieldItem(输入框)") { section in
                 section.lineSpace = 0
                 section.column = 1
@@ -341,10 +352,10 @@ class ViewController: UIViewController {
                         print("开始编辑")
                     }
                 }
-            +++ Section("TextViewItem(多行输入框)") { section in
-                section.lineSpace = 0
-                section.column = 1
-            }
+        +++ Section("TextViewItem(多行输入框)") { section in
+            section.lineSpace = 0
+            section.column = 1
+        }
             <<< TextViewItem("多行文本输入:\n(自动高度)") { item in
                 item.placeholder = "最多100个"
                 item.showLimit = true
@@ -379,23 +390,22 @@ class ViewController: UIViewController {
                 item.inputContentPadding = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
                 item.minHeight = 50
             }
-            
-            +++ Section("HtmlInfoItem") { section in
-                section.lineSpace = 0
-                section.column = 1
-            }
-                <<< HtmlInfoItem() { item in
-                    item.content = "HtmlInfoItem是用于展示Html代码字符串的Item，设置value为Html代码，即可展示\n展示出来后会自动调整高度，设置estimatedSize表示预估的size，会根据size的比例预先设置大小\n设置contentInsets可调整内容的四边间距"
-                    item.contentInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-                    /// 设置预估高度可以减少跳动
-                    item.estimatedSize = CGSize(width: 100, height: 30)
-                }
-                <<< getHtmlImageItem(isFirst: true)
-                <<< getHtmlImageItem()
-                <<< getHtmlImageItem()
-                <<< getHtmlImageItem()
-                <<< getHtmlImageItem(isLast: true)
-        
+        /// HtmlInfoItem可能会导致滚动时卡顿跳动，使用前请谨慎考虑
+//        +++ Section("HtmlInfoItem") { section in
+//            section.lineSpace = 0
+//            section.column = 1
+//        }
+//                <<< HtmlInfoItem() { item in
+//                    item.content = "HtmlInfoItem是用于展示Html代码字符串的Item，设置value为Html代码，即可展示\n展示出来后会自动调整高度，设置estimatedSize表示预估的size，会根据size的比例预先设置大小\n设置contentInsets可调整内容的四边间距"
+//                    item.contentInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//                    /// 设置预估高度可以减少跳动
+//                    item.estimatedSize = CGSize(width: 100, height: 30)
+//                }
+//                <<< getHtmlImageItem(isFirst: true)
+//                <<< getHtmlImageItem()
+//                <<< getHtmlImageItem()
+//                <<< getHtmlImageItem()
+//                <<< getHtmlImageItem(isLast: true)
         +++ Section("ImageItem") { section in
             section.lineSpace = 0
             section.column = 1

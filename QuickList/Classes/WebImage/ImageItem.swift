@@ -211,7 +211,7 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
         }
     }
     
-    public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
+    public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self
         else {

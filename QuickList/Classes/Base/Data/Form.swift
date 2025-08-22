@@ -11,7 +11,7 @@ public protocol FormDelegate : AnyObject {
     /// 滚动方向
     var scrollDirection: UICollectionView.ScrollDirection { get }
     /// 列表控件
-    var formView: FormViewProtocol? { get }
+    var formView: QuickListView? { get }
     /// 是否正在滚动
     var isScrolling: Bool { get }
     
@@ -65,9 +65,9 @@ public final class Form: NSObject {
     }
     
     /// 列表的Header
-    public var header: FormHeaderFooterView?
+    public var header: FormHeaderFooterReusable?
     /// 列表的Footer
-    public var footer: FormHeaderFooterView?
+    public var footer: FormHeaderFooterReusable?
     
     /// 所有Section的数组
     public private(set) var sections = [Section]()
@@ -99,6 +99,11 @@ public final class Form: NSObject {
     public convenience init(sections: [Section]) {
         self.init()
         self.append(contentsOf: sections)
+    }
+    
+    /// 仅刷新界面布局
+    public func updateLayout(animation: Bool = false) {
+        delegate?.updateLayout(withAnimation: animation, afterSection: 0)
     }
 }
 
