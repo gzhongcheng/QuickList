@@ -701,7 +701,7 @@ extension QuickListSectionAttribute {
             }
             if var footerAttributes = self.footerAttributes {
                 if self.shouldSuspensionFooter {
-                    suspensionFooterAttributes(&footerAttributes, for: view, footerSize: headerSize, suspensionFooter: suspensionFooter, with: scrollDirection)
+                    suspensionFooterAttributes(&footerAttributes, for: view, footerSize: footerSize, suspensionFooter: suspensionFooter, with: scrollDirection)
                     resultAttrs.append(footerAttributes)
                 } else if rect.intersects(footerAttributes.frame) {
                     footerAttributes.zIndex = 502
