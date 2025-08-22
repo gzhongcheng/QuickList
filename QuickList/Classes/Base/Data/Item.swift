@@ -281,7 +281,7 @@ open class Item: NSObject {
     
     /// 刷新界面布局
     public func updateLayout(animation: Bool = false) {
-        section?.form?.delegate?.updateLayout(withAnimation: animation, afterSection: self.section?.index ?? 0)
+        section?.updateLayout(animation: animation)
     }
     
     /// 初始化

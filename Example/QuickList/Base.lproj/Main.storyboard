@@ -25,7 +25,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rwy-Rl-Eov" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1000" y="78"/>
+            <point key="canvasLocation" x="-1002" y="738"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="EYu-MF-UpV">
@@ -38,12 +38,13 @@
                     </tabBar>
                     <connections>
                         <segue destination="nBA-Te-ZJ5" kind="relationship" relationship="viewControllers" id="iS7-hp-zT7"/>
-                        <segue destination="MrS-TL-n2w" kind="relationship" relationship="viewControllers" id="lZK-50-zBV"/>
+                        <segue destination="N5R-Bx-djl" kind="relationship" relationship="viewControllers" id="vqQ-Oa-Hs5"/>
+                        <segue destination="MrS-TL-n2w" kind="relationship" relationship="viewControllers" id="dtg-bX-jbi"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3hM-Pe-2xp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1921" y="-227"/>
+            <point key="canvasLocation" x="-2310" y="168"/>
         </scene>
         <!--Demo-->
         <scene sceneID="ufC-wZ-h7g">
@@ -58,18 +59,53 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Home" image="balloon.fill" catalog="system" id="aFS-iw-0oc"/>
                     <navigationItem key="navigationItem" title="Demo" id="WPk-gS-8Rp"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-175" y="-636"/>
         </scene>
-        <!--Item-->
+        <!--横向-->
+        <scene sceneID="gfV-EV-Sch">
+            <objects>
+                <navigationController id="N5R-Bx-djl" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="横向" image="lightspectrum.horizontal" catalog="system" id="kLO-6b-mWU"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="871-zz-HNW">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="FvZ-iN-z5x" kind="relationship" relationship="rootViewController" id="TbJ-6b-tZp"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Rdc-OF-Ot6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1002" y="43"/>
+        </scene>
+        <!--Horizontal View Controller-->
+        <scene sceneID="8b0-DC-Atz">
+            <objects>
+                <viewController id="FvZ-iN-z5x" customClass="HorizontalViewController" customModule="QuickList_Example" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="jR8-qc-WpU"/>
+                        <viewControllerLayoutGuide type="bottom" id="Uzf-WL-Oth"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ndL-pm-N24">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Wlg-r7-MVz"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="5WK-Md-UQV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-175" y="43"/>
+        </scene>
+        <!--竖向-->
         <scene sceneID="YHO-DQ-MJT">
             <objects>
                 <navigationController id="nBA-Te-ZJ5" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Item" id="drJ-fD-Lq8"/>
+                    <tabBarItem key="tabBarItem" title="竖向" image="list.bullet.below.rectangle" catalog="system" id="drJ-fD-Lq8"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Lot-Z2-BHb">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -84,8 +120,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="balloon.fill" catalog="system" width="77" height="128"/>
         <image name="figure.racquetball" catalog="system" width="128" height="94"/>
+        <image name="lightspectrum.horizontal" catalog="system" width="128" height="123"/>
+        <image name="list.bullet.below.rectangle" catalog="system" width="128" height="110"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -204,7 +204,7 @@ open class QuickListBaseLayout {
                 frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
             } else {
                 let startX = attribute.headerAttributes?.frame.maxX ?? attribute.startPoint.x
-                let endX = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.x
+                let endX = attribute.footerAttributes?.frame.maxX ?? attribute.endPoint.x
                 let startY = formContentInset.top
                 let viewWidth = endX - startX
                 frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)

@@ -11,6 +11,16 @@ import QuickList
 import SnapKit
 
 class ViewController: UIViewController {
+    
+    let formlist = QuickListView()
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        coordinator.animate(alongsideTransition: {
+            _ in
+            self.formlist.reload()
+        }, completion: nil)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,7 +68,6 @@ class ViewController: UIViewController {
 //                section.lineHeight = 44
 //            }
 //        ])
-        let formlist = QuickListView()
         self.view.addSubview(formlist)
         
         /// 内容尺寸变化的回调
@@ -422,12 +431,9 @@ class ViewController: UIViewController {
                 guard let `self` = self, let section = item.section, let itemIndex = item.indexPath?.item else { return }
                 let index = section.count
 //                section <<<! self.newImageItem(index, self.getNumberImage(index))
-                section >>>! (itemIndex ..< itemIndex + 1, [self.newImageItem(index, self.getNumberImage(Int.random(in: 10 ... 20)))])
+                section >>>! (itemIndex ..< itemIndex + 1, [newImageItem(i + 30, getRandomGif())])
             }
         }
-//        for i in 0...30 {
-//            towColumSection.append(newImageItem(i + 30, getRandomGif()))
-//        }
         
         formlist.form +++ towColumSection
 
@@ -443,8 +449,8 @@ class ViewController: UIViewController {
             threeColumSection <<< newImageItem(i, getRandomImage(), true)
         }
         formlist.form +++ threeColumSection
-//        
-//        formlist.reloadData()
+//        数据更新需要刷新时，可手动调用reload接口
+//        formlist.reload()
     }
 
     override func didReceiveMemoryWarning() {

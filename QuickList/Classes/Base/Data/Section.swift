@@ -180,7 +180,7 @@ open class Section: NSObject {
     
     /// 仅刷新界面布局
     public func updateLayout(animation: Bool = false) {
-        form?.delegate?.updateLayout(withAnimation: animation, afterSection: self.index ?? 0)
+        form?.updateLayout(afterSection: self.index ?? 0, animation: animation)
     }
 }
 

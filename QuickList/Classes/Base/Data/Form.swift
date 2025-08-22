@@ -102,8 +102,8 @@ public final class Form: NSObject {
     }
     
     /// 仅刷新界面布局
-    public func updateLayout(animation: Bool = false) {
-        delegate?.updateLayout(withAnimation: animation, afterSection: 0)
+    public func updateLayout(afterSection: Int, animation: Bool = false) {
+        delegate?.formView?.setNeedUpdateLayout(afterSection: afterSection, useAnimation: animation)
     }
 }
 

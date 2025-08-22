@@ -252,13 +252,13 @@ extension ImageItem {
             let width = height * aspectRatio!.width / aspectRatio!.height
             return width
         }
-        return nil
+        return height
     }
     public func aspectHeight(_ width: CGFloat) -> CGFloat? {
         if aspectRatio != nil {
             let height = width * aspectRatio!.height / aspectRatio!.width
             return height
         }
-        return nil
+        return width
     }
 }

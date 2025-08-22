@@ -25,7 +25,7 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         let sectionContentInset = section.contentInset
         
         let maxWidth = formView.bounds.width - formContentInset.left - formContentInset.right
-        let maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom
+        let maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom - formView.adjustedContentInset.top - formView.adjustedContentInset.bottom
         
         if layout.scrollDirection == .horizontal, maxHeight <= 0 {
             return attribute

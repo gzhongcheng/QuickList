@@ -95,8 +95,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
                     currentOffset.y += height
                 } else {
-                    let width = header.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: collectionView.bounds.height)
+                    let height = collectionView.bounds.size.height - collectionView.adjustedContentInset.top - collectionView.adjustedContentInset.bottom
+                    let width = header.height(form, CGSize(width: collectionView.bounds.size.width, height: height), self.scrollDirection)
+                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: height)
                     currentOffset.x += width
                 }
                 headerAttributes?.frame = frame
@@ -157,8 +158,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
                     currentOffset.y += height
                 } else {
-                    let width = footer.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: collectionView.bounds.height)
+                    let height = collectionView.bounds.size.height - collectionView.adjustedContentInset.top - collectionView.adjustedContentInset.bottom
+                    let width = footer.height(form, CGSize(width: collectionView.bounds.size.width, height: height), self.scrollDirection)
+                    frame = CGRect(x: currentOffset.x, y: 0, width: width, height: height)
                     currentOffset.x += width
                 }
                 footerAttributes?.frame = frame
@@ -292,7 +294,11 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             guard sectionAttr.endPoint != .zero else {
                 return
             }
-            self.currentOffset = CGPoint(x: sectionAttr.startPoint.x, y: sectionAttr.endPoint.y)
+            if self.scrollDirection == .vertical {
+                self.currentOffset = CGPoint(x: sectionAttr.startPoint.x, y: sectionAttr.endPoint.y)
+            } else {
+                self.currentOffset = CGPoint(x: sectionAttr.endPoint.x, y: sectionAttr.startPoint.y)
+            }
         }
         
         if let sectionLayout = section.layout {
@@ -473,9 +479,12 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public override var collectionViewContentSize: CGSize {
         switch scrollDirection {
         case .horizontal:
+            guard let view = self.form?.delegate?.formView else {
+                return .zero
+            }
             return CGSize(
                 width: currentOffset.x,
-                height: max(currentOffset.y, self.form?.delegate?.formView?.bounds.height ?? 0)
+                height: max(currentOffset.y, view.bounds.height - view.adjustedContentInset.top - view.adjustedContentInset.bottom)
             )
         case .vertical:
             return CGSize(
@@ -553,9 +562,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             if let header = header as? FormCompressibleHeaderFooterReusable {
                 let offset = view.contentOffset.x > 0 ? view.contentOffset.x : 0
                 if let minSize = header.minSize {
-                    size = CGSize(width: max(size.width - offset, minSize.width), height: view.bounds.height)
+                    size = CGSize(width: max(size.width - offset, minSize.width), height: size.height)
                 } else {
-                    size = CGSize(width: size.width - offset, height: view.bounds.height)
+                    size = CGSize(width: size.width - offset, height: size.height)
                 }
                 if header.shouldSuspension {
                     /// 如果是悬浮header，返回压缩后的尺寸，非悬浮返回原始尺寸
@@ -640,9 +649,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 var offset = view.contentSize.width - view.contentOffset.x - view.bounds.width
                 offset = offset > 0 ? offset : 0
                 if let minSize = footer.minSize {
-                    size = CGSize(width: max(size.width - offset, minSize.width), height: view.bounds.height)
+                    size = CGSize(width: max(size.width - offset, minSize.width), height: size.height)
                 } else {
-                    size = CGSize(width: size.width - offset, height: view.bounds.height)
+                    size = CGSize(width: size.width - offset, height: size.height)
                 }
             }
             inListSize = CGSize(width: size.width, height: size.height)

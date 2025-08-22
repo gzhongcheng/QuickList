@@ -66,6 +66,10 @@ open class QuickListView: UICollectionView {
     }
     
     open override func adjustedContentInsetDidChange() {
+        if self.bounds.size.width == 0 || self.bounds.size.height == 0 {
+            needReload = true
+            return
+        }
         self.handler.layout.reloadAll()
     }
     
@@ -119,13 +123,34 @@ open class QuickListView: UICollectionView {
         if needReload {
             needReload = false
             reload()
+            needUpdateLayout = false
+            firstUpdateSection = .max
+        } else if needUpdateLayout, firstUpdateSection < form.count {
+            handler.updateLayout(withAnimation: updateLayoutUseAnimation, afterSection: firstUpdateSection)
+            firstUpdateSection = .max
+            updateLayoutUseAnimation = false
         }
         if !handler.addedLongTap {
             handler.addLongTapIfNeeded()
         }
     }
     
-    private var needReload = true
+    private var needUpdateLayout = true
+    private var updateLayoutUseAnimation = false
+    private var firstUpdateSection: Int = .max
+    public func setNeedUpdateLayout(afterSection: Int, useAnimation: Bool = false) {
+        needUpdateLayout = true
+        firstUpdateSection = min(firstUpdateSection, afterSection)
+        updateLayoutUseAnimation = useAnimation || updateLayoutUseAnimation
+        setNeedsLayout()
+    }
+    
+    private var needReload = true {
+        didSet {
+            setNeedsLayout()
+        }
+    }
+    
     public func reload() {
         if self.superview == nil {
             needReload = true
