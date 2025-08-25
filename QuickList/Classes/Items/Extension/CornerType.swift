@@ -70,71 +70,88 @@ public struct CornerType {
             /// 画左上角圆弧
             var tempValue = min(maxRadius,abs(leftTop))
             if leftTop < 0 {
+                path.move(to: CGPoint(x: rect.minX, y: rect.minY + tempValue))
                 path.addArc(
                     withCenter: CGPoint(x: rect.minX, y: rect.minY),
                     radius: tempValue,
                     startAngle: 0.5 * CGFloat.pi,
                     endAngle: 0,
                     clockwise: false)
-            } else {
+            } else if leftTop > 0 {
+                path.move(to: CGPoint(x: rect.minX, y: rect.minY + tempValue))
                 path.addArc(
                     withCenter: CGPoint(x: rect.minX + tempValue, y: rect.minY + tempValue),
                     radius: tempValue,
                     startAngle: CGFloat.pi,
                     endAngle: 1.5 * CGFloat.pi,
                     clockwise: true)
+            } else {
+                path.move(to: CGPoint(x: rect.minX, y: rect.minY))
             }
             /// 画右上角圆弧
             tempValue = min(maxRadius,abs(rightTop))
             if rightTop < 0 {
+                path.addLine(to: CGPoint(x: rect.maxX - tempValue, y: rect.minY))
                 path.addArc(
                     withCenter: CGPoint(x: rect.maxX, y: rect.minY),
                     radius: tempValue,
                     startAngle: CGFloat.pi,
                     endAngle: 0.5 * CGFloat.pi,
                     clockwise: false)
-            } else {
+            } else if rightTop > 0 {
+                path.addLine(to: CGPoint(x: rect.maxX - tempValue, y: rect.minY))
                 path.addArc(
                     withCenter: CGPoint(x: rect.maxX - tempValue, y: rect.minY + tempValue),
                     radius: tempValue,
                     startAngle: 1.5 * CGFloat.pi,
                     endAngle: 0,
                     clockwise: true)
+            } else {
+                path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
             }
             /// 画右下角圆弧
             tempValue = min(maxRadius,abs(rightBottom))
             if rightBottom < 0 {
+                path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - tempValue))
                 path.addArc(
                     withCenter: CGPoint(x: rect.maxX, y: rect.maxY),
                     radius: tempValue,
                     startAngle: 1.5 * CGFloat.pi,
                     endAngle: CGFloat.pi,
                     clockwise: false)
-            } else {
+            } else if rightBottom > 0 {
+                path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - tempValue))
                 path.addArc(
                     withCenter: CGPoint(x: rect.maxX - tempValue, y: rect.maxY - tempValue),
                     radius: tempValue,
                     startAngle: 0,
                     endAngle: 0.5 * CGFloat.pi,
                     clockwise: true)
+            } else {
+                path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
             }
             /// 画左下角圆弧
             tempValue = min(maxRadius,abs(leftBottom))
             if leftBottom < 0 {
+                path.addLine(to: CGPoint(x: rect.minX + tempValue, y: rect.maxY))
                 path.addArc(
                     withCenter: CGPoint(x: rect.minX, y: rect.maxY),
                     radius: tempValue,
                     startAngle: 0,
                     endAngle: 1.5 * CGFloat.pi,
                     clockwise: false)
-            } else {
+            } else if leftBottom > 0 {
+                path.addLine(to: CGPoint(x: rect.minX + tempValue, y: rect.maxY))
                 path.addArc(
                     withCenter: CGPoint(x: rect.minX + tempValue, y: rect.maxY - tempValue),
                     radius: tempValue,
                     startAngle: 0.5 * CGFloat.pi,
                     endAngle: CGFloat.pi,
                     clockwise: true)
+            } else {
+                path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
             }
+            /// 闭合路径
             path.close()
             return path
         }

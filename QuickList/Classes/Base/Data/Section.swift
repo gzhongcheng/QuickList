@@ -51,15 +51,14 @@ open class Section: NSObject {
         guard
             let form = self.form,
             let delegate = form.delegate,
-            let viewSize = delegate.formView?.displaySize()
+            let formView = delegate.formView
         else {
             return .zero
         }
         let formContentInset = form.contentInset
-        
         switch delegate.scrollDirection {
         case .vertical:
-            let maxWidth = viewSize.width - formContentInset.left - formContentInset.right
+            let maxWidth = formView.bounds.width - formContentInset.left - formContentInset.right
             if column > 1 {
                 let itemTotalWidth = maxWidth - self.contentInset.left - self.contentInset.right
                 let singleItemWidth: CGFloat = (itemTotalWidth - (column > 1 ? (itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
@@ -69,7 +68,8 @@ open class Section: NSObject {
                 return CGSize(width: maxWidth, height: maxWidth)
             }
         case .horizontal:
-            let maxHeight = viewSize.height - formContentInset.top - formContentInset.bottom
+            let formAutoInset = formView.adjustedContentInset
+            let maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom - formAutoInset.top - formAutoInset.bottom
             if self.column > 1 {
                 let itemTotalHeight = maxHeight - self.contentInset.top - self.contentInset.bottom
                 let singleItemHeight: CGFloat = (itemTotalHeight - (column > 1 ? (itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)

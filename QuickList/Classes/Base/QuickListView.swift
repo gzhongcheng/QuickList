@@ -38,10 +38,6 @@ open class QuickListView: UICollectionView {
         addSubview(view)
     }
     
-    public func displaySize() -> CGSize {
-        self.bounds.size
-    }
-    
     public func scrollToItem(_ item: Item, at scrollPosition: UICollectionView.ScrollPosition, animation: Bool) {
         guard let indexPath = item.indexPath else { return }
         self.scrollToItem(at: indexPath, at: scrollPosition, animated: animation)

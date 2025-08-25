@@ -464,6 +464,7 @@ class ViewController: UIViewController {
             item.corners = [.leftTop(10),.rightBottom(15)] // CornerType.all(5)
             item.autoSize = autoSize
             item.aspectRatio = CGSize(width: 1, height: 1)
+//            item.contentMode = .center
             item.loadFaildImage = UIImage(named: "load_faild")
             item.loadingIndicatorType = .activity
         }
