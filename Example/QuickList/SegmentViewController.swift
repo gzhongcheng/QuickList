@@ -49,7 +49,9 @@ class SegmentViewController: UIViewController {
         let menuBgView1 = UIView()
         menuBgView1.backgroundColor = .white
         
-        let scrollManager = QuickSegmentScrollManager(rootScrollView: formlist)
+        let scrollManager = QuickSegmentScrollManager.create(
+            rootScrollView: formlist
+        )
         
         formlist.form
         +++ QuickSegmentSection(
