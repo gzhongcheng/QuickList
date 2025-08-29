@@ -33,6 +33,11 @@ extension UICollectionViewLayoutAttributes {
     }
 }
 
+public protocol QuickListCollectionLayoutDelegate: AnyObject {
+    /// 更新完成回调
+    func collectionLayoutDidFinishLayout(_ layout: QuickListCollectionLayout)
+}
+
 public class QuickListCollectionLayout: UICollectionViewLayout {
     /// 滚动方向
     public var scrollDirection: UICollectionView.ScrollDirection = .vertical
@@ -58,9 +63,36 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     var oldSectionAttributes: [Int: QuickListSectionAttribute] = [:]
     /// 计算中的中间量，用于定位各个section的开始位置
     var currentOffset: CGPoint = .zero
-    /// 布局完成回调
-    var didFinishLayout: ((_ layout: QuickListCollectionLayout) -> Void)?
     
+    // MARK: - 多播代理
+    private let multiDelegate: NSHashTable<AnyObject> = NSHashTable.weakObjects()
+    
+    func add(_ delegate: QuickListCollectionLayoutDelegate) {
+        multiDelegate.add(delegate)
+    }
+    
+    func remove(_ delegate: QuickListCollectionLayoutDelegate) {
+        invoke {
+            if $0 === delegate as AnyObject {
+                multiDelegate.remove($0)
+            }
+        }
+    }
+    
+    /// 通知布局完成
+    func noticeDidFinishLayout() {
+        invoke {
+            $0.collectionLayoutDidFinishLayout(self)
+        }
+    }
+    
+    private func invoke(_ invocation: (QuickListCollectionLayoutDelegate) -> Void) {
+        for delegate in multiDelegate.allObjects.reversed() {
+            invocation(delegate as! QuickListCollectionLayoutDelegate)
+        }
+    }
+    
+    // MARK: - 布局计算
     func reloadAll() {
         reloadSectionsAfter(index: 0)
     }
@@ -220,7 +252,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         
         needReloadAll = true
         invalidateLayout()
-        didFinishLayout?(self)
+        noticeDidFinishLayout()
     }
     
     func resetData() {
@@ -497,6 +529,15 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
     
     public override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        if
+            form?.header is FormCompressibleHeaderFooterReusable ||
+            form?.footer is FormCompressibleHeaderFooterReusable ||
+            form?.header?.shouldSuspension == true ||
+            form?.footer?.shouldSuspension == true
+        {
+            /// 如果有可压缩的header/footer，或者悬浮的header/footer，需要重新布局
+            return true
+        }
         for section in sectionAttributes.values {
             if section.isFormHeader {
                 /// 如果是表单头部，始终需要重新布局

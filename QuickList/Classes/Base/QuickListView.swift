@@ -107,11 +107,7 @@ open class QuickListView: UICollectionView {
         self.delegate = handler
         self.dataSource = handler
         
-        handler.layout.didFinishLayout = { [weak self] layout in
-            if let block = self?.listSizeChangedBlock {
-                block(layout.collectionViewContentSize)
-            }
-        }
+        handler.layout.add(self)
     }
     
     open override func layoutSubviews() {
@@ -167,4 +163,12 @@ open class QuickListView: UICollectionView {
 
 extension QuickListView: FormViewLongTapProtorol {
     
+}
+
+extension QuickListView: QuickListCollectionLayoutDelegate {
+    public func collectionLayoutDidFinishLayout(_ layout: QuickListCollectionLayout) {
+        if let block = self.listSizeChangedBlock {
+            block(layout.collectionViewContentSize)
+        }
+    }
 }

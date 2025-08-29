@@ -144,6 +144,63 @@ public class FormViewHandler: NSObject {
         }
     }
     
+    /// 更新选中状态到指定位置
+    public func updateSelectedItemDecorationTo(position: CGFloat) {
+        guard
+            let selectedItemDecoration = form.selectedItemDecoration,
+            let formView = formView,
+            form.count == 1,
+            let section = form.sections.first
+        else {
+            assertionFailure("仅支持单Section的Form使用此方法")
+            return
+        }
+        formView.addDecorationViewIfNeeded(selectedItemDecoration)
+        
+        let position = max(0, min(CGFloat(section.count - 1), position))
+        let floorIndex: Int = Int(floor(position))
+        let ceilIndex: Int = Int(ceil(position))
+        
+        var alpha: CGFloat = 1
+        if floorIndex == ceilIndex {
+            for (index, item) in section.items.enumerated() {
+                item.isSelected = index == floorIndex
+            }
+            if
+                let layoutAttributes = self.layout.layoutAttributesForItem(at: IndexPath(item: floorIndex, section: 0))
+            {
+                let targetZPosition = form.selectedItemDecorationPosition == .below ? CGFloat(layoutAttributes.zIndex) - 1 : CGFloat(layoutAttributes.zIndex) + 1
+                selectedItemDecoration.layer.zPosition = targetZPosition
+                selectedItemDecoration.frame = layoutAttributes.frame
+            }
+        } else {
+            let floorItem = section.items[floorIndex]
+            let ceilItem = section.items[ceilIndex]
+            if floorItem.isHidden && ceilItem.isHidden {
+                alpha = 0
+            } else if floorItem.isHidden {
+                alpha = position - CGFloat(floorIndex)
+            } else if ceilItem.isHidden {
+                alpha = CGFloat(ceilIndex) - position
+            }
+            if
+                let floorLayoutAttributes = self.layout.layoutAttributesForItem(at: IndexPath(item: floorIndex, section: 0)),
+                let ceilLayoutAttributes = self.layout.layoutAttributesForItem(at: IndexPath(item: ceilIndex, section: 0))
+            {
+                let targetZIndex = min(floorLayoutAttributes.zIndex, ceilLayoutAttributes.zIndex)
+                let targetZPosition = form.selectedItemDecorationPosition == .below ? CGFloat(targetZIndex) - 1 : CGFloat(targetZIndex) + 1
+                selectedItemDecoration.layer.zPosition = targetZPosition
+                let centerX = floorLayoutAttributes.center.x + (ceilLayoutAttributes.center.x - floorLayoutAttributes.center.x) * (position - CGFloat(floorIndex))
+                let centerY = floorLayoutAttributes.center.y + (ceilLayoutAttributes.center.y - floorLayoutAttributes.center.y) * (position - CGFloat(floorIndex))
+                let width = floorLayoutAttributes.size.width + (ceilLayoutAttributes.size.width - floorLayoutAttributes.size.width) * (position - CGFloat(floorIndex))
+                let height = floorLayoutAttributes.size.height + (ceilLayoutAttributes.size.height - floorLayoutAttributes.size.height) * (position - CGFloat(floorIndex))
+                selectedItemDecoration.frame = CGRect(x: centerX - width * 0.5, y: centerY - height * 0.5, width: width, height: height)
+            }
+        }
+        
+        form.selectedItemDecoration?.alpha = alpha
+    }
+    
     
     // 滚动显示Item
     func makeItemVisible(_ item: Item, animation: Bool = true) {
@@ -343,7 +400,10 @@ extension FormViewHandler: FormDelegate {
     }
     
     public func getViewSize() -> CGSize {
-        self.formView?.bounds.size ?? .zero
+        guard let formView = self.formView else {
+            return .zero
+        }
+        return CGSize(width: formView.bounds.width - formView.adjustedContentInset.left - formView.adjustedContentInset.right, height: formView.bounds.height - formView.adjustedContentInset.top - formView.adjustedContentInset.bottom)
     }
     
     public func getContentSize() -> CGSize {
