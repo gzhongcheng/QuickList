@@ -29,6 +29,7 @@ public class QuickSegmentPagesItemCell: ItemCell {
         listView.scrollDirection = .horizontal
         listView.contentInsetAdjustmentBehavior = .never
         listView.isPagingEnabled = true
+        listView.bounces = false
         return listView
     }()
 }
@@ -41,14 +42,21 @@ public protocol QuickSegmentPagesItemDelegate: AnyObject {
 
 // MARK: - QuickSegmentPagesItem
 public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, ItemType {
+    public enum MenuType {
+        case header
+        case item
+    }
     
+    public var pagesScrollDirection: UICollectionView.ScrollDirection = .horizontal
     public var pageViewControllers: [QuickSegmentPageViewDelegate] = []
     public var menuHeight: CGFloat = 0
+    public var menuType: MenuType = .header
     public var pageContainerHeight: CGFloat?
     public weak var delegate: QuickSegmentPagesItemDelegate?
     public weak var currentListView: QuickSegmentPageListView?
     public var scrollEnable: Bool = true
     public var scrollManager: QuickSegmentScrollManager?
+    public var shouldScrollToTopWhenPageDisappear: Bool = true
     
     private var contentSize: CGSize = .zero {
         didSet {
@@ -91,11 +99,12 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
             self.currentListView?.observeScrollViewContentOffset(to: manager)
         }
         self.currentListView?.isScrollEnabled = scrollEnable
+        cell.pageList.scrollDirection = pagesScrollDirection
         cell.pageList.handerDelegate = self
         cell.pageList.form.removeAll()
         let section = Section()
         for pageVC in pageViewControllers {
-            section <<< QuickSegmentSinglePageItem(pageViewController: pageVC)
+            section <<< QuickSegmentSinglePageItem(pageViewController: pageVC, shouldScrollToTopWhenDisappear: shouldScrollToTopWhenPageDisappear)
         }
         cell.pageList.form +++ section
     }
@@ -111,19 +120,41 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
     
     /// 计算尺寸
     public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
-        guard
-            item == self,
-            let size = self.section?.form?.delegate?.getViewSize()
-        else {
-            return nil
-        }
+        let size = view.handler.getViewSize()
         switch layoutType {
         case .vertical:
-            contentSize = CGSize(width: estimateItemSize.width, height: max((pageContainerHeight ?? size.height) - menuHeight, 0))
+            switch menuType {
+            case .header:
+                contentSize = CGSize(width: estimateItemSize.width, height: max((pageContainerHeight ?? size.height) - menuHeight, 0))
+            case .item:
+                contentSize = CGSize(width: max(estimateItemSize.width - menuHeight, 0), height: pageContainerHeight ?? size.height)
+            }
         case .horizontal:
-            contentSize = CGSize(width: max((pageContainerHeight ?? size.width) - menuHeight, 0), height: estimateItemSize.height)
+            switch menuType {
+            case .header:
+                contentSize = CGSize(width: max(0, pageContainerHeight ?? (size.width - menuHeight)), height: estimateItemSize.height)
+            case .item:
+                contentSize = CGSize(width: pageContainerHeight ?? size.width, height: estimateItemSize.height - menuHeight)
+            }
         case .free:
-            contentSize = size
+            switch view.scrollDirection {
+            case .vertical:
+                switch menuType {
+                case .header:
+                    contentSize = CGSize(width: estimateItemSize.width, height: max((pageContainerHeight ?? size.height) - menuHeight, 0))
+                case .item:
+                    contentSize = CGSize(width: max(estimateItemSize.width - menuHeight, 0), height: pageContainerHeight ?? size.height)
+                }
+            case .horizontal:
+                switch menuType {
+                case .header:
+                    contentSize = CGSize(width: max(0, pageContainerHeight ?? (size.width - menuHeight)), height: estimateItemSize.height)
+                case .item:
+                    contentSize = CGSize(width: pageContainerHeight ?? size.width, height: estimateItemSize.height - menuHeight)
+                }
+            @unknown default:
+                contentSize = size
+            }
         }
         return contentSize
     }

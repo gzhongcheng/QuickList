@@ -5,6 +5,7 @@
 //  Created by ZhongCheng Guo on 2025/3/28.
 //
 
+import Foundation
 import UIKit
 import SnapKit
 
@@ -19,9 +20,69 @@ public protocol QuickSegmentTabProtocol {
     func updateSelectedDecorationTo(position: CGFloat)
 }
 
+public protocol QuickSegmentMenuConfig {
+}
+
+public struct QuickSegmentHorizontalMenuConfig: QuickSegmentMenuConfig {
+    var menuHeight: CGFloat
+    var menuItemSpace: CGFloat
+    var menuListInsets: UIEdgeInsets
+    var menuBackground: UIView?
+    var menuBackgroundDecoration: UIView?
+    var menuSelectedItemDecoration: UIView?
+    
+    public init(
+        menuHeight: CGFloat = 44,
+        menuItemSpace: CGFloat = 30,
+        menuListInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20),
+        menuBackground: UIView? = nil,
+        menuBackgroundDecoration: UIView? = nil,
+        menuSelectedItemDecoration: UIView? = nil
+    ) {
+        self.menuHeight = menuHeight
+        self.menuItemSpace = menuItemSpace
+        self.menuListInsets = menuListInsets
+        self.menuBackground = menuBackground
+        self.menuBackgroundDecoration = menuBackgroundDecoration
+        self.menuSelectedItemDecoration = menuSelectedItemDecoration
+    }
+}
+
+public struct QuickSegmentVerticalMenuConfig: QuickSegmentMenuConfig {
+    var menuItemMinHeight: CGFloat
+    var menuItemMaxWidth: CGFloat
+    var menuItemLineSpace: CGFloat
+    var menuListInsets: UIEdgeInsets
+    var menuBackground: UIView?
+    var menuBackgroundDecoration: UIView?
+    var menuSelectedItemDecoration: UIView?
+    
+    public init(
+        menuItemMinHeight: CGFloat = 44,
+        menuItemMaxWidth: CGFloat = 200,
+        menuItemLineSpace: CGFloat = 10,
+        menuListInsets: UIEdgeInsets = UIEdgeInsets(top: 20, left: 16, bottom: 20, right: 16),
+        menuBackground: UIView? = nil,
+        menuBackgroundDecoration: UIView? = nil,
+        menuSelectedItemDecoration: UIView? = nil
+    ) {
+        self.menuItemMinHeight = menuItemMinHeight
+        self.menuItemMaxWidth = menuItemMaxWidth
+        self.menuItemLineSpace = menuItemLineSpace
+        self.menuListInsets = menuListInsets
+        self.menuBackground = menuBackground
+        self.menuBackgroundDecoration = menuBackgroundDecoration
+        self.menuSelectedItemDecoration = menuSelectedItemDecoration
+    }
+}
+
 public class QuickSegmentSection: Section {
     /// 选择tab时是否置顶
-    public var shouldScrollToTopWhenSelectedTab: Bool = true
+    public var shouldScrollToTopWhenSelectedTab: Bool = true {
+        didSet {
+            self.pagesItem.shouldScrollToTopWhenPageDisappear = shouldScrollToTopWhenSelectedTab
+        }
+    }
     
     /// 页面是否可以滚动切换，默认false
     public var pageScrollEnable: Bool {
@@ -41,12 +102,7 @@ public class QuickSegmentSection: Section {
             }
         }
     }
-    /// 菜单列表的边距
-    var menuListInsets: UIEdgeInsets = .zero {
-        didSet {
-            self.menuTabList.form.contentInset = menuListInsets
-        }
-    }
+    
     /// 菜单Item间距
     var menuItemSpace: CGFloat = 30
     
@@ -58,7 +114,11 @@ public class QuickSegmentSection: Section {
     
     var scrollManager: QuickSegmentScrollManager?
     
-    var currentPageIndex: Int = 0
+    var currentPageIndex: Int = 0 {
+        didSet {
+            didSetCurrentPage()
+        }
+    }
     
     var sectionStartPoint: CGPoint = .zero
     var sectionEndPoint: CGPoint = .zero
@@ -72,24 +132,14 @@ public class QuickSegmentSection: Section {
     /**
     初始化一个分段页面Section
      - Parameters:
-        - menuHeight: 菜单高度，默认44
-        - menuBackground: 菜单背景视图，默认为nil
-        - menuItemSpace: 菜单Item间距，默认30
-        - menuListInsets: 菜单列表的边距，默认UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-        - menuBackgroundDecoration: 菜单背景装饰视图，默认nil
-        - menuSelectedItemDecoration: 菜单选中Item装饰视图，默认nil
+        - menuConfig: 菜单配置
         - pageViewControllers: 页面控制器列表
         - pageContainerHeight: 页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高)
         - pageScrollEnable: 页面是否可以滚动切换，默认false
         - initializer: 初始化配置完成回调
      */
     public convenience init(
-        menuHeight: CGFloat = 44,
-        menuBackground: UIView? = nil,
-        menuItemSpace: CGFloat = 30,
-        menuListInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20),
-        menuBackgroundDecoration: UIView? = nil,
-        menuSelectedItemDecoration: UIView? = nil,
+        menuConfig: QuickSegmentMenuConfig,
         pageViewControllers: [QuickSegmentPageViewDelegate],
         pageContainerHeight: CGFloat? = nil,
         pageScrollEnable: Bool = true,
@@ -102,12 +152,38 @@ public class QuickSegmentSection: Section {
         self.pageContainerHeight = pageContainerHeight
         self.scrollManager = scrollManager
         
-        self.menuTabList.form.selectedItemDecoration = menuSelectedItemDecoration
-        self.menuTabList.form.backgroundDecoration = menuBackgroundDecoration
-        self.menuTabList.form.contentInset = menuListInsets
+        switch scrollManager.rootDirection {
+        case .vertical:
+            if let horizontalMenuConfig = menuConfig as? QuickSegmentHorizontalMenuConfig {
+                configHorizontalMenuHeader(menuConfig: horizontalMenuConfig)
+            }
+        case .horizontal:
+            if let horizontalMenuConfig = menuConfig as? QuickSegmentHorizontalMenuConfig {
+                configHorizontalMenuItem(menuConfig: horizontalMenuConfig, pageContainerHeight: pageContainerHeight)
+            }
+        @unknown default:
+            assertionFailure("未处理的滚动方向")
+        }
+        
+        self.pagesItem.scrollManager = scrollManager
+        self.pagesItem.scrollEnable = pageScrollEnable
+        self.append(self.pagesItem)
+        
+        initializer?(self)
+    }
+    
+    private func configHorizontalMenuHeader(
+        menuConfig: QuickSegmentHorizontalMenuConfig
+    ) {
+        self.pagesItem.menuType = .header
+        self.pagesItem.pagesScrollDirection = .horizontal
+        
+        self.menuTabList.form.selectedItemDecoration = menuConfig.menuSelectedItemDecoration
+        self.menuTabList.form.backgroundDecoration = menuConfig.menuBackgroundDecoration
+        self.menuTabList.form.contentInset = menuConfig.menuListInsets
         self.header = SectionHeaderFooterView<UICollectionReusableView>({[weak self] view, section in
             guard let self = self else { return }
-            if let menuBackground = menuBackground {
+            if let menuBackground = menuConfig.menuBackground {
                 view.addSubview(menuBackground)
                 menuBackground.snp.makeConstraints { make in
                     make.edges.equalToSuperview()
@@ -120,16 +196,35 @@ public class QuickSegmentSection: Section {
         })
         self.header?.shouldSuspension = true
         self.header?.height = { _, _, _ in
-            menuHeight
+            menuConfig.menuHeight
         }
-        self.menuItemSpace = menuItemSpace
+        self.menuItemSpace = menuConfig.menuItemSpace
+        self.reloadMenu()
+    }
+    
+    private func configHorizontalMenuItem(
+        menuConfig: QuickSegmentHorizontalMenuConfig,
+        pageContainerHeight: CGFloat?
+    ) {
+        self.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
+        
+        self.pagesItem.menuType = .item
+        self.pagesItem.pagesScrollDirection = .horizontal
+        
+        self.menuTabList.form.selectedItemDecoration = menuConfig.menuSelectedItemDecoration
+        self.menuTabList.form.backgroundDecoration = menuConfig.menuBackgroundDecoration
+        self.menuTabList.form.contentInset = menuConfig.menuListInsets
+        
+        let menuItem = QuickSegmentHorizontalMenuItem(
+            identifier: "MenuItem_\(self.index ?? 0)",
+            pageContainerHeight: pageContainerHeight,
+            config: menuConfig,
+            menuTabList: self.menuTabList
+        )
+        self.menuItemSpace = menuConfig.menuItemSpace
         self.reloadMenu()
         
-        self.pagesItem.scrollManager = scrollManager
-        self.pagesItem.scrollEnable = pageScrollEnable
-        self.append(self.pagesItem)
-        
-        initializer?(self)
+        self.append(menuItem)
     }
     
     /// 菜单列表Tab
@@ -161,17 +256,7 @@ public class QuickSegmentSection: Section {
                 guard let self = self else { return }
                 self.pagesItem.scrollToPage(index: index, animated: true)
                 self.currentPageIndex = index
-                /// 切换监听的scrollView
-                /// 如果当前的scrollView正在滚动，先停止滚动
-                self.currentPageScrollView?.setContentOffset(self.currentPageScrollView?.contentOffset ?? .zero, animated: false)
-                self.currentPageScrollView?.removeObserveScrollViewContentOffset()
-                self.currentPageScrollView = self.pageViewControllers[self.currentPageIndex].listScrollView()
-                self.scrollManager?.pageDidChanged(of: self)
-                if let gestureRecognizersInPageScrollView = self.currentPageScrollView?.gestureRecognizers {
-                    otherPageGestureRecognizers = gestureRecognizersInPageScrollView
-                }
-                guard let scrollManager = self.scrollManager else { return }
-                self.currentPageScrollView?.observeScrollViewContentOffset(to: scrollManager)
+                self.scrollManager?.pageDidChanged(in: self)
             }
             section.append(pageVC.pageTabItem)
         }
@@ -180,7 +265,7 @@ public class QuickSegmentSection: Section {
         self.menuTabList.reload()
     }
     
-    func setCurrentPage() {
+    func didSetCurrentPage() {
         self.currentPageScrollView?.removeObserveScrollViewContentOffset()
         self.currentPageScrollView = self.pageViewControllers[self.currentPageIndex].listScrollView()
         if let gestureRecognizersInPageScrollView = self.currentPageScrollView?.gestureRecognizers {
@@ -201,17 +286,16 @@ extension QuickSegmentSection: QuickSegmentPagesItemDelegate {
         
         let floorIndex: Int = Int(floor(index))
         let ceilIndex: Int = Int(ceil(index))
-        if floorIndex == ceilIndex {
+        if floorIndex == ceilIndex, floorIndex != currentPageIndex {
             self.currentPageIndex = floorIndex
-            /// 完全滑动到某个位置， 切换监听的scrollView
-            self.setCurrentPage()
+            self.scrollManager?.pageDidChanged(in: self)
         }
     }
 }
 
 extension QuickSegmentSection: QuickListCollectionLayoutDelegate {
     public func collectionLayoutDidFinishLayout(_ layout: QuickListCollectionLayout) {
-        setCurrentPage()
+        didSetCurrentPage()
         guard let index = self.index else { return }
         self.sectionStartPoint = layout.sectionAttributes[index]?.startPoint ?? .zero
         self.sectionEndPoint = layout.sectionAttributes[index]?.endPoint ?? .zero

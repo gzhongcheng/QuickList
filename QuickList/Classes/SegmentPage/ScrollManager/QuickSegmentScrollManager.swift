@@ -47,37 +47,29 @@ public class QuickSegmentScrollManager {
     
     public static func create(
         rootScrollView: QuickSegmentPageListView? = nil,
-        bouncesType: BouncesType = .root,
-        rootDirection: UICollectionView.ScrollDirection = .vertical
+        bouncesType: BouncesType = .root
     ) -> QuickSegmentScrollManager {
-        switch bouncesType {
-        case .root:
-            switch rootDirection {
-            case .vertical:
+        switch rootScrollView?.scrollDirection {
+        case .vertical:
+            switch bouncesType {
+            case .root:
                 return QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
-            case .horizontal:
+            case .pageWhenRootTop:
                 return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            default:
+            case .pageWhenTouchInPage:
                 return QuickSegmentScrollManager(rootScrollView: rootScrollView)
             }
-        case .pageWhenRootTop:
-            switch rootDirection {
-            case .vertical:
-                return QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
-            case .horizontal:
+        case .horizontal:
+            switch bouncesType {
+            case .root:
+                return QuickSegmentHorizontalRootScrollManager(rootScrollView: rootScrollView)
+            case .pageWhenRootTop:
                 return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            default:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            }
-        case .pageWhenTouchInPage:
-            switch rootDirection {
-            case .vertical:
-                return QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
-            case .horizontal:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            default:
+            case .pageWhenTouchInPage:
                 return QuickSegmentScrollManager(rootScrollView: rootScrollView)
             }
+        default:
+            return QuickSegmentScrollManager(rootScrollView: rootScrollView)
         }
     }
     
@@ -90,9 +82,14 @@ public class QuickSegmentScrollManager {
     internal init(
         rootScrollView: QuickSegmentPageListView? = nil
     ) {
+        guard let rootScrollView = rootScrollView else {
+            assertionFailure("必须传入rootScrollView")
+            return
+        }
         self.rootScrollView = rootScrollView
-        rootScrollView?.handler.layout.add(self)
-        rootScrollView?.observeScrollViewContentOffset(to: self)
+        self.rootDirection = rootScrollView.scrollDirection
+        rootScrollView.handler.layout.add(self)
+        rootScrollView.observeScrollViewContentOffset(to: self)
     }
     
     
@@ -110,7 +107,15 @@ public class QuickSegmentScrollManager {
     /// 处理滚动事件
     func scrollViewDidScroll(_ scrollView: QuickSegmentPageScrollViewType, from lastOffset: CGPoint) {
         if currentScrollDirection == nil {
-            currentScrollDirection = abs(scrollView.contentOffset.x - lastOffset.x) > abs(scrollView.contentOffset.y - lastOffset.y) ? .horizontal : .vertical
+            let xD = abs(scrollView.contentOffset.x - lastOffset.x)
+            let yD = abs(scrollView.contentOffset.y - lastOffset.y)
+            if xD == yD {
+                /// 优先以总表滚动方向为准
+                currentScrollDirection = rootDirection
+            } else {
+                currentScrollDirection = xD > yD ? .horizontal : .vertical
+            }
+            print("手势开始，dx: \(xD), dy: \(yD)")
         }
         
         if scrollView == rootScrollView {
@@ -151,8 +156,13 @@ public class QuickSegmentScrollManager {
     }
     
     /// 容器内页面更新
-    func pageDidChanged(of section: QuickSegmentSection) {
-        assertionFailure("必须在子类中重写此方法")
+    func pageDidChanged(in section: QuickSegmentSection) {
+        guard let rootScrollView = self.rootScrollView else { return }
+        if section.shouldScrollToTopWhenSelectedTab {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                rootScrollView.setContentOffset(CGPoint(x: section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left, y: rootScrollView.contentOffset.y), animated: true)
+            }
+        }
     }
     
     /// 当前可滚动的子列表滚动
@@ -177,11 +187,11 @@ public class QuickSegmentScrollManager {
     func pagesBoxScrollViewDidScroll(_ scrollView: QuickSegmentPageListView, at section: QuickSegmentSection, from lastOffset: CGPoint) {
         switch scrollView.scrollDirection {
         case .horizontal:
-            if scrollView.scrollDirection != currentScrollDirection {
+            if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
                 scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
             }
         case .vertical:
-            if scrollView.scrollDirection != currentScrollDirection {
+            if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
                 scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
             }
         @unknown default:

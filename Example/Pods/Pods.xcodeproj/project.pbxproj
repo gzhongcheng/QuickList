@@ -75,6 +75,8 @@
 		2DBA4F472E61E66400A8B0CB /* QuickSegmentPageTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F462E61E66400A8B0CB /* QuickSegmentPageTableView.swift */; };
 		2DBA4F492E61E68600A8B0CB /* QuickSegmentPageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F482E61E68600A8B0CB /* QuickSegmentPageCollectionView.swift */; };
 		2DBA4F4B2E61E6B800A8B0CB /* QuickSegmentVerticalRootScrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F4A2E61E6B800A8B0CB /* QuickSegmentVerticalRootScrollManager.swift */; };
+		2DBA4F4D2E61F17400A8B0CB /* QuickSegmentHorizontalRootScrollManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F4C2E61F17400A8B0CB /* QuickSegmentHorizontalRootScrollManager.swift */; };
+		2DBA4F4F2E61FB1100A8B0CB /* QuickSegmentHorizontalMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F4E2E61FB1100A8B0CB /* QuickSegmentHorizontalMenuItem.swift */; };
 		2E2B7A23CEA408A537CAD885C93C5701 /* Form.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5AB6B04192739DF8E586E2AA2A4A2C6 /* Form.swift */; };
 		2EEDC0EAE02ADA918ADA1C7FD7E90B63 /* upsampling_mips_dsp_r2.c in Sources */ = {isa = PBXBuildFile; fileRef = 197DB173F63F9ECB0CC3C07A2A77060D /* upsampling_mips_dsp_r2.c */; settings = {COMPILER_FLAGS = "-D_THREAD_SAFE -fno-objc-arc"; }; };
 		2F376D41F4BE929776FAB9F4BB6EAD8B /* sharpyuv_dsp.c in Sources */ = {isa = PBXBuildFile; fileRef = D1BC47FE84964891D4BD660457DA7B59 /* sharpyuv_dsp.c */; settings = {COMPILER_FLAGS = "-D_THREAD_SAFE -fno-objc-arc"; }; };
@@ -538,6 +540,8 @@
 		2DBA4F462E61E66400A8B0CB /* QuickSegmentPageTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSegmentPageTableView.swift; sourceTree = "<group>"; };
 		2DBA4F482E61E68600A8B0CB /* QuickSegmentPageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSegmentPageCollectionView.swift; sourceTree = "<group>"; };
 		2DBA4F4A2E61E6B800A8B0CB /* QuickSegmentVerticalRootScrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSegmentVerticalRootScrollManager.swift; sourceTree = "<group>"; };
+		2DBA4F4C2E61F17400A8B0CB /* QuickSegmentHorizontalRootScrollManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSegmentHorizontalRootScrollManager.swift; sourceTree = "<group>"; };
+		2DBA4F4E2E61FB1100A8B0CB /* QuickSegmentHorizontalMenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuickSegmentHorizontalMenuItem.swift; path = QuickList/Classes/SegmentPage/QuickSegmentHorizontalMenuItem.swift; sourceTree = "<group>"; };
 		2FAA9FEBA103FDCFE2C777C0C1787DE5 /* RequestModifier.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RequestModifier.swift; path = Sources/Networking/RequestModifier.swift; sourceTree = "<group>"; };
 		2FC7D0890A2DCAA85AFA92E9014FBB85 /* KingfisherWebP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KingfisherWebP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2FDC1B0DE60F9E3D938494752EA23052 /* decode.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = decode.h; path = src/webp/decode.h; sourceTree = "<group>"; };
@@ -1005,6 +1009,7 @@
 				80F2057994A38A438B1D0FCBD60FC740 /* QuickSegmentSinglePageItem.swift */,
 				AC8992E122C7553CA906F659C9B0729C /* ContentScrollview */,
 				7ED830C9251DA876D6F2FCBD44BEA4F5 /* ScrollManager */,
+				2DBA4F4E2E61FB1100A8B0CB /* QuickSegmentHorizontalMenuItem.swift */,
 			);
 			name = SegmentPage;
 			sourceTree = "<group>";
@@ -1116,6 +1121,7 @@
 			children = (
 				E3DC126C14D6A5098E0C6AB8E50B78DD /* QuickSegmentScrollManager.swift */,
 				2DBA4F4A2E61E6B800A8B0CB /* QuickSegmentVerticalRootScrollManager.swift */,
+				2DBA4F4C2E61F17400A8B0CB /* QuickSegmentHorizontalRootScrollManager.swift */,
 			);
 			name = ScrollManager;
 			path = QuickList/Classes/SegmentPage/ScrollManager;
@@ -2274,6 +2280,7 @@
 				182525AA01EAB5366D9CD848C2EBB871 /* ItemCell.swift in Sources */,
 				6B242181D2F33FEF0C892FCB8EF78C10 /* LineItem.swift in Sources */,
 				7BECD0ED2DAA21BE3663BC6B81D2ACFC /* MultivalusedSection.swift in Sources */,
+				2DBA4F4F2E61FB1100A8B0CB /* QuickSegmentHorizontalMenuItem.swift in Sources */,
 				26CA1FA6311A430AA6710374E472A75F /* Operators.swift in Sources */,
 				CCE462FA55AD520AE40F22799775EA3F /* PlaceholderTextView.swift in Sources */,
 				9F036B368314A251145D5078547D4FE5 /* PresentationMode.swift in Sources */,
@@ -2304,6 +2311,7 @@
 				3E0F98675AC5B4C0966A54EACA94F1DD /* TitleValueItem.swift in Sources */,
 				18D1DF33D723A7EB0F4017B265DA417A /* UIButton+WebImage.swift in Sources */,
 				91D08847009A770C46CCDFCF314C9F22 /* UIImage+Ex.swift in Sources */,
+				2DBA4F4D2E61F17400A8B0CB /* QuickSegmentHorizontalRootScrollManager.swift in Sources */,
 				B881597DFEEE6C4175057270E8C45EF8 /* UIImage+WebImage.swift in Sources */,
 				9BAAA35C756730EC3D98E0403F3203C5 /* UIImageView+WebImage.swift in Sources */,
 				9349565A2A499C4D188271CDDF056ACC /* UIView+Ex.swift in Sources */,

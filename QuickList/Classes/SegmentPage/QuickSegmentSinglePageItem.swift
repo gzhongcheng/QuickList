@@ -22,13 +22,16 @@ class QuickSegmentSinglePageItemCell: ItemCell {
 // MARK:- QuickSegmentSinglePageItem
 final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, ItemType {
     var pageViewController: QuickSegmentPageViewDelegate?
+    var shouldScrollToTopWhenDisappear: Bool = true
     
     convenience init(
         pageViewController: QuickSegmentPageViewDelegate,
+        shouldScrollToTopWhenDisappear: Bool,
         _ initializer: ((QuickSegmentSinglePageItem) -> Void)? = nil
     ) {
         self.init()
         self.pageViewController = pageViewController
+        self.shouldScrollToTopWhenDisappear = shouldScrollToTopWhenDisappear
         initializer?(self)
     }
     
@@ -71,6 +74,40 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         super.didEndDisplay()
         guard let pageVC = pageViewController else {
             return
+        }
+        if
+            let scrollableView = pageVC.listScrollView()
+        {
+            if shouldScrollToTopWhenDisappear {
+                scrollableView.contentOffset = .zero
+                scrollableView.scrollLastOffset = .zero
+                scrollableView.layoutIfNeeded()
+            } else {
+                if scrollableView.contentOffset.x < 0 || scrollableView.contentOffset.y < 0 {
+                    scrollableView.contentOffset = .zero
+                    scrollableView.scrollLastOffset = .zero
+                    scrollableView.layoutIfNeeded()
+                } else {
+                    switch scrollableView.scrollDirection {
+                    case .horizontal:
+                        if scrollableView.contentOffset.x > (scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right) {
+                            let targetX = max(0, scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right)
+                            scrollableView.contentOffset.x = targetX
+                            scrollableView.scrollLastOffset.x = targetX
+                            scrollableView.layoutIfNeeded()
+                        }
+                    case .vertical:
+                        if scrollableView.contentOffset.y > (scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom) {
+                            let targetY = max(0, scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom)
+                            scrollableView.contentOffset.y = targetY
+                            scrollableView.scrollLastOffset.y = targetY
+                            scrollableView.layoutIfNeeded()
+                        }
+                    @unknown default:
+                        break
+                    }
+                }
+            }
         }
         pageVC.beginAppearanceTransition(false, animated: false)
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// 分段页面滚动管理器默认实现
+/// 分段页面滚动管理器
 /// 对应的总表的滚动方向为竖直
 /// 对应bouncesType为.root
 class QuickSegmentVerticalRootScrollManager: QuickSegmentScrollManager {
@@ -185,23 +185,6 @@ class QuickSegmentVerticalRootScrollManager: QuickSegmentScrollManager {
             canRootScroll = false
             canPageScroll = true
             scrollView.contentOffset.y = targetOffsetY
-        }
-    }
-    
-    /// 子页面切换
-    override func pageDidChanged(of section: QuickSegmentSection) {
-        guard let rootScrollView = self.rootScrollView else { return }
-        if
-            let scrollableView = section.currentPageScrollView
-        {
-            scrollableView.contentOffset = .zero
-            scrollableView.scrollLastOffset = .zero
-            scrollableView.layoutIfNeeded()
-        }
-        if section.shouldScrollToTopWhenSelectedTab {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                rootScrollView.setContentOffset(CGPoint(x: rootScrollView.contentOffset.x, y: section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top), animated: true)
-            }
         }
     }
     

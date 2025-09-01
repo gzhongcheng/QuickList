@@ -75,11 +75,11 @@ extension QuickSegmentPageListView: UIGestureRecognizerDelegate {
         else {
             return false
         }
-        if section.otherPageGestureRecognizers.contains(otherGestureRecognizer) {
-            return false
-        }
         if gestureRecognizer.state == .possible {
             scrollManager.touchSection = section
+        }
+        if section.otherPageGestureRecognizers.contains(otherGestureRecognizer) {
+            return false
         }
         return true
     }
