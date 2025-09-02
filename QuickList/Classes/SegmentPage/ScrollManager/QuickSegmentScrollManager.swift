@@ -115,7 +115,6 @@ public class QuickSegmentScrollManager {
             } else {
                 currentScrollDirection = xD > yD ? .horizontal : .vertical
             }
-            print("手势开始，dx: \(xD), dy: \(yD)")
         }
         
         if scrollView == rootScrollView {
@@ -189,10 +188,86 @@ public class QuickSegmentScrollManager {
         case .horizontal:
             if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
                 scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                return
+            }
+            if self.rootScrollView?.scrollDirection != currentScrollDirection {
+                if let pageScrollView = section.currentPageScrollView, pageScrollView.scrollDirection == .horizontal {
+                    if
+                        scrollView.contentOffset.x > lastOffset.x,
+                        pageScrollView.contentOffset.x < (pageScrollView.contentSize.width - pageScrollView.bounds.width + pageScrollView.adjustedContentInset.right)
+                    {
+                        canPagesBoxScroll = false
+                        canPageScroll = true
+                        /// 当前子列表可以滚动
+                        scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                        return
+                    }
+                    if
+                        scrollView.contentOffset.x < lastOffset.x,
+                        pageScrollView.contentOffset.x > 0
+                    {
+                        canPagesBoxScroll = false
+                        canPageScroll = true
+                        /// 当前子列表可以滚动
+                        scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                        return
+                    }
+                }
+            } else {
+                if scrollView.contentOffset.x < 0 {
+                    canPagesBoxScroll = false
+                    canRootScroll = true
+                    scrollView.contentOffset.x = 0
+                    return
+                }
+                if scrollView.contentOffset.x > (scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right) {
+                    canPagesBoxScroll = false
+                    canRootScroll = true
+                    scrollView.contentOffset.x = scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right
+                    return
+                }
             }
         case .vertical:
             if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
                 scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
+                return
+            }
+            if self.rootScrollView?.scrollDirection != currentScrollDirection {
+                if let pageScrollView = section.currentPageScrollView, pageScrollView.scrollDirection == .vertical {
+                    if
+                        scrollView.contentOffset.y > lastOffset.y,
+                        pageScrollView.contentOffset.y < (pageScrollView.contentSize.height - pageScrollView.bounds.height + pageScrollView.adjustedContentInset.bottom)
+                    {
+                        canPagesBoxScroll = false
+                        canPageScroll = true
+                        /// 当前子列表可以滚动
+                        scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
+                        return
+                    }
+                    if
+                        scrollView.contentOffset.y < lastOffset.y,
+                        pageScrollView.contentOffset.y > 0
+                    {
+                        canPagesBoxScroll = false
+                        canPageScroll = true
+                        /// 当前子列表可以滚动
+                        scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
+                        return
+                    }
+                }
+            } else {
+                if scrollView.contentOffset.y < 0 {
+                    canPagesBoxScroll = false
+                    canRootScroll = true
+                    scrollView.contentOffset.y = 0
+                    return
+                }
+                if scrollView.contentOffset.y > (scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.bottom) {
+                    canPagesBoxScroll = false
+                    canRootScroll = true
+                    scrollView.contentOffset.y = scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.bottom
+                    return
+                }
             }
         @unknown default:
             return

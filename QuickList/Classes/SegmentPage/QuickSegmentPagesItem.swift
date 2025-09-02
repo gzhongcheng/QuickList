@@ -8,6 +8,9 @@
 import Foundation
 import SnapKit
 
+public class QuickSegmentPagesListView: QuickSegmentPageListView {
+}
+
 // Senment页面容器
 // MARK: - QuickSegmentPagesItemCell
 public class QuickSegmentPagesItemCell: ItemCell {
@@ -24,12 +27,13 @@ public class QuickSegmentPagesItemCell: ItemCell {
     }
     
     /// 页面控制器展示列表
-    public let pageList: QuickSegmentPageListView = {
-        let listView = QuickSegmentPageListView()
+    public let pageList: QuickSegmentPagesListView = {
+        let listView = QuickSegmentPagesListView()
+        listView.isQuickSegmentSubPage = true
         listView.scrollDirection = .horizontal
         listView.contentInsetAdjustmentBehavior = .never
         listView.isPagingEnabled = true
-        listView.bounces = false
+//        listView.bounces = false
         return listView
     }()
 }
@@ -75,14 +79,12 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
     
     public convenience init(
         pageViewControllers: [QuickSegmentPageViewDelegate],
-        menuHeight: CGFloat = 44,
         pageContainerHeight: CGFloat? = nil,
         scrollDirection: UICollectionView.ScrollDirection = .horizontal,
         _ initializer: ((QuickSegmentPagesItem) -> Void)? = nil
     ) {
         self.init()
         self.pageViewControllers = pageViewControllers
-        self.menuHeight = menuHeight
         self.pageContainerHeight = pageContainerHeight
         initializer?(self)
     }
@@ -174,11 +176,19 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
 
 extension QuickSegmentPagesItem: FormViewHandlerDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView.isTracking || scrollView.isDragging || scrollView.isDecelerating else {
+        guard
+            scrollView.isTracking || scrollView.isDragging || scrollView.isDecelerating,
+            let cell = self.cell as? QuickSegmentPagesItemCell
+        else {
             /// 判断是否手势滚动
             return
         }
-        let index = scrollView.contentOffset.x / scrollView.bounds.width
-        self.delegate?.segmentPagesItem(self, didScrollTo: index)
+        if cell.pageList.scrollDirection == .horizontal {
+            let index = scrollView.contentOffset.x / scrollView.bounds.width
+            self.delegate?.segmentPagesItem(self, didScrollTo: index)
+        } else {
+            let index = scrollView.contentOffset.y / scrollView.bounds.height
+            self.delegate?.segmentPagesItem(self, didScrollTo: index)
+        }
     }
 }

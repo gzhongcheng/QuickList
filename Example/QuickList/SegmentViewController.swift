@@ -59,12 +59,22 @@ class SegmentViewController: UIViewController {
             menuSelectedItemDecoration: SegmentTabSelectedView()
         )
         
-        let menuConfig1 = QuickSegmentHorizontalMenuConfig(
+        let menuConfig1 = QuickSegmentVerticalMenuConfig(
+            menuWidthType: .auto(maxWidth: 150),
             menuBackground: menuBgView1,
             menuSelectedItemDecoration: SegmentTabSelectedView()
         )
         
         formlist.form
+        +++ QuickSegmentSection(
+            menuConfig: menuConfig1,
+            pageViewControllers: [
+                SegmentPageViewController(),
+                SegmentPageViewController1(),
+                SegmentPageViewController2()
+            ],
+            scrollManager: scrollManager
+        )
         +++ QuickSegmentSection(
             menuConfig: menuConfig,
             pageViewControllers: [
@@ -73,15 +83,6 @@ class SegmentViewController: UIViewController {
                 SegmentPageViewController2()
             ],
 //            pageContainerHeight: 300,
-            scrollManager: scrollManager
-        )
-        +++ QuickSegmentSection(
-            menuConfig: menuConfig1,
-            pageViewControllers: [
-                SegmentPageViewController(),
-                SegmentPageViewController1(),
-                SegmentPageViewController2()
-            ],
             scrollManager: scrollManager
         )
     }
@@ -101,6 +102,7 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        formlist.scrollDirection = .horizontal
         self.view.addSubview(formlist)
         formlist.contentInsetAdjustmentBehavior = .never
         formlist.snp.makeConstraints { make in

@@ -135,13 +135,8 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 headerAttributes?.frame = frame
                 headerAttributes?.caculatedFrame = frame
             }
-            
-            if scrollDirection == .vertical {
-                currentOffset.y += form.contentInset.top
-            } else {
-                currentOffset.x += form.contentInset.left
-            }
-            
+            currentOffset.y += form.contentInset.top
+            currentOffset.x += form.contentInset.left
         } else {
             for (i, attr) in self.sectionAttributes {
                 if i < index {

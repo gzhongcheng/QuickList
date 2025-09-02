@@ -52,7 +52,7 @@ open class AutolayoutItemOf<Cell: ItemCell>: ItemOf<Cell> {
         if !cell.isSetup {
             cell.setup()
         }
-        var estimateItemSize = CGSize(width: floor(estimateItemSize.width), height: floor(estimateItemSize.height))
+        let estimateItemSize = CGSize(width: floor(estimateItemSize.width), height: floor(estimateItemSize.height))
         /// 自适应尺寸时需要先设置宽度约束，才能准确使用autolayout计算需要的高度，尤其iOS8及以下
         switch layoutType {
         case .vertical:
