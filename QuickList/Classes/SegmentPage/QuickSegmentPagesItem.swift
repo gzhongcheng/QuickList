@@ -116,7 +116,7 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         }
         self.currentListView = cell.pageList
         self.currentListView?.scrollManager = self.scrollManager
-        self.currentListView?.isScrollEnabled = scrollEnable
+        self.currentListView?.pageScrollEnable = scrollEnable
         cell.pageList.scrollDirection = pagesScrollDirection
         cell.pageList.handerDelegate = self
         cell.pageList.form.removeAll()

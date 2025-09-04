@@ -88,6 +88,7 @@ class SegmentViewController: UIViewController {
                 SegmentPageViewController1(),
                 SegmentPageViewController2()
             ],
+            pageScrollEnable: false,
             scrollManager: scrollManager
         ) { section in
 //            section.shouldScrollToTopWhenSelectedTab = false

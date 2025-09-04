@@ -149,11 +149,17 @@ public class QuickSegmentScrollManager {
     }
     
     /// 子页面切换
-    func pageDidChanged(in section: QuickSegmentSection) {
+    func pageDidChanged(in section: QuickSegmentSection, fromMenu: Bool) {
         guard let rootScrollView = self.rootScrollView else { return }
         switch rootDirection {
         case .vertical:
             if section.shouldScrollToTopWhenSelectedTab {
+                if fromMenu {
+                    UIView.animate(withDuration: 0.25) {
+                        rootScrollView.contentOffsetY = section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top
+                    }
+                    return
+                }
                 if rootScrollView.contentOffset.y > section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top {
                     rootScrollView.contentOffsetY = section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top
                 }
@@ -165,6 +171,12 @@ public class QuickSegmentScrollManager {
             }
         case .horizontal:
             if section.shouldScrollToTopWhenSelectedTab {
+                if fromMenu {
+                    UIView.animate(withDuration: 0.25) {
+                        rootScrollView.contentOffsetX = section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left
+                    }
+                    return
+                }
                 if rootScrollView.contentOffset.x > section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left {
                     rootScrollView.contentOffsetX = section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left
                 }

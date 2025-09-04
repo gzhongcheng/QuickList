@@ -10,6 +10,7 @@ import Foundation
 public class QuickSegmentPagesListView: QuickListView, QuickSegmentScrollViewType {
     public var scrollOffsetObserve: NSKeyValueObservation?
     public var isQuickSegmentSubPage: Bool = false
+    public var pageScrollEnable: Bool = true
     public weak var scrollManager: QuickSegmentScrollManager?
     
     public override var contentOffset: CGPoint {
@@ -36,6 +37,25 @@ public class QuickSegmentPagesListView: QuickListView, QuickSegmentScrollViewTyp
 }
 
 extension QuickSegmentPagesListView: UIGestureRecognizerDelegate {
+    public override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer is UIPanGestureRecognizer, gestureRecognizer.view == self {
+            if !self.pageScrollEnable {
+                return false
+            }
+            let velocity = (gestureRecognizer as! UIPanGestureRecognizer).velocity(in: self)
+            if self.scrollDirection == .horizontal {
+                if abs(velocity.y) > abs(velocity.x) {
+                    return false
+                }
+            } else {
+                if abs(velocity.x) > abs(velocity.y) {
+                    return false
+                }
+            }
+        }
+        return true
+    }
+    
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         /// 如果正在滚动的过程中，强行停止滚动
         if

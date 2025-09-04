@@ -337,7 +337,7 @@ public class QuickSegmentSection: Section {
                 guard let self = self else { return }
                 self.pagesItem.scrollToPage(index: index, animated: true)
                 self.currentPageIndex = index
-                self.scrollManager?.pageDidChanged(in: self)
+                self.scrollManager?.pageDidChanged(in: self, fromMenu: true)
             }
             if let itemSize = pageVC.pageTabItem.representableItem()?.sizeForItem(pageVC.pageTabItem, with: CGSize(width: 1000, height: 40), in: self.menuTabList, layoutType: .horizontal) {
                 maxItemWidth = Swift.max(maxItemWidth, itemSize.width)
@@ -363,7 +363,7 @@ extension QuickSegmentSection: QuickSegmentPagesItemDelegate {
         let ceilIndex: Int = Int(ceil(index))
         if floorIndex == ceilIndex, floorIndex != currentPageIndex {
             self.currentPageIndex = floorIndex
-            self.scrollManager?.pageDidChanged(in: self)
+            self.scrollManager?.pageDidChanged(in: self, fromMenu: false)
         }
     }
 }
