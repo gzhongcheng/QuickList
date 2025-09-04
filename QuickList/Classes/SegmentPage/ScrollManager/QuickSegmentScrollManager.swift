@@ -13,9 +13,7 @@ public class QuickSegmentScrollManager {
         /// 总列表
         case root
         /// 子列表（当总列表滚动到顶部/底部后，子列表可以继续滚动）
-        case pageWhenRootTop
-        /// 子列表（手势在子列表中触发时，始终是子列表进行滚动）
-        case pageWhenTouchInPage
+        case page
     }
     public var bouncesType: BouncesType = .root
     
@@ -36,7 +34,7 @@ public class QuickSegmentScrollManager {
     var scrollableSection: QuickSegmentSection?
     
     /// 总列表
-    public weak var rootScrollView: QuickSegmentPageListView?
+    public weak var rootScrollView: QuickSegmentRootListView?
     /// 总表的滚动方向
     public var rootDirection: UICollectionView.ScrollDirection = .vertical
     
@@ -46,7 +44,7 @@ public class QuickSegmentScrollManager {
     var canPageScroll: Bool = false
     
     public static func create(
-        rootScrollView: QuickSegmentPageListView? = nil,
+        rootScrollView: QuickSegmentRootListView? = nil,
         bouncesType: BouncesType = .root
     ) -> QuickSegmentScrollManager {
         switch rootScrollView?.scrollDirection {
@@ -54,19 +52,15 @@ public class QuickSegmentScrollManager {
             switch bouncesType {
             case .root:
                 return QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
-            case .pageWhenRootTop:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            case .pageWhenTouchInPage:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
+            case .page:
+                return QuickSegmentVerticalPageScrollManager(rootScrollView: rootScrollView)
             }
         case .horizontal:
             switch bouncesType {
             case .root:
                 return QuickSegmentHorizontalRootScrollManager(rootScrollView: rootScrollView)
-            case .pageWhenRootTop:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
-            case .pageWhenTouchInPage:
-                return QuickSegmentScrollManager(rootScrollView: rootScrollView)
+            case .page:
+                return QuickSegmentHorizontalPageScrollManager(rootScrollView: rootScrollView)
             }
         default:
             return QuickSegmentScrollManager(rootScrollView: rootScrollView)
@@ -80,7 +74,7 @@ public class QuickSegmentScrollManager {
     /// - Parameters:
     ///  - rootScrollView: 总列表
     internal init(
-        rootScrollView: QuickSegmentPageListView? = nil
+        rootScrollView: QuickSegmentRootListView? = nil
     ) {
         guard let rootScrollView = rootScrollView else {
             assertionFailure("必须传入rootScrollView")
@@ -89,7 +83,7 @@ public class QuickSegmentScrollManager {
         self.rootScrollView = rootScrollView
         self.rootDirection = rootScrollView.scrollDirection
         rootScrollView.handler.layout.add(self)
-        rootScrollView.observeScrollViewContentOffset(to: self)
+        rootScrollView.scrollManager = self
     }
     
     
@@ -100,12 +94,12 @@ public class QuickSegmentScrollManager {
         resetStatus(for: rootScrollView)
     }
     
-    func resetStatus(for rootScrollView: QuickSegmentPageListView) {
+    func resetStatus(for rootScrollView: QuickSegmentRootListView) {
         assertionFailure("必须在子类中重写此方法")
     }
     
     /// 处理滚动事件
-    func scrollViewDidScroll(_ scrollView: QuickSegmentPageScrollViewType, from lastOffset: CGPoint) {
+    func scrollViewDidScroll(_ scrollView: QuickSegmentScrollViewType, from lastOffset: CGPoint) {
         if currentScrollDirection == nil {
             let xD = abs(scrollView.contentOffset.x - lastOffset.x)
             let yD = abs(scrollView.contentOffset.y - lastOffset.y)
@@ -145,137 +139,95 @@ public class QuickSegmentScrollManager {
     }
     
     /// 查找目标滚动Section
-    func findScrollableView(to rootView: QuickSegmentPageListView, from lastOffset: CGPoint) {
+    func findScrollableView(to rootView: QuickSegmentRootListView, from lastOffset: CGPoint) {
         assertionFailure("必须在子类中重写此方法")
     }
     
     /// 总列表滚动
-    func rootScrollViewDidScroll(_ scrollView: QuickSegmentPageScrollViewType, from lastOffset: CGPoint) {
+    func rootScrollViewDidScroll(_ scrollView: QuickSegmentScrollViewType, from lastOffset: CGPoint) {
         assertionFailure("必须在子类中重写此方法")
     }
     
-    /// 容器内页面更新
+    /// 子页面切换
     func pageDidChanged(in section: QuickSegmentSection) {
         guard let rootScrollView = self.rootScrollView else { return }
-        if section.shouldScrollToTopWhenSelectedTab {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                rootScrollView.setContentOffset(CGPoint(x: section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left, y: rootScrollView.contentOffset.y), animated: true)
+        switch rootDirection {
+        case .vertical:
+            if section.shouldScrollToTopWhenSelectedTab {
+                if rootScrollView.contentOffset.y > section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top {
+                    rootScrollView.contentOffsetY = section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top
+                }
+            } else if
+                (section.currentPageScrollView?.contentOffset.y ?? 0) > 0,
+                rootScrollView.contentOffset.y < section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top
+            {
+                rootScrollView.contentOffsetY = section.sectionStartPoint.y - rootScrollView.adjustedContentInset.top
             }
+        case .horizontal:
+            if section.shouldScrollToTopWhenSelectedTab {
+                if rootScrollView.contentOffset.x > section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left {
+                    rootScrollView.contentOffsetX = section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left
+                }
+            } else if
+                (section.currentPageScrollView?.contentOffset.x ?? 0) > 0,
+                rootScrollView.contentOffset.x < section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left
+            {
+                rootScrollView.contentOffsetX = section.sectionStartPoint.x - rootScrollView.adjustedContentInset.left
+            }
+        default:
+            break
         }
     }
     
     /// 当前可滚动的子列表滚动
-    func scrollablePageScrollViewDidScroll(_ scrollView: QuickSegmentPageScrollViewType, from lastOffset: CGPoint) {
+    func scrollablePageScrollViewDidScroll(_ scrollView: QuickSegmentScrollViewType, from lastOffset: CGPoint) {
         assertionFailure("必须在子类中重写此方法")
     }
     
     /// 非当前可滚动的子列表滚动
-    func unScrollablePageScrollViewDidScroll(_ scrollView: QuickSegmentPageScrollViewType, from lastOffset: CGPoint) {
+    func unScrollablePageScrollViewDidScroll(_ scrollView: QuickSegmentScrollViewType, from lastOffset: CGPoint) {
         /// 当前子列表不允许滚动
         switch rootDirection {
         case .vertical:
-            scrollView.contentOffset.y = lastOffset.y
+            scrollView.contentOffsetY = lastOffset.y
         case .horizontal:
-            scrollView.contentOffset.x = lastOffset.x
+            scrollView.contentOffsetX = lastOffset.x
         @unknown default:
             break
         }
     }
     
     /// 子列表容器滚动
-    func pagesBoxScrollViewDidScroll(_ scrollView: QuickSegmentPageListView, at section: QuickSegmentSection, from lastOffset: CGPoint) {
-        switch scrollView.scrollDirection {
-        case .horizontal:
-            if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
-                scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
-                return
-            }
-            if self.rootScrollView?.scrollDirection != currentScrollDirection {
-                if let pageScrollView = section.currentPageScrollView, pageScrollView.scrollDirection == .horizontal {
-                    if
-                        scrollView.contentOffset.x > lastOffset.x,
-                        pageScrollView.contentOffset.x < (pageScrollView.contentSize.width - pageScrollView.bounds.width + pageScrollView.adjustedContentInset.right)
-                    {
-                        canPagesBoxScroll = false
-                        canPageScroll = true
-                        /// 当前子列表可以滚动
-                        scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
-                        return
-                    }
-                    if
-                        scrollView.contentOffset.x < lastOffset.x,
-                        pageScrollView.contentOffset.x > 0
-                    {
-                        canPagesBoxScroll = false
-                        canPageScroll = true
-                        /// 当前子列表可以滚动
-                        scrollView.contentOffset.x = CGFloat(section.currentPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
-                        return
-                    }
-                }
-            } else {
-                if scrollView.contentOffset.x < 0 {
-                    canPagesBoxScroll = false
-                    canRootScroll = true
-                    scrollView.contentOffset.x = 0
-                    return
-                }
-                if scrollView.contentOffset.x > (scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right) {
-                    canPagesBoxScroll = false
-                    canRootScroll = true
-                    scrollView.contentOffset.x = scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right
-                    return
-                }
-            }
-        case .vertical:
-            if !canPagesBoxScroll || scrollView.scrollDirection != currentScrollDirection {
-                scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
-                return
-            }
-            if self.rootScrollView?.scrollDirection != currentScrollDirection {
-                if let pageScrollView = section.currentPageScrollView, pageScrollView.scrollDirection == .vertical {
-                    if
-                        scrollView.contentOffset.y > lastOffset.y,
-                        pageScrollView.contentOffset.y < (pageScrollView.contentSize.height - pageScrollView.bounds.height + pageScrollView.adjustedContentInset.bottom)
-                    {
-                        canPagesBoxScroll = false
-                        canPageScroll = true
-                        /// 当前子列表可以滚动
-                        scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
-                        return
-                    }
-                    if
-                        scrollView.contentOffset.y < lastOffset.y,
-                        pageScrollView.contentOffset.y > 0
-                    {
-                        canPagesBoxScroll = false
-                        canPageScroll = true
-                        /// 当前子列表可以滚动
-                        scrollView.contentOffset.y = CGFloat(section.currentPageIndex) * (scrollView.bounds.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom)
-                        return
-                    }
-                }
-            } else {
-                if scrollView.contentOffset.y < 0 {
-                    canPagesBoxScroll = false
-                    canRootScroll = true
-                    scrollView.contentOffset.y = 0
-                    return
-                }
-                if scrollView.contentOffset.y > (scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.bottom) {
-                    canPagesBoxScroll = false
-                    canRootScroll = true
-                    scrollView.contentOffset.y = scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.bottom
-                    return
-                }
-            }
-        @unknown default:
-            return
-        }
+    func pagesBoxScrollViewDidScroll(_ scrollView: QuickSegmentPagesListView, at section: QuickSegmentSection, from lastOffset: CGPoint) {
+        assertionFailure("必须在子类中重写此方法")
     }
     
-    deinit {
-        rootScrollView?.removeObserveScrollViewContentOffset()
+    /// 当前滚动的页面是否是最后一个可滚动的页面
+    func isCurrentPageLast() -> Bool {
+        if
+            let scrollableSection = self.scrollableSection,
+            self.allScrollableSections.last == scrollableSection
+        {
+            if scrollableSection.pagesItem.pagesScrollDirection != rootDirection {
+                return true
+            }
+            return scrollableSection.currentPageIndex == scrollableSection.pageViewControllers.count - 1
+        }
+        return false
+    }
+    
+    /// 当前可滚动的页面是否是第一个可滚动的页面
+    func isCurrentPageFirst() -> Bool {
+        if
+            let scrollableSection = self.scrollableSection,
+            self.allScrollableSections.first == scrollableSection
+        {
+            if scrollableSection.pagesItem.pagesScrollDirection != rootDirection {
+                return true
+            }
+            return scrollableSection.currentPageIndex == 0
+        }
+        return false
     }
 }
 

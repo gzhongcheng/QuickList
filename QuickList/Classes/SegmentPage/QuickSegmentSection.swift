@@ -134,7 +134,7 @@ public class QuickSegmentSection: Section {
         pageContainerHeight: CGFloat? = nil,
         pageScrollEnable: Bool = true,
         scrollManager: QuickSegmentScrollManager,
-        _ initializer: ((Section) -> Void)? = nil
+        _ initializer: ((QuickSegmentSection) -> Void)? = nil
     ) {
         self.init()
         
@@ -312,8 +312,8 @@ public class QuickSegmentSection: Section {
     }()
     
     
-    internal weak var currentPageScrollView: QuickSegmentPageScrollViewType?
-    internal var otherPageGestureRecognizers: [UIGestureRecognizer] = []
+    internal weak var currentPageScrollView: QuickSegmentScrollViewType?
+    
     /// 页面item
     public lazy var pagesItem: QuickSegmentPagesItem = {
         let item = QuickSegmentPagesItem(pageViewControllers: self.pageViewControllers, pageContainerHeight: self.pageContainerHeight)
@@ -329,6 +329,9 @@ public class QuickSegmentSection: Section {
         var maxItemWidth: CGFloat = 0
         for (index, pageVC) in self.pageViewControllers.enumerated() {
             pageVC.listScrollView()?.isQuickSegmentSubPage = true
+            if let manager = self.scrollManager {
+                pageVC.listScrollView()?.scrollManager = manager
+            }
             pageVC.pageTabItem.isSelected = index == 0
             pageVC.pageTabItem.callbackCellOnSelection = { [weak self] in
                 guard let self = self else { return }
@@ -348,17 +351,7 @@ public class QuickSegmentSection: Section {
     }
     
     func didSetCurrentPage() {
-        self.currentPageScrollView?.removeObserveScrollViewContentOffset()
         self.currentPageScrollView = self.pageViewControllers[self.currentPageIndex].listScrollView()
-        if let gestureRecognizersInPageScrollView = self.currentPageScrollView?.gestureRecognizers {
-            otherPageGestureRecognizers = gestureRecognizersInPageScrollView
-        }
-        guard let scrollManager = self.scrollManager else { return }
-        self.currentPageScrollView?.observeScrollViewContentOffset(to: scrollManager)
-    }
-    
-    deinit {
-        self.currentPageScrollView?.removeObserveScrollViewContentOffset()
     }
 }
 

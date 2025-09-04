@@ -122,9 +122,6 @@ open class QuickListView: UICollectionView {
             firstUpdateSection = .max
             updateLayoutUseAnimation = false
         }
-        if !handler.addedLongTap {
-            handler.addLongTapIfNeeded()
-        }
     }
     
     private var needUpdateLayout = true

@@ -74,7 +74,6 @@ public class FormViewHandler: NSObject {
             formView?.reloadData()
         }
         self.layout.reloadAll()
-        addLongTapIfNeeded()
     }
     /// 仅刷新Layout
     public func updateLayout() {
@@ -209,104 +208,104 @@ public class FormViewHandler: NSObject {
         else { return }
         collectionView.scrollToItem(item, at: [.centeredHorizontally, .centeredVertically], animation: animation)
     }
-    
-    // 添加长按事件
-    func addLongTapIfNeeded() {
-        addedLongTap = false
-        for section in form.sections {
-            if section is MultivalusedSection {
-                addLongTapGesture()
-                return
-            }
-        }
-        if !addedLongTap {
-            removeLongTap()
-        }
-    }
-    /// 是否已添加
-    var addedLongTap = false
-    /// 添加长按事件
-    func addLongTapGesture() {
-        removeLongTap()
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongGesture(_:)))
-        formView?.addGestureRecognizer(longPress)
-        addedLongTap = true
-    }
-    /// 移除原有长按事件
-    func removeLongTap() {
-        if let gestures = formView?.gestureRecognizers {
-            for gesture in gestures {
-                if gesture is UILongPressGestureRecognizer {
-                    formView?.removeGestureRecognizer(gesture)
-                }
-            }
-        }
-    }
-    
-    // 长按响应方法(仅在CollectionMultivalusedSection中才支持)
-    @objc func handleLongGesture(_ longPress: UILongPressGestureRecognizer) {
-        guard let view = formView as? FormViewLongTapProtorol else {
-            return
-        }
-        switch longPress.state {
-        case .began:
-            /// 开始长按手势，判断section是否支持移动
-            guard
-                let indexPath = view.indexPathForItem(at: longPress.location(in: view)),
-                let section = form[indexPath.section] as? MultivalusedSection,
-                section.moveAble,
-                section.items.count > 1
-            else {
-                return
-            }
-            _ = view.beginInteractiveMovementForItem(at: indexPath)
-        case .changed:
-            view.updateInteractiveMovementTargetPosition(longPress.location(in: view))
-            /// 判断是否在可移动的section内部
-            guard
-                let indexPath = view.indexPathForItem(at: longPress.location(in: view))
-            else {
-                return
-            }
-            guard form[indexPath.section] is MultivalusedSection else {
-                view.cancelInteractiveMovement()
-                return
-            }
-        case .ended:
-            view.endInteractiveMovement()
-        case .possible:
-            view.cancelInteractiveMovement()
-        case .cancelled:
-            view.cancelInteractiveMovement()
-        case .failed:
-            view.cancelInteractiveMovement()
-        @unknown default:
-            view.cancelInteractiveMovement()
-        }
-    }
-    
-    /// cell成为第一响应者
-    public final func beginEditing(of cell: ItemCell) {
-//        cell.item?.isHighlighted = true
-//        cell.item?.updateCell()
-//        cell.item?.callbackOnCellHighlightChanged?()
-//        guard (form.inlineRowHideOptions ?? Form.defaultInlineRowHideOptions).contains(.FirstResponderChanges) else { return }
-//        let row = cell.row
-//        let inlineItem = row?._inlineItem
-//        for r in (form.allRows as! [CollectionItem]).filter({ $0 !== row && $0 !== inlineItem && $0._inlineItem != nil }) {
-//            if let inline = r as?  BaseInlineRowType {
-//                inline.collapseInlineRow()
+//    
+//    // 添加长按事件
+//    func addLongTapIfNeeded() {
+////        addedLongTap = false
+////        for section in form.sections {
+////            if section is MultivalusedSection {
+////                addLongTapGesture()
+////                return
+////            }
+////        }
+////        if !addedLongTap {
+////            removeLongTap()
+////        }
+//    }
+//    /// 是否已添加
+//    var addedLongTap = false
+//    /// 添加长按事件
+//    func addLongTapGesture() {
+//        removeLongTap()
+//        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongGesture(_:)))
+//        formView?.addGestureRecognizer(longPress)
+//        addedLongTap = true
+//    }
+//    /// 移除原有长按事件
+//    func removeLongTap() {
+//        if let gestures = formView?.gestureRecognizers {
+//            for gesture in gestures {
+//                if gesture is UILongPressGestureRecognizer {
+//                    formView?.removeGestureRecognizer(gesture)
+//                }
 //            }
 //        }
-    }
-    
-    /// cell失去第一响应者
-    public final func endEditing(of cell: ItemCell) {
-//        cell.item?.isHighlighted = false
-//        cell.item?.callbackOnCellHighlightChanged?()
-//        cell.item?.callbackOnCellEndEditing?()
-//        cell.item?.updateCell()
-    }
+//    }
+//    
+//    // 长按响应方法(仅在CollectionMultivalusedSection中才支持)
+//    @objc func handleLongGesture(_ longPress: UILongPressGestureRecognizer) {
+//        guard let view = formView as? FormViewLongTapProtorol else {
+//            return
+//        }
+//        switch longPress.state {
+//        case .began:
+//            /// 开始长按手势，判断section是否支持移动
+//            guard
+//                let indexPath = view.indexPathForItem(at: longPress.location(in: view)),
+//                let section = form[indexPath.section] as? MultivalusedSection,
+//                section.moveAble,
+//                section.items.count > 1
+//            else {
+//                return
+//            }
+//            _ = view.beginInteractiveMovementForItem(at: indexPath)
+//        case .changed:
+//            view.updateInteractiveMovementTargetPosition(longPress.location(in: view))
+//            /// 判断是否在可移动的section内部
+//            guard
+//                let indexPath = view.indexPathForItem(at: longPress.location(in: view))
+//            else {
+//                return
+//            }
+//            guard form[indexPath.section] is MultivalusedSection else {
+//                view.cancelInteractiveMovement()
+//                return
+//            }
+//        case .ended:
+//            view.endInteractiveMovement()
+//        case .possible:
+//            view.cancelInteractiveMovement()
+//        case .cancelled:
+//            view.cancelInteractiveMovement()
+//        case .failed:
+//            view.cancelInteractiveMovement()
+//        @unknown default:
+//            view.cancelInteractiveMovement()
+//        }
+//    }
+//    
+//    /// cell成为第一响应者
+//    public final func beginEditing(of cell: ItemCell) {
+////        cell.item?.isHighlighted = true
+////        cell.item?.updateCell()
+////        cell.item?.callbackOnCellHighlightChanged?()
+////        guard (form.inlineRowHideOptions ?? Form.defaultInlineRowHideOptions).contains(.FirstResponderChanges) else { return }
+////        let row = cell.row
+////        let inlineItem = row?._inlineItem
+////        for r in (form.allRows as! [CollectionItem]).filter({ $0 !== row && $0 !== inlineItem && $0._inlineItem != nil }) {
+////            if let inline = r as?  BaseInlineRowType {
+////                inline.collapseInlineRow()
+////            }
+////        }
+//    }
+//    
+//    /// cell失去第一响应者
+//    public final func endEditing(of cell: ItemCell) {
+////        cell.item?.isHighlighted = false
+////        cell.item?.callbackOnCellHighlightChanged?()
+////        cell.item?.callbackOnCellEndEditing?()
+////        cell.item?.updateCell()
+//    }
     
     /// 在主线程执行代码块
     /// - Parameters:
@@ -331,12 +330,6 @@ extension FormViewHandler: FormDelegate {
             self.formView?.insertSections(at)
             self.updateLayout(withAnimation: true, afterSection: at.first ?? 0)
             self.updateSelectedItemDecorationIfNeeded()
-        }
-        for section in sections {
-            if section is MultivalusedSection {
-                addLongTapGesture()
-                return
-            }
         }
     }
     

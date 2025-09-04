@@ -9,78 +9,38 @@ import UIKit
 
 public class QuickSegmentPageListView: QuickListView, QuickSegmentPageScrollViewType {
     public var scrollOffsetObserve: NSKeyValueObservation?
-    public var scrollLastOffset: CGPoint = .zero
     public var isQuickSegmentSubPage: Bool = false
+    public weak var scrollManager: QuickSegmentScrollManager?
+    public weak var pageBoxView: QuickSegmentPagesListView?
     
-    public func observeScrollViewContentOffset(to manager: QuickSegmentScrollManager) {
-        scrollOffsetObserve = self.observe(\.contentOffset, options: [.initial, .new, .old], changeHandler: { [weak self] (scrollView, change) in
-            guard let self = self else {
+    public override var contentOffset: CGPoint {
+        get {
+            return super.contentOffset
+        }
+        set {
+            if super.contentOffset == newValue {
                 return
             }
-            guard change.newValue != change.oldValue else {
-                return
-            }
-            manager.scrollViewDidScroll(self, from: self.scrollLastOffset)
-            self.scrollLastOffset = self.contentOffset
-        })
+            let oldValue = super.contentOffset
+            super.contentOffset = newValue
+            self.scrollManager?.scrollViewDidScroll(self, from: oldValue)
+        }
     }
     
-    public func removeObserveScrollViewContentOffset() {
-        scrollOffsetObserve?.invalidate()
-        scrollOffsetObserve = nil
+    public func setContentOffset(_ contentOffset: CGPoint, noticeManager: Bool) {
+        if noticeManager {
+            self.contentOffset = contentOffset
+        } else {
+            super.contentOffset = contentOffset
+        }
     }
 }
 
 extension QuickSegmentPageListView: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        /// 如果正在滚动的过程中，强行停止滚动
-        if
-            gestureRecognizer.state == .possible,
-            self.isDecelerating
-        {
-            self.setContentOffset(self.scrollLastOffset, animated: false)
-        }
-        
-        /// 获取点击的位置所在的section
-        let touchPoint = gestureRecognizer.location(in: self)
-        if !self.bounds.contains(touchPoint) {
-            return false
-        }
-        if self.isQuickSegmentSubPage {
+        if gestureRecognizer is UIPanGestureRecognizer, otherGestureRecognizer is UIPanGestureRecognizer {
             return true
         }
-        var touchSectionIndex: Int?
-        for (i, attr) in self.handler.layout.sectionAttributes {
-            switch self.scrollDirection {
-            case .vertical:
-                if attr.startPoint.y <= touchPoint.y, touchPoint.y <= attr.endPoint.y {
-                    touchSectionIndex = i
-                }
-            case .horizontal:
-                if attr.startPoint.x <= touchPoint.x, touchPoint.x <= attr.endPoint.x {
-                    touchSectionIndex = i
-                }
-            @unknown default:
-                return false
-            }
-            if touchSectionIndex != nil {
-                break
-            }
-        }
-        guard
-            let sectionIndex = touchSectionIndex,
-            sectionIndex < self.form.count,
-            let section = self.form[sectionIndex] as? QuickSegmentSection,
-            let scrollManager = section.scrollManager
-        else {
-            return false
-        }
-        if gestureRecognizer.state == .possible {
-            scrollManager.touchSection = section
-        }
-        if section.otherPageGestureRecognizers.contains(otherGestureRecognizer) {
-            return false
-        }
-        return true
+        return false
     }
 }

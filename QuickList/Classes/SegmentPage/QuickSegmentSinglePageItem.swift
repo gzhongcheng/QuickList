@@ -19,19 +19,42 @@ class QuickSegmentSinglePageItemCell: ItemCell {
     }
 }
 
+extension QuickSegmentSinglePageItemCell: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.view == self || gestureRecognizer.view == self.contentView {
+            return true
+        }
+        return false
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if otherGestureRecognizer.view == self || otherGestureRecognizer.view == self.contentView {
+            return true
+        }
+        return false
+    }
+}
+
 // MARK:- QuickSegmentSinglePageItem
 final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, ItemType {
     var pageViewController: QuickSegmentPageViewDelegate?
     var shouldScrollToTopWhenDisappear: Bool = true
+    weak var segmentPagesView: QuickSegmentPagesListView?
     
     convenience init(
         pageViewController: QuickSegmentPageViewDelegate,
         shouldScrollToTopWhenDisappear: Bool,
+        segmentPagesView: QuickSegmentPagesListView? = nil,
         _ initializer: ((QuickSegmentSinglePageItem) -> Void)? = nil
     ) {
         self.init()
         self.pageViewController = pageViewController
         self.shouldScrollToTopWhenDisappear = shouldScrollToTopWhenDisappear
+        self.segmentPagesView = segmentPagesView
         initializer?(self)
     }
     
@@ -47,6 +70,7 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
             let viewController = section?.form?.delegate?.formView?.getViewController(),
             pageVC.parent != viewController || pageVC.view.superview != cell.contentView
         {
+            pageVC.listScrollView()?.pageBoxView = segmentPagesView
             if pageVC.parent != nil {
                 pageVC.willMove(toParent: nil)
                 pageVC.view.removeFromSuperview()
@@ -78,29 +102,28 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         if
             let scrollableView = pageVC.listScrollView()
         {
+            if scrollableView.isDecelerating {
+                scrollableView.forceStopScroll()
+            }
             if shouldScrollToTopWhenDisappear {
                 scrollableView.contentOffset = .zero
-                scrollableView.scrollLastOffset = .zero
                 scrollableView.layoutIfNeeded()
             } else {
                 if scrollableView.contentOffset.x < 0 || scrollableView.contentOffset.y < 0 {
                     scrollableView.contentOffset = .zero
-                    scrollableView.scrollLastOffset = .zero
                     scrollableView.layoutIfNeeded()
                 } else {
                     switch scrollableView.scrollDirection {
                     case .horizontal:
                         if scrollableView.contentOffset.x > (scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right) {
                             let targetX = max(0, scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right)
-                            scrollableView.contentOffset.x = targetX
-                            scrollableView.scrollLastOffset.x = targetX
+                            scrollableView.contentOffsetX = targetX
                             scrollableView.layoutIfNeeded()
                         }
                     case .vertical:
                         if scrollableView.contentOffset.y > (scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom) {
                             let targetY = max(0, scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom)
-                            scrollableView.contentOffset.y = targetY
-                            scrollableView.scrollLastOffset.y = targetY
+                            scrollableView.contentOffsetY = targetY
                             scrollableView.layoutIfNeeded()
                         }
                     @unknown default:

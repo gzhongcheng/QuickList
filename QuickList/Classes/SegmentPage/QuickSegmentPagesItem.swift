@@ -8,22 +8,26 @@
 import Foundation
 import SnapKit
 
-public class QuickSegmentPagesListView: QuickSegmentPageListView {
-}
-
 // Senment页面容器
 // MARK: - QuickSegmentPagesItemCell
 public class QuickSegmentPagesItemCell: ItemCell {
     
+    public override var contentView: UIView {
+        return pageList
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        pageList.frame = bounds
+    }
+    
     public override func setup() {
         super.setup()
         backgroundColor = .clear
-        contentView.backgroundColor = .clear
         
-        contentView.addSubview(pageList)
-        pageList.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        self.addSubview(pageList)
+        
+        pageList.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
     }
     
     /// 页面控制器展示列表
@@ -36,6 +40,26 @@ public class QuickSegmentPagesItemCell: ItemCell {
 //        listView.bounces = false
         return listView
     }()
+}
+
+extension QuickSegmentPagesItemCell: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.view == self {
+            return true
+        }
+        return false
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if otherGestureRecognizer.view == self {
+            return true
+        }
+        return false
+    }
 }
 
 // MARK: - QuickSegmentPagesItemDelegate
@@ -57,9 +81,9 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
     public var menuType: MenuType = .header
     public var pageContainerHeight: CGFloat?
     public weak var delegate: QuickSegmentPagesItemDelegate?
-    public weak var currentListView: QuickSegmentPageListView?
+    public weak var currentListView: QuickSegmentPagesListView?
     public var scrollEnable: Bool = true
-    public var scrollManager: QuickSegmentScrollManager?
+    public weak var scrollManager: QuickSegmentScrollManager?
     public var shouldScrollToTopWhenPageDisappear: Bool = true
     
     private var contentSize: CGSize = .zero {
@@ -67,11 +91,6 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
             guard let cell = cell as? QuickSegmentPagesItemCell else {
                 return
             }
-            cell.pageList.snp.remakeConstraints { make in
-                make.size.equalTo(contentSize)
-                make.center.equalToSuperview()
-            }
-            cell.contentView.layoutIfNeeded()
             cell.pageList.setNeedUpdateLayout(afterSection: 0, useAnimation: false)
             print("QuickSegmentPagesItem - contentSize: \(contentSize)")
         }
@@ -95,11 +114,8 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         guard let cell = cell as? QuickSegmentPagesItemCell else {
             return
         }
-        self.currentListView?.removeObserveScrollViewContentOffset()
         self.currentListView = cell.pageList
-        if let manager = scrollManager {
-            self.currentListView?.observeScrollViewContentOffset(to: manager)
-        }
+        self.currentListView?.scrollManager = self.scrollManager
         self.currentListView?.isScrollEnabled = scrollEnable
         cell.pageList.scrollDirection = pagesScrollDirection
         cell.pageList.handerDelegate = self
@@ -115,14 +131,10 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         return "QuickSegmentPagesItem_\(self.section?.index ?? 0)"
     }
     
-    deinit {
-        self.currentListView?.removeObserveScrollViewContentOffset()
-    }
-    
     
     /// 计算尺寸
     public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
-        let size = view.handler.getViewSize()
+        let size = CGSize(width: view.bounds.width - view.adjustedContentInset.left, height: view.bounds.height - view.adjustedContentInset.top)
         switch layoutType {
         case .vertical:
             switch menuType {
