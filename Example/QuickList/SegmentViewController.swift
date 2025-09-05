@@ -25,7 +25,7 @@ class SegmentViewController: UIViewController {
         super.viewDidLoad()
         
         formlist.contentInsetAdjustmentBehavior = .always
-        formlist.scrollDirection = .horizontal
+//        formlist.scrollDirection = .horizontal
         self.view.addSubview(formlist)
         formlist.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -88,7 +88,8 @@ class SegmentViewController: UIViewController {
                 SegmentPageViewController1(),
                 SegmentPageViewController2()
             ],
-            pageScrollEnable: false,
+//            pageScrollEnable: false,
+            pageContainerHeight: 300,
             scrollManager: scrollManager
         ) { section in
 //            section.shouldScrollToTopWhenSelectedTab = false
@@ -120,7 +121,7 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        formlist.scrollDirection = .horizontal
+//        formlist.scrollDirection = .horizontal
         self.view.addSubview(formlist)
         formlist.contentInsetAdjustmentBehavior = .never
         formlist.snp.makeConstraints { make in

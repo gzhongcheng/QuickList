@@ -283,6 +283,7 @@ public class QuickSegmentSection: Section {
 
         let menuItem = QuickSegmentVerticalMenuItem(
             identifier: "MenuItem_\(self.index ?? 0)",
+            pageContainerHeight: pageContainerHeight,
             config: menuConfig,
             menuTabList: self.menuTabList
         )
