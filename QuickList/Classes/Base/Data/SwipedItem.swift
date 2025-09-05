@@ -22,6 +22,9 @@ open class SwipedItemCell: ItemCell {
             var totalWidth: CGFloat = 0
             for button in swipedActionButtons.reversed() {
                 button.rightSpacingToCell = totalWidth
+                button.didTouchUpInsideAction = { [weak self] in
+                    self?.closeSwipeActions()
+                }
                 buttonsContainerView.addSubview(button)
                 button.snp.makeConstraints { make in
                     make.top.bottom.equalToSuperview()
@@ -139,7 +142,7 @@ open class SwipedItemCell: ItemCell {
 
     public func openSwipeActions() {
         if autoTriggerFirstButton, lastGestureProgress * totalButtonsWidth() > self.bounds.width * 0.5 {
-            self.swipedActionButtons.first?.sendActions(for: .touchUpInside)
+            self.swipedActionButtons.first?.touchUpInsideAction?()
             UIView.animate(withDuration: 0.3, delay: 0) {
                 self.swipedActionButtons.first?.snp.updateConstraints({ make in
                     make.trailing.equalTo(0).priority(.high)
@@ -221,6 +224,9 @@ public class SwipedActionButton: UIControl {
     /// 展示到cell上时的右侧距离
     var rightSpacingToCell: CGFloat = 0
     
+    /// 点击按钮后是否自动收起
+    public var autoCloseSwipe: Bool = true
+    
     /// 按钮宽度
     public var width: CGFloat = 80
     
@@ -267,8 +273,10 @@ public class SwipedActionButton: UIControl {
     
     /// 点击事件
     public var touchUpInsideAction: (() -> Void)?
+    /// 点击事件完成回调
+    var didTouchUpInsideAction: (() -> Void)?
     
-    public init(icon: UIImage? = nil, iconTintColor: UIColor = .white, title: String? = nil, titleColor: UIColor = .white, font: UIFont = .systemFont(ofSize: 14), backgroundColor: UIColor = .red, width: CGFloat = 80, touchUpInside: (() -> Void)? = nil) {
+    public init(icon: UIImage? = nil, iconTintColor: UIColor = .white, title: String? = nil, titleColor: UIColor = .white, font: UIFont = .systemFont(ofSize: 14), backgroundColor: UIColor = .red, width: CGFloat = 80, autoCloseSwipe: Bool = true, touchUpInside: (() -> Void)? = nil) {
         super.init(frame: .zero)
         self.width = width
         self.icon = icon
@@ -278,6 +286,7 @@ public class SwipedActionButton: UIControl {
         self.font = font
         self.buttonBackgroundColor = backgroundColor
         self.touchUpInsideAction = touchUpInside
+        self.autoCloseSwipe = autoCloseSwipe
         setup()
     }
     
@@ -321,6 +330,9 @@ public class SwipedActionButton: UIControl {
     
     @objc func buttonTapped() {
         touchUpInsideAction?()
+        if autoCloseSwipe {
+            didTouchUpInsideAction?()
+        }
     }
     
     private var iconTextSpaceConstraint: ConstraintMakerEditable?
