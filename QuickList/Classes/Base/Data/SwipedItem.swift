@@ -143,7 +143,7 @@ open class SwipeItemCell: ItemCell {
     public func openSwipeActions() {
         if autoTriggerFirstButton, lastGestureProgress * totalButtonsWidth() > self.bounds.width * 0.5 {
             self.swipedActionButtons.first?.touchUpInsideAction?()
-            UIView.animate(withDuration: 0.3, delay: 0) {
+            UIView.animate(withDuration: 0.25, delay: 0) {
                 self.swipedActionButtons.first?.snp.updateConstraints({ make in
                     make.trailing.equalTo(0).priority(.high)
                 })
@@ -158,7 +158,7 @@ open class SwipeItemCell: ItemCell {
                 self.buttonsContainerView.alpha = 1
             }
         } else {
-            UIView.animate(withDuration: 0.3) {
+            UIView.animate(withDuration: 0.25) {
                 self.swipeProgressUpdated(progress: 1)
                 self.layoutIfNeeded()
             }
@@ -166,7 +166,7 @@ open class SwipeItemCell: ItemCell {
     }
     
     public func closeSwipeActions() {
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.25) {
             self.swipeProgressUpdated(progress: 0)
             self.layoutIfNeeded()
         }
