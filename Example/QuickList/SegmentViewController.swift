@@ -140,6 +140,23 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
         formHeader.displayType = .normal
         formlist.form.header = formHeader
         
+        let swipItemSection = Section("测试左滑Icon") { section in
+            section.column = 2
+            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+            section.lineSpace = 10
+            section.itemSpace = 10
+        }
+        for i in 0 ... 30 {
+            swipItemSection <<< TestSwipedItem("左滑删除\(i)") { item in
+                item.swipedActionButtons = [
+                    SwipedActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red),
+                    SwipedActionButton(title: "添加收藏", backgroundColor: .yellow),
+                    SwipedActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                ]
+            }
+        }
+        formlist.form +++ swipItemSection
+        
         let towColumSection = Section("固定大小两列图片") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)

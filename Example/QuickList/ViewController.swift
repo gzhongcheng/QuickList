@@ -120,6 +120,35 @@ class ViewController: UIViewController {
         formlist.form.footer = formFooter
         
         // MARK: - 创建完成后添加sections
+        let swipItemSection = Section("测试左滑Icon") { section in
+            section.column = 2
+            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+            section.lineSpace = 10
+            section.itemSpace = 10
+        }
+        for i in 0 ... 30 {
+            swipItemSection <<< TestSwipedItem("左滑删除\(i)") { item in
+                item.swipedActionButtons = [
+                    SwipedActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
+                        guard let section = item?.section else { return }
+                        item?.isHidden = true
+                        section.updateLayout(animation: true)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            UIView.performWithoutAnimation {
+                                section.removeAll(where: { $0 === item })
+                                section.reload()
+                            }
+                        }
+                    }),
+                    SwipedActionButton(title: "添加收藏", backgroundColor: .yellow),
+                    SwipedActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                ]
+                item.autoTriggerFirstButton = true
+            }
+        }
+        formlist.form +++ swipItemSection
+        
+        
         formlist.form +++ Section(header: "自动换行", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10

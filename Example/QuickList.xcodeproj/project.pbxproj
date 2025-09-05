@@ -15,6 +15,7 @@
 		2DB1DE942E0262F200522BF4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE792E0262F200522BF4 /* Images.xcassets */; };
 		2DB1DE952E0262F200522BF4 /* Main.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE8B2E0262F200522BF4 /* Main.strings */; };
 		2DB1DE962E0262F200522BF4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2DB1DE852E0262F200522BF4 /* Main.storyboard */; };
+		2DBA4F5D2E6AB84100A8B0CB /* TestSwipedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DBA4F5C2E6AB84100A8B0CB /* TestSwipedItem.swift */; };
 		2DF0BCF32E58013100C4B327 /* CompressibleHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */; };
 		2DF0BD312E584BDF00C4B327 /* SegmentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BD302E584BDF00C4B327 /* SegmentViewController.swift */; };
 		2DF0BD352E584DE600C4B327 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DF0BD342E584DE600C4B327 /* SceneDelegate.swift */; };
@@ -42,6 +43,7 @@
 		2DB1DE892E0262F200522BF4 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
 		2DB1DE8A2E0262F200522BF4 /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-HK"; path = "zh-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		2DB1DE8C2E0262F200522BF4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		2DBA4F5C2E6AB84100A8B0CB /* TestSwipedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestSwipedItem.swift; sourceTree = "<group>"; };
 		2DF0BCF22E58013100C4B327 /* CompressibleHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressibleHeaderView.swift; sourceTree = "<group>"; };
 		2DF0BD302E584BDF00C4B327 /* SegmentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentViewController.swift; sourceTree = "<group>"; };
 		2DF0BD342E584DE600C4B327 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				2DF0BD362E585DC900C4B327 /* HorizontalViewController.swift */,
 				2DF0BD382E5DA2F100C4B327 /* SegmentTabSelectedView.swift */,
 				2DF0BD3A2E5F0A4A00C4B327 /* ImageResources.swift */,
+				2DBA4F5C2E6AB84100A8B0CB /* TestSwipedItem.swift */,
 			);
 			path = QuickList;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 				2DB1DE8F2E0262F200522BF4 /* ItemPresentViewController.swift in Sources */,
 				2DF0BD3B2E5F0A4A00C4B327 /* ImageResources.swift in Sources */,
 				2DF0BD372E585DC900C4B327 /* HorizontalViewController.swift in Sources */,
+				2DBA4F5D2E6AB84100A8B0CB /* TestSwipedItem.swift in Sources */,
 				2DF0BD312E584BDF00C4B327 /* SegmentViewController.swift in Sources */,
 				2DB1DE902E0262F200522BF4 /* AppDelegate.swift in Sources */,
 				2DF0BD392E5DA2F100C4B327 /* SegmentTabSelectedView.swift in Sources */,
