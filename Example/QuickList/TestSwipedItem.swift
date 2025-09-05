@@ -11,7 +11,7 @@ import QuickList
 
 // MARK: - TestSwipedItemCell
 // TestSwipedItemCell
-class TestSwipedItemCell: SwipedItemCell {
+class TestSwipeItemCell: SwipeItemCell {
     
     override func setup() {
         super.setup()
@@ -35,19 +35,19 @@ class TestSwipedItemCell: SwipedItemCell {
 
 // MARK: - TestSwipedItem
 // TestSwipedItem
-final class TestSwipedItem: SwipedAutolayoutItemOf<TestSwipedItemCell>, ItemType {
+final class TestSwipeItem: SwipeAutolayoutItemOf<TestSwipeItemCell>, ItemType {
     
     // 更新cell的布局
     override func customUpdateCell() {
         super.customUpdateCell()
-        guard let cell = cell as? TestSwipedItemCell else {
+        guard let cell = cell as? TestSwipeItemCell else {
             return
         }
         updateCellData(cell)
     }
     
     /// 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
-    override func updateCellData(_ cell: TestSwipedItemCell) {
+    override func updateCellData(_ cell: TestSwipeItemCell) {
         cell.testLabel.text = title
     }
     

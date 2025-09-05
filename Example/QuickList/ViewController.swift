@@ -127,9 +127,9 @@ class ViewController: UIViewController {
             section.itemSpace = 10
         }
         for i in 0 ... 30 {
-            swipItemSection <<< TestSwipedItem("左滑删除\(i)") { item in
+            swipItemSection <<< TestSwipeItem("左滑删除\(i)") { item in
                 item.swipedActionButtons = [
-                    SwipedActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
+                    SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
                         guard let section = item?.section else { return }
                         item?.isHidden = true
                         section.updateLayout(animation: true)
@@ -140,8 +140,8 @@ class ViewController: UIViewController {
                             }
                         }
                     }),
-                    SwipedActionButton(title: "添加收藏", backgroundColor: .yellow),
-                    SwipedActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                    SwipeActionButton(title: "添加收藏", backgroundColor: .yellow),
+                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
                 ]
                 item.autoTriggerFirstButton = true
             }

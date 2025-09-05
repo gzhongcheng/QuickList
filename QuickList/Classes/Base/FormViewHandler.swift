@@ -445,7 +445,7 @@ extension FormViewHandler: UICollectionViewDataSource {
         if !cell.isSetup {
             cell.setup()
         }
-        if let swipedItem = item as? SwipedItemType {
+        if let swipedItem = item as? SwipeItemType {
             swipedItem.configureSwipe()
         }
         item.updateCell()

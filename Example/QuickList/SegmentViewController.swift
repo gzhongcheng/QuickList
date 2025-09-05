@@ -147,11 +147,11 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
             section.itemSpace = 10
         }
         for i in 0 ... 30 {
-            swipItemSection <<< TestSwipedItem("左滑删除\(i)") { item in
+            swipItemSection <<< TestSwipeItem("左滑删除\(i)") { item in
                 item.swipedActionButtons = [
-                    SwipedActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red),
-                    SwipedActionButton(title: "添加收藏", backgroundColor: .yellow),
-                    SwipedActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                    SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red),
+                    SwipeActionButton(title: "添加收藏", backgroundColor: .yellow),
+                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
                 ]
             }
         }

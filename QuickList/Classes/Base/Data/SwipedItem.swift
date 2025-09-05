@@ -9,12 +9,12 @@ import Foundation
 import SnapKit
 
 /// 支持左滑事件的cell
-open class SwipedItemCell: ItemCell {
+open class SwipeItemCell: ItemCell {
     /// 是否可以左滑
     public var canSwiped: Bool = true
     
     /// 左滑时显示的按钮
-    public var swipedActionButtons: [SwipedActionButton] = [] {
+    public var swipedActionButtons: [SwipeActionButton] = [] {
         didSet {
             for button in buttonsContainerView.subviews {
                 button.removeFromSuperview()
@@ -45,7 +45,7 @@ open class SwipedItemCell: ItemCell {
     public var autoTriggerFirstButton: Bool = false
     
     /// 会跟随左滑的内容视图
-    public var swipedContentView: UIView = UIView()
+    public var swipeContentView: UIView = UIView()
     
     /// 左滑出现的按钮容器
     public var buttonsContainerView: UIView = {
@@ -59,8 +59,8 @@ open class SwipedItemCell: ItemCell {
         super.setup()
         self.clipsToBounds = true
         
-        self.contentView.addSubview(swipedContentView)
-        self.swipedContentView.snp.makeConstraints { make in
+        self.contentView.addSubview(swipeContentView)
+        self.swipeContentView.snp.makeConstraints { make in
             make.centerX.equalToSuperview().offset(0)
             make.top.bottom.equalToSuperview()
             make.width.equalToSuperview()
@@ -76,7 +76,7 @@ open class SwipedItemCell: ItemCell {
     
     private func configureSwipeGesture() {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
-//        panGesture.delegate = self
+        panGesture.delegate = self
         self.addGestureRecognizer(panGesture)
         self.isUserInteractionEnabled = true
     }
@@ -126,7 +126,7 @@ open class SwipedItemCell: ItemCell {
     public func swipeProgressUpdated(progress: CGFloat) {
         let realProgress = min(max(progress, 0), 1)
         let totalWidth = totalButtonsWidth()
-        self.swipedContentView.snp.updateConstraints { make in
+        self.swipeContentView.snp.updateConstraints { make in
             make.centerX.equalToSuperview().offset(-totalWidth * realProgress)
         }
         self.buttonsContainerView.snp.updateConstraints { make in
@@ -178,22 +178,41 @@ open class SwipedItemCell: ItemCell {
     }
 }
 
-public protocol SwipedItemType {
+extension SwipeItemCell: UIGestureRecognizerDelegate {
+    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let gesture = gestureRecognizer as? UIPanGestureRecognizer {
+            let velocity = gesture.velocity(in: self)
+            if abs(velocity.x) > abs(velocity.y) {
+                return true
+            }
+        }
+        return false
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.state == .began || gestureRecognizer.state == .changed {
+            return false
+        }
+        return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer is UIPanGestureRecognizer
+    }
+}
+
+public protocol SwipeItemType {
     func configureSwipe()
 }
 
 // MARK: - SwipedAutolayoutItemOf
 // SwipedAutolayoutItemOf
-open class SwipedAutolayoutItemOf<Cell: SwipedItemCell>: AutolayoutItemOf<Cell>, SwipedItemType {
+open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, SwipeItemType {
     /// 是否可以左滑
     public var canSwiped: Bool = true
     /// 左滑时显示的按钮
-    public var swipedActionButtons: [SwipedActionButton] = []
+    public var swipedActionButtons: [SwipeActionButton] = []
     /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
     public var autoTriggerFirstButton: Bool = false
     
     public func configureSwipe() {
-        guard let cell = self.cell as? SwipedItemCell else { return }
+        guard let cell = self.cell as? SwipeItemCell else { return }
         cell.canSwiped = canSwiped
         cell.swipedActionButtons = swipedActionButtons
         cell.autoTriggerFirstButton = autoTriggerFirstButton
@@ -202,16 +221,16 @@ open class SwipedAutolayoutItemOf<Cell: SwipedItemCell>: AutolayoutItemOf<Cell>,
 
 // MARK: - SwipedItemOf
 // SwipedAutolayoutItemOf
-open class SwipedItemOf<Cell: SwipedItemCell>: ItemOf<Cell>, SwipedItemType {
+open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
     /// 是否可以左滑
     public var canSwiped: Bool = true
     /// 左滑时显示的按钮
-    public var swipedActionButtons: [SwipedActionButton] = []
+    public var swipedActionButtons: [SwipeActionButton] = []
     /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
     public var autoTriggerFirstButton: Bool = false
     
     public func configureSwipe() {
-        guard let cell = self.cell as? SwipedItemCell else { return }
+        guard let cell = self.cell as? SwipeItemCell else { return }
         cell.canSwiped = canSwiped
         cell.swipedActionButtons = swipedActionButtons
         cell.autoTriggerFirstButton = autoTriggerFirstButton
@@ -220,7 +239,7 @@ open class SwipedItemOf<Cell: SwipedItemCell>: ItemOf<Cell>, SwipedItemType {
 
 // MARK: - SwipedActionButton
 /// 左滑时显示的按钮
-public class SwipedActionButton: UIControl {
+public class SwipeActionButton: UIControl {
     /// 展示到cell上时的右侧距离
     var rightSpacingToCell: CGFloat = 0
     
