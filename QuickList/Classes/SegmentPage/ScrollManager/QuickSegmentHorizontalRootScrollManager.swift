@@ -95,22 +95,62 @@ class QuickSegmentHorizontalRootScrollManager: QuickSegmentScrollManager {
         }
         if
             let touchSection = touchSection,
-            let sectionScrollView = touchSection.currentPageScrollView
+            let pagesBox = touchSection.pagesItem.currentListView
         {
-            if
-                lastOffset.x < rootView.contentOffset.x,
-                sectionScrollView.contentOffset.x >= (sectionScrollView.contentSize.width - sectionScrollView.bounds.width - sectionScrollView.adjustedContentInset.left - sectionScrollView.adjustedContentInset.right)
-            {
-                /// 上拉，且当前触摸的section已经滚动到底部，就需要切换到下一个section
-                let currentIndex = allScrollableSections.firstIndex(of: touchSection) ?? 0
-                if currentIndex + 1 < allScrollableSections.count {
-                    let targetSection = allScrollableSections[currentIndex + 1]
-                    /// 如果下一个section没有可滚动的子列表，或者还没有完全展示出来，就不切换
+            let findLastSection: () -> QuickSegmentSection? = {
+                let currentIndex = self.allScrollableSections.firstIndex(of: touchSection) ?? 0
+                if currentIndex - 1 >= 0 {
+                    let targetSection = self.allScrollableSections[currentIndex - 1]
+                    /// 如果上一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到顶了，就不切换
                     if
-                        targetSection.currentPageScrollView != nil,
-                        targetSection.sectionEndPoint.x <= contentOffsetX + rootView.bounds.width - rootView.adjustedContentInset.right
+                        targetSection.sectionStartPoint.x >= contentOffsetX,
+                        let targetPage = targetSection.currentPageScrollView,
+                        let targetPagesBox = targetSection.pagesItem.currentListView,
+                        targetPagesBox.contentOffset.x > 0 || targetPage.contentOffset.x > 0
                     {
-                        self.scrollableSection = targetSection
+                        return targetSection
+                    }
+                }
+                return nil
+            }
+            
+            let findNextSection: () -> QuickSegmentSection? = {
+                let currentIndex = self.allScrollableSections.firstIndex(of: touchSection) ?? 0
+                if currentIndex + 1 < self.allScrollableSections.count {
+                    let targetSection = self.allScrollableSections[currentIndex + 1]
+                    /// 如果下一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到底了，就不切换
+                    if
+                        targetSection.sectionEndPoint.x <= contentOffsetX + rootView.bounds.width - rootView.adjustedContentInset.right,
+                        let targetPage = targetSection.currentPageScrollView,
+                        let targetPagesBox = targetSection.pagesItem.currentListView,
+                        targetPagesBox.contentOffset.x < (targetPagesBox.contentSize.width - targetPagesBox.bounds.width + targetPagesBox.adjustedContentInset.left + targetPagesBox.adjustedContentInset.right) || targetPage.contentOffset.x < (targetPage.contentSize.width - targetPage.bounds.width + targetPage.adjustedContentInset.left + targetPage.adjustedContentInset.right)
+                    {
+                        return targetSection
+                    }
+                }
+                return nil
+            }
+            
+            if let sectionScrollView = touchSection.currentPageScrollView {
+                if
+                    lastOffset.x < rootView.contentOffset.x,
+                    sectionScrollView.contentOffset.x >= (sectionScrollView.contentSize.width - sectionScrollView.bounds.width - sectionScrollView.adjustedContentInset.left - sectionScrollView.adjustedContentInset.right),
+                    pagesBox.contentOffset.x >= (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
+                {
+                    /// 左滑，且当前触摸的section已经滚动到底部，就需要切换到下一个section
+                    if let nextSection = findNextSection() {
+                        self.scrollableSection = nextSection
+                    } else {
+                        self.scrollableSection = touchSection
+                    }
+                } else if
+                    lastOffset.x > rootView.contentOffset.x,
+                    sectionScrollView.contentOffset.x <= 0,
+                    pagesBox.contentOffset.x <= 0
+                {
+                    /// 右滑，且当前触摸的section已经滚动到顶部，就需要切换到上一个section
+                    if let lastSection = findLastSection() {
+                        self.scrollableSection = lastSection
                     } else {
                         self.scrollableSection = touchSection
                     }
@@ -118,22 +158,22 @@ class QuickSegmentHorizontalRootScrollManager: QuickSegmentScrollManager {
                     self.scrollableSection = touchSection
                 }
             } else if
-                lastOffset.x > rootView.contentOffset.x,
-                sectionScrollView.contentOffset.x <= 0
+                lastOffset.x < rootView.contentOffset.x,
+                pagesBox.contentOffset.x >= (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
             {
-                /// 下拉，且当前触摸的section已经滚动到顶部，就需要切换到上一个section
-                let currentIndex = allScrollableSections.firstIndex(of: touchSection) ?? 0
-                if currentIndex - 1 >= 0 {
-                    let targetSection = allScrollableSections[currentIndex - 1]
-                    /// 如果上一个section没有可滚动的子列表，或者还没有完全展示出来，就不切换
-                    if
-                        targetSection.currentPageScrollView != nil,
-                        targetSection.sectionStartPoint.x >= contentOffsetX
-                    {
-                        self.scrollableSection = targetSection
-                    } else {
-                        self.scrollableSection = touchSection
-                    }
+                /// 左滑，且当前触摸的section已经滚动到底部，就需要切换到下一个section
+                if let nextSection = findNextSection() {
+                    self.scrollableSection = nextSection
+                } else {
+                    self.scrollableSection = touchSection
+                }
+            } else if
+                lastOffset.x > rootView.contentOffset.x,
+                pagesBox.contentOffset.x <= 0
+            {
+                /// 右滑，且当前触摸的section已经滚动到顶部，就需要切换到上一个section
+                if let lastSection = findLastSection() {
+                    self.scrollableSection = lastSection
                 } else {
                     self.scrollableSection = touchSection
                 }
@@ -141,10 +181,6 @@ class QuickSegmentHorizontalRootScrollManager: QuickSegmentScrollManager {
                 self.scrollableSection = touchSection
             }
         } else {
-            self.scrollableSection = touchSection
-        }
-        
-        if scrollableSection?.currentPageScrollView == nil, scrollableSection?.pagesItem.pagesScrollDirection == .vertical {
             self.scrollableSection = nil
         }
     }

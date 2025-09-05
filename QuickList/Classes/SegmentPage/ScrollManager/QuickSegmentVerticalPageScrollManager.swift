@@ -104,9 +104,9 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                     /// 如果上一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到顶了，就不切换
                     if
                         targetSection.sectionStartPoint.y >= contentOffsetY,
-                        targetSection.currentPageScrollView != nil,
+                        let targetPage = targetSection.currentPageScrollView,
                         let targetPagesBox = targetSection.pagesItem.currentListView,
-                        targetPagesBox.contentOffset.y <= 0
+                        targetPagesBox.contentOffset.y > 0 || targetPage.contentOffset.y > 0
                     {
                         return targetSection
                     }
@@ -121,9 +121,9 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                     /// 如果下一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到底了，就不切换
                     if
                         targetSection.sectionEndPoint.y <= contentOffsetY + rootView.bounds.height - rootView.adjustedContentInset.bottom,
-                        targetSection.currentPageScrollView != nil,
+                        let targetPage = targetSection.currentPageScrollView,
                         let targetPagesBox = targetSection.pagesItem.currentListView,
-                        targetPagesBox.contentOffset.y >= (targetPagesBox.contentSize.height - targetPagesBox.bounds.height - targetPagesBox.adjustedContentInset.top - targetPagesBox.adjustedContentInset.bottom)
+                        targetPagesBox.contentOffset.y < (targetPagesBox.contentSize.height - targetPagesBox.bounds.height + targetPagesBox.adjustedContentInset.top + targetPagesBox.adjustedContentInset.bottom) || targetPage.contentOffset.y < (targetPage.contentSize.height - targetPage.bounds.height + targetPage.adjustedContentInset.top + targetPage.adjustedContentInset.bottom)
                     {
                         return targetSection
                     }

@@ -123,7 +123,6 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
         
 //        formlist.scrollDirection = .horizontal
         self.view.addSubview(formlist)
-        formlist.contentInsetAdjustmentBehavior = .never
         formlist.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
