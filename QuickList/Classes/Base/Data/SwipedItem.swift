@@ -90,6 +90,7 @@ open class SwipedItemCell: ItemCell {
         switch gesture.state {
         case .began:
             gestureBeginProgress = swipeProgress
+            self.contentView.bringSubviewToFront(self.buttonsContainerView)
         case .changed:
             let progress = max(0, -translation.x / totalWidth + gestureBeginProgress)
             swipeProgressUpdated(progress: progress)
