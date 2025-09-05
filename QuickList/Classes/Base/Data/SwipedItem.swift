@@ -41,6 +41,9 @@ open class SwipedItemCell: ItemCell {
     /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
     public var autoTriggerFirstButton: Bool = false
     
+    /// 会跟随左滑的内容视图
+    public var swipedContentView: UIView = UIView()
+    
     /// 左滑出现的按钮容器
     public var buttonsContainerView: UIView = {
         let view = UIView()
@@ -53,13 +56,14 @@ open class SwipedItemCell: ItemCell {
         super.setup()
         self.clipsToBounds = true
         
-        self.contentView.snp.remakeConstraints { make in
+        self.contentView.addSubview(swipedContentView)
+        self.swipedContentView.snp.makeConstraints { make in
             make.centerX.equalToSuperview().offset(0)
             make.top.bottom.equalToSuperview()
             make.width.equalToSuperview()
         }
         
-        self.addSubview(buttonsContainerView)
+        self.contentView.addSubview(buttonsContainerView)
         buttonsContainerView.snp.makeConstraints { make in
             make.top.bottom.trailing.equalToSuperview()
             make.width.equalTo(0)
@@ -118,7 +122,7 @@ open class SwipedItemCell: ItemCell {
     public func swipeProgressUpdated(progress: CGFloat) {
         let realProgress = min(max(progress, 0), 1)
         let totalWidth = totalButtonsWidth()
-        self.contentView.snp.updateConstraints { make in
+        self.swipedContentView.snp.updateConstraints { make in
             make.centerX.equalToSuperview().offset(-totalWidth * realProgress)
         }
         self.buttonsContainerView.snp.updateConstraints { make in
@@ -319,7 +323,11 @@ public class SwipedActionButton: UIControl {
     }
     
     private var iconTextSpaceConstraint: ConstraintMakerEditable?
-    private let contentView: UIView = UIView()
+    private let contentView: UIView = {
+        let view = UIView()
+        view.isUserInteractionEnabled = false
+        return view
+    }()
     
     public lazy var titleLabel: UILabel = {
         let label = UILabel()
