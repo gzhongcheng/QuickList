@@ -289,6 +289,26 @@ open class Item: NSObject {
         self.tag = tag
         self.title = title
     }
+    
+    /// 从列表中动画删除
+    public func removeFromSection(animation: Bool = true) {
+        guard let section = self.section else { return }
+        self.isHidden = true
+        section.updateLayout(animation: animation)
+        if animation {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                UIView.performWithoutAnimation {
+                    section.removeAll(where: { $0 === self })
+                    section.reload()
+                }
+            }
+        } else {
+            UIView.performWithoutAnimation {
+                section.removeAll(where: { $0 === self })
+                section.reload()
+            }
+        }
+    }
 }
 
 // MARK: - Item的初始化协议

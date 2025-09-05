@@ -130,15 +130,7 @@ class ViewController: UIViewController {
             swipItemSection <<< TestSwipeItem("左滑删除\(i)") { item in
                 item.swipedActionButtons = [
                     SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
-                        guard let section = item?.section else { return }
-                        item?.isHidden = true
-                        section.updateLayout(animation: true)
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            UIView.performWithoutAnimation {
-                                section.removeAll(where: { $0 === item })
-                                section.reload()
-                            }
-                        }
+                        item?.removeFromSection()
                     }),
                     SwipeActionButton(title: "添加收藏", backgroundColor: .yellow),
                     SwipeActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
