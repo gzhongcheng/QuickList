@@ -40,6 +40,8 @@ public class FormViewHandler: NSObject {
     var registedDecorationIdentifier = [String]()
     // 用于存储已注册的Cell对应的identifier
     var registedCellIdentifier = [String]()
+    // 当前已展开左滑按钮的cell
+    public var currentOpenedSwipeCell: SwipeItemCell?
     
     /// 滚动方向,默认为竖直方向滚动
     public var scrollDirection: UICollectionView.ScrollDirection = .vertical {
@@ -684,6 +686,7 @@ extension FormViewHandler: UICollectionViewDelegate {
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        currentOpenedSwipeCell?.closeSwipeActions()
         guard
             collectionView == self.formView,
             let cell = collectionView.cellForItem(at: indexPath) as? ItemCell,
@@ -745,6 +748,7 @@ extension FormViewHandler: UICollectionViewDelegate {
     
     // MARK: UIScrollViewDelegate
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        currentOpenedSwipeCell?.closeSwipeActions()
         notifyBeginScroll()
         delegate?.scrollViewDidScroll?(scrollView)
     }

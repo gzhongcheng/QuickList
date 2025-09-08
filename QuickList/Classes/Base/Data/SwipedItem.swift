@@ -92,6 +92,9 @@ open class SwipeItemCell: ItemCell {
         
         switch gesture.state {
         case .began:
+            if let currentSwipeCell = self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell {
+                currentSwipeCell.closeSwipeActions()
+            }
             gestureBeginProgress = swipeProgress
             self.contentView.bringSubviewToFront(self.buttonsContainerView)
         case .changed:
@@ -141,6 +144,7 @@ open class SwipeItemCell: ItemCell {
     }
 
     public func openSwipeActions() {
+        self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell = self
         if autoTriggerFirstButton, lastGestureProgress * totalButtonsWidth() > self.bounds.width * 0.5 {
             self.swipedActionButtons.first?.touchUpInsideAction?()
             UIView.animate(withDuration: 0.25, delay: 0) {
