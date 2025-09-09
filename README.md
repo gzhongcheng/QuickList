@@ -110,7 +110,7 @@ Section("自定义layout") { section in
 
 #### SegmentPage
 使用QuickList为基础创建的可以嵌入List中的pageController
-（待开发）
+[使用文档](.Doc/SegmentPage的使用.md)
 
 #### Picker
 使用QuickList为基础创建的PickerView
