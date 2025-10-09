@@ -565,7 +565,7 @@ extension FormViewHandler: UICollectionViewDelegate {
             var needUpdateLayout: Bool = false
             for section in form.sections {
                 for i in section.items {
-                    var targetSelect: Bool = false
+                    var targetSelect: Bool = i.isSelected
                     if form.singleSelection || form.selectedItemDecoration != nil {
                         targetSelect = item == i
                     } else if item == i {
