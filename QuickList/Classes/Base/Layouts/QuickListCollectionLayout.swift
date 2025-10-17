@@ -484,7 +484,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public func initialLayoutAttributesForElement(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = sectionAttributes[sectionIndex]
+            let section = oldSectionAttributes[sectionIndex]
         else {
             return nil
         }

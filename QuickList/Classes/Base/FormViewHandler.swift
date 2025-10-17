@@ -708,15 +708,18 @@ extension FormViewHandler: UICollectionViewDelegate {
         cell.item?.willDisplay()
         if
             let oldFrame = self.layout.initialLayoutAttributesForItem(at: indexPath)?.frame,
-            let finalFrame = self.layout.layoutAttributesForItem(at: indexPath)?.frame,
-            oldFrame != finalFrame
+            let finalAttr = self.layout.layoutAttributesForItem(at: indexPath),
+            oldFrame != finalAttr.frame
         {
+            let finalFrame = finalAttr.frame
             let tx = oldFrame.origin.x - finalFrame.origin.x
             let ty = oldFrame.origin.y - finalFrame.origin.y
+            cell.transform = CGAffineTransform(translationX: tx, y: ty)
+            cell.superview?.layoutIfNeeded()
             DispatchQueue.main.async {
-                cell.transform = CGAffineTransform(translationX: tx, y: ty)
                 UIView.animate(withDuration: 0.3) {
                     cell.transform = .identity
+                    finalAttr.alpha = cell.item?.isHidden == true ? 0 : 1
                 }
             }
         }
@@ -724,15 +727,18 @@ extension FormViewHandler: UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         if
-            let oldFrame = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath),
-            let finalFrame = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
+            let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath),
+            let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
         {
-            let tx = oldFrame.frame.origin.x - finalFrame.frame.origin.x
-            let ty = oldFrame.frame.origin.y - finalFrame.frame.origin.y
+            let tx = oldAttr.frame.origin.x - finalAttr.frame.origin.x
+            let ty = oldAttr.frame.origin.y - finalAttr.frame.origin.y
+            view.transform = CGAffineTransform(translationX: tx, y: ty)
+            view.alpha = 0
+            view.superview?.layoutIfNeeded()
             DispatchQueue.main.async {
-                view.transform = CGAffineTransform(translationX: tx, y: ty)
                 UIView.animate(withDuration: 0.3) {
                     view.transform = .identity
+                    view.alpha = 1
                 }
             }
         }
