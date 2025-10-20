@@ -41,8 +41,10 @@ open class SwipeItemCell: ItemCell {
         }
     }
     
-    /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+    /// 全部展示后继续左滑，是否自动触发第一个按钮的事件
     public var autoTriggerFirstButton: Bool = false
+    /// 全部展示后继续左滑，自动触发第一个按钮的事件的阈值（需要固定负数，单位为px）
+    public var autoTriggerFirstButtonThreshold: CGFloat = -60
     
     /// 会跟随左滑的内容视图
     public var swipeContentView: UIView = UIView()
@@ -92,7 +94,7 @@ open class SwipeItemCell: ItemCell {
         
         switch gesture.state {
         case .began:
-            if let currentSwipeCell = self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell {
+            if let currentSwipeCell = self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell, currentSwipeCell != self {
                 currentSwipeCell.closeSwipeActions()
             }
             gestureBeginProgress = swipeProgress
@@ -145,7 +147,7 @@ open class SwipeItemCell: ItemCell {
 
     public func openSwipeActions() {
         self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell = self
-        if autoTriggerFirstButton, lastGestureProgress * totalButtonsWidth() > self.bounds.width * 0.5 {
+        if autoTriggerFirstButton, (1 - lastGestureProgress) * totalButtonsWidth() < autoTriggerFirstButtonThreshold {
             self.swipedActionButtons.first?.touchUpInsideAction?()
             UIView.animate(withDuration: 0.25, delay: 0) {
                 self.swipedActionButtons.first?.snp.updateConstraints({ make in
