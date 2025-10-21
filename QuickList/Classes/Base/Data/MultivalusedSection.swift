@@ -7,34 +7,6 @@
 
 import Foundation
 
-/**
- *  可编辑的section允许的操作选项,可以有多个值，如：
- *      let xxxOptions = MultivaluedOptions.Insert.union(.Delete)
- *   判断时使用`contains`方法判断，如：
- *      xxxOptions.contains(.Reorder)
- */
-public struct MultivaluedOptions: OptionSet {
-
-    private enum Options: Int {
-        case none = 0, insert = 1, delete = 2, reorder = 4
-    }
-    public let rawValue: Int
-    public  init(rawValue: Int) { self.rawValue = rawValue}
-    private init(_ options: Options) { self.rawValue = options.rawValue }
-
-    /// 没有多值
-    public static let None = MultivaluedOptions(.none)
-
-    /// 允许插入行
-    public static let Insert = MultivaluedOptions(.insert)
-
-    /// 允许移除行
-    public static let Delete = MultivaluedOptions(.delete)
-
-    /// 允许重新排序
-    public static let Reorder = MultivaluedOptions(.reorder)
-}
-
 // MARK: - 可编辑的section
 open class MultivalusedSection: Section {
     public var moveAble: Bool = true
@@ -110,6 +82,7 @@ extension  SelectableSectionType where Self: Section {
 
     /// Item添加到section之前调用的函数
     func prepare(selectableItems items: [Item]) {
+        var needUpdateLayout: Bool = false
         for item in items {
             if let sItem = item as? SelectableItem {
                 sItem.onCellSelection { [weak self] item in
@@ -125,10 +98,17 @@ extension  SelectableSectionType where Self: Section {
                                 sItem.isSelected = true
                         }
                     }
-                    sItem.updateCell()
+                    if sItem.onSelectedChanged() {
+                        sItem.needReSize = true
+                        needUpdateLayout = true
+                    }
                     s.onSelectSelectableItem?(sItem)
                 }
             }
+        }
+        
+        if needUpdateLayout {
+            self.updateLayout()
         }
     }
 

@@ -1,5 +1,5 @@
 //
-//  TestSwipedItem.swift
+//  TestSwipeItem.swift
 //  QuickList_Example
 //
 //  Created by ZhongCheng Guo on 2025/9/5.
@@ -9,8 +9,8 @@
 import Foundation
 import QuickList
 
-// MARK: - TestSwipedItemCell
-// TestSwipedItemCell
+// MARK: - TestSwipeItemCell
+// TestSwipeItemCell
 class TestSwipeItemCell: SwipeItemCell {
     
     override func setup() {
@@ -33,8 +33,8 @@ class TestSwipeItemCell: SwipeItemCell {
     }()
 }
 
-// MARK: - TestSwipedItem
-// TestSwipedItem
+// MARK: - TestSwipeItem
+// TestSwipeItem
 final class TestSwipeItem: SwipeAutolayoutItemOf<TestSwipeItemCell>, ItemType {
     
     // 更新cell的布局

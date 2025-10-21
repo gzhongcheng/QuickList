@@ -28,6 +28,9 @@ QuickList项目分成三个subspec：
 pod 'QuickList', :path => '../', :subspecs => ['Base', 'Items', 'WebImage']
 ```
 
+> 为方便快速创建Item，在项目的xctemplate文件夹下，已经创建了一些模板文件，可将它们复制到 `/Applications/Xcode.app/Contents/Developer/Library/Xcode/Templates/File Templates/Source` 文件夹下，这样就可以在创建文件时直接选择对应的Item类型来创建
+> 另外，在本项目的根目录下，可以找到`CodeSnippets.zip`压缩包，里面是一些预定好的代码段，可将它解压到 `~/Library/Developer/Xcode/UserData/CodeSnippets/` 文件夹下，然后在Xcode的`Code Snippets`中就可以查看并使用了。
+
 ## 运算符相关
 
 框架中定义了一些运算符，用于快速操作Form和Section，具体如下：

@@ -1,5 +1,5 @@
 //
-//  SwipedItem.swift
+//  SwipeItem.swift
 //  QuickList
 //
 //  Created by ZhongCheng Guo on 2025/9/5.
