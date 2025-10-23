@@ -370,3 +370,4 @@ public func >>>! (left: Section, right: (Range<Int>, [Item])) -> Section {
  */
 public func += <C: Collection>(lhs: inout Section, rhs: C) where C.Iterator.Element == Item {
     lhs.append(contentsOf: rhs)
+}

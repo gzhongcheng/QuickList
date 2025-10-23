@@ -87,7 +87,7 @@ class HorizontalViewController: UIViewController {
         formlist.form.footer = formFooter
         
         // MARK: - Add sections after creation
-        formlist.form +++ Section(header: "自动换行", footer: nil) { section in
+        formlist.form +++ Section(header: "Automatic Wrap", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10

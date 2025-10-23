@@ -147,20 +147,20 @@ class ViewController: UIViewController {
         formlist.form.footer = formFooter
         
         // MARK: - Add sections after creation
-        let swipItemSection = Section("测试左滑Icon") { section in
+        let swipItemSection = Section("Test Swipe") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
         }
         for i in 0 ... 30 {
-            swipItemSection <<< TestSwipeItem("左滑删除\(i)") { item in
+            swipItemSection <<< TestSwipeItem("Swipe Delete \(i)") { item in
                 item.swipedActionButtons = [
                     SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
                         item?.removeFromSection()
                     }),
-                    SwipeActionButton(title: "添加收藏", backgroundColor: .yellow),
-                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                    SwipeActionButton(title: "Favorite", backgroundColor: .black),
+                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "More", backgroundColor: .lightGray)
                 ]
                 item.autoTriggerFirstButton = true
             }
@@ -168,7 +168,7 @@ class ViewController: UIViewController {
         formlist.form +++ swipItemSection
         
         
-        formlist.form +++ Section(header: "自动换行", footer: nil) { section in
+        formlist.form +++ Section(header: "Automatic Wrap", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
@@ -527,7 +527,7 @@ class ViewController: UIViewController {
             threeColumSection <<< newImageItem(i, getRandomImage(), true)
         }
         formlist.form +++ threeColumSection
-        
+
         /**
         * 数据更新需要刷新时，可手动调用reload接口
         * When data needs to be updated, the reload interface can be manually called

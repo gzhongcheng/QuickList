@@ -82,11 +82,11 @@
             </objects>
             <point key="canvasLocation" x="-175" y="-636"/>
         </scene>
-        <!--横向-->
+        <!--Horizontal-->
         <scene sceneID="gfV-EV-Sch">
             <objects>
                 <navigationController id="N5R-Bx-djl" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="横向" image="lightspectrum.horizontal" catalog="system" id="kLO-6b-mWU"/>
+                    <tabBarItem key="tabBarItem" title="Horizontal" image="lightspectrum.horizontal" catalog="system" id="kLO-6b-mWU"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="871-zz-HNW">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -118,11 +118,11 @@
             </objects>
             <point key="canvasLocation" x="-175" y="43"/>
         </scene>
-        <!--竖向-->
+        <!--Vertical-->
         <scene sceneID="YHO-DQ-MJT">
             <objects>
                 <navigationController id="nBA-Te-ZJ5" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="竖向" image="list.bullet.below.rectangle" catalog="system" id="drJ-fD-Lq8"/>
+                    <tabBarItem key="tabBarItem" title="Vertical" image="list.bullet.below.rectangle" catalog="system" id="drJ-fD-Lq8"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Lot-Z2-BHb">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
