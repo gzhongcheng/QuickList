@@ -1,20 +1,20 @@
-# 如何自定义Item
+# How to Customize Item
 
-每个Item都由两个部分组成：
+Each Item consists of two parts:
 
-> **Cell**：界面布局，供Collectionview展示的Cell，单元格固定的界面展示控件在Cell中定义并添加并做好布局约束
+> **Cell**: Interface layout, Cell for CollectionView display. Fixed interface display controls for the cell are defined, added, and layout constraints are set in the Cell
 >
-> **Item**：单元格数据对象，用于存储单元格的各种状态，由于Cell的复用机制，对同一cell的各种界面样式修改可以记录在属性中并在`customUpdateCell()`方法中完成修改。
+> **Item**: Cell data object, used to store various states of the cell. Due to Cell's reuse mechanism, various interface style modifications for the same cell can be recorded in properties and completed in the `customUpdateCell()` method.
 
-为方便Item的使用，定义了**ItemType**协议，包含了默认的初始化方法（带初始化完成回调），以及各种事件回调，回调的参数则会自动设置为对应的Item的类型，减少类型转换的麻烦。
+For convenience in using Items, the **ItemType** protocol is defined, which includes default initialization methods (with initialization completion callbacks) and various event callbacks. The callback parameters are automatically set to the corresponding Item type, reducing the hassle of type conversion.
 
-> **需要注意的是，只有用`final`修饰符修饰的Item类型才能使用ItemType协议自动实现协议中的init方法。**
+> **Note: Only Item types modified with the `final` modifier can use the ItemType protocol to automatically implement the init method in the protocol.**
 
-### 1、定义Cell：
+### 1. Define Cell:
 
-**Cell**: 继承 **ItemCell**，在`setup()`中完成布局方法：
+**Cell**: Inherit from **ItemCell**, complete layout methods in `setup()`:
 
-以下是代码模版：
+Here's the code template:
 
 ```swift
 // MARK: - <#CellName#>
@@ -25,7 +25,7 @@ class <#CellName#>: ItemCell {
         super.setup()
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        // **注意：一定要将子控件添加到contentView上，否则可能会出现点击事件失效等情况**
+        // **Note: Must add sub-controls to contentView, otherwise click events may fail**
       	// <# add UI to contentView #>
     }
   
@@ -35,19 +35,19 @@ class <#CellName#>: ItemCell {
 
 
 
-### 2、定义Item
+### 2. Define Item
 
-框架中提供了手动计算尺寸的`ItemOf<T>`和自动布局计算尺寸的`AutolayoutItemOf<T>`两种Item的基类，可按需进行选择（如果是固定尺寸的，建议直接用手动计算的基类，减少性能消耗）
+The framework provides two base classes for Items: `ItemOf<T>` for manual size calculation and `AutolayoutItemOf<T>` for auto layout size calculation. Choose as needed (if it's a fixed size, recommend using the manual calculation base class directly to reduce performance consumption)
 
-#### 2.1、使用`ItemOf<T>`
+#### 2.1. Using `ItemOf<T>`
 
-**Item**：继承 **ItemOf< Cell >**，Cell代表了Item对应的Cell类型
+**Item**: Inherit from **ItemOf< Cell >**, where Cell represents the Cell type corresponding to the Item
 
-可在`customUpdateCell()`方法中调整cell的布局、设置对应Cell的界面展示数据
+Can adjust cell layout and set corresponding Cell interface display data in the `customUpdateCell()` method
 
-重写`identifier`返回复用的identifier（可以用不同的id来让cell不复用）
+Override `identifier` to return the reuse identifier (can use different ids to prevent cell reuse)
 
-以下是代码模版：
+Here's the code template:
 
 ```swift
 // MARK: - <#ItemName#>
@@ -55,7 +55,7 @@ class <#CellName#>: ItemCell {
 final class <#ItemName#>: ItemOf<<#CellName#>>, ItemType {
     
     
-    // 更新cell的布局
+    // Update cell layout
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? <#CellName#> else {
@@ -69,14 +69,14 @@ final class <#ItemName#>: ItemOf<<#CellName#>>, ItemType {
     }
     
     
-    /// 计算尺寸
+    /// Calculate size
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: any FormViewProtocol, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self
         else {
             return nil
         }
-      	/// 可以按不同布局方式返回不同尺寸，也可以直接返回一个固定的尺寸
+      	/// Can return different sizes based on different layout methods, or directly return a fixed size
         switch layoutType {
         case .vertical:
             return <#CGSize#>
@@ -89,15 +89,15 @@ final class <#ItemName#>: ItemOf<<#CellName#>>, ItemType {
 }
 ```
 
-#### 2.2、使用`AutolayoutItemOf<T>`
+#### 2.2. Using `AutolayoutItemOf<T>`
 
-**Item**：继承 **AutolayoutItemOf< Cell >**，Cell代表了Item对应的Cell类型
+**Item**: Inherit from **AutolayoutItemOf< Cell >**, where Cell represents the Cell type corresponding to the Item
 
-在`updateCellData(:)`方法中调整cell的布局、设置对应Cell的界面展示数据
+Adjust cell layout and set corresponding Cell interface display data in the `updateCellData(:)` method
 
-重写`identifier`返回复用的identifier（可以用不同的id来让cell不复用）
+Override `identifier` to return the reuse identifier (can use different ids to prevent cell reuse)
 
-以下是代码模版：
+Here's the code template:
 
 ```swift
 // MARK: - <#ItemName#>
@@ -105,7 +105,7 @@ final class <#ItemName#>: ItemOf<<#CellName#>>, ItemType {
 final class <#ItemName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
     
     
-    // 更新cell的布局
+    // Update cell layout
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? <#CellName#> else {
@@ -114,7 +114,7 @@ final class <#ItemName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
         updateCellData(cell)
     }
     
-    /// 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
+    /// This method is needed for auto layout size calculation, setting data first then calculating size, so the above updateCell method directly calls this method
     override func updateCellData(_ cell: <#CellName#>) {
         
     }
@@ -125,4 +125,4 @@ final class <#ItemName#>: AutolayoutItemOf<<#CellName#>>, ItemType {
 }
 ```
 
-可以将创建Cell和Item的模板代码添加到Xcode的[Code Snippets](https://cloud.tencent.com/developer/article/1615615)中，便于快速创建。
+You can add the template code for creating Cell and Item to Xcode's [Code Snippets](https://cloud.tencent.com/developer/article/1615615) for quick creation.

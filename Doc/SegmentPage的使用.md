@@ -1,131 +1,131 @@
-# SegmentPage的使用
+# SegmentPage Usage
 
-SegmentPage是基于QuickList框架实现的分段页面控制器，可以嵌入到List中，支持水平或垂直方向的页面切换，提供丰富的菜单配置选项和滚动管理功能。
+SegmentPage is a segmented page controller implemented based on the QuickList framework. It can be embedded in Lists, supports horizontal or vertical page switching, and provides rich menu configuration options and scroll management functionality.
 
-## 核心组件
+## Core Components
 
 ### QuickSegmentSection
-作为SegmentPage的核心容器，继承自Section，负责管理菜单和页面内容。
+As the core container of SegmentPage, it inherits from Section and is responsible for managing menus and page content.
 
-#### 通用属性
+#### Common Properties
 
-> **shouldScrollToTopWhenSelectedTab**：选择tab时是否置顶，默认为true
-> **pageScrollEnable**：页面是否可以滚动切换，默认为false
-> **pageViewControllers**：页面控制器列表
-> **pageContainerHeight**：页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高)
+> **shouldScrollToTopWhenSelectedTab**: Whether to scroll to top when selecting tab, defaults to true
+> **pageScrollEnable**: Whether pages can be switched by scrolling, defaults to false
+> **pageViewControllers**: List of page controllers
+> **pageContainerHeight**: Page controller container height (defaults to nil, meaning equal to the remaining area after subtracting menu height from parent view)
 
 ### QuickSegmentPageViewDelegate
-页面控制器需要实现的协议，用于提供页面内容。
+Protocol that page controllers need to implement to provide page content.
 
-> **pageTabItem**：页面对应的Tab Item
-> **listScrollView()**：返回页面的滚动视图
+> **pageTabItem**: Tab Item corresponding to the page
+> **listScrollView()**: Return the page's scroll view
 
 ### QuickSegmentScrollManager
-滚动管理器，负责处理复杂的滚动交互逻辑。
+Scroll manager responsible for handling complex scroll interaction logic.
 
-> **bouncesType**：阻尼效果类型，支持`.root`(总列表)和`.page`(子列表)
-> **rootScrollView**：总列表引用
-> **rootDirection**：总表的滚动方向
+> **bouncesType**: Bounce effect type, supports `.root` (main list) and `.page` (sub list)
+> **rootScrollView**: Main list reference
+> **rootDirection**: Main list scroll direction
 
-## 菜单配置
+## Menu Configuration
 
 ### QuickSegmentHorizontalMenuConfig
-水平菜单配置，适用于菜单在顶部的情况。
+Horizontal menu configuration, suitable for menus at the top.
 
-> **menuHeight**：菜单高度，默认44
-> **menuItemSpace**：菜单项间距，默认30
-> **menuListInsets**：菜单列表边距，默认UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-> **menuBackground**：菜单背景视图
-> **menuBackgroundDecoration**：菜单背景装饰视图
-> **menuSelectedItemDecoration**：菜单选中项装饰视图
+> **menuHeight**: Menu height, default 44
+> **menuItemSpace**: Menu item spacing, default 30
+> **menuListInsets**: Menu list margins, default UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+> **menuBackground**: Menu background view
+> **menuBackgroundDecoration**: Menu background decoration view
+> **menuSelectedItemDecoration**: Menu selected item decoration view
 
 ### QuickSegmentVerticalMenuConfig
-垂直菜单配置，适用于菜单在左侧的情况。
+Vertical menu configuration, suitable for menus on the left.
 
-> **menuWidthType**：菜单宽度类型，支持`.fixed(width:)`(固定宽度)和`.auto(maxWidth:)`(自动宽度)
-> **menuItemLineSpace**：菜单项行间距，默认10
-> **menuListInsets**：菜单列表边距，默认UIEdgeInsets(top: 20, left: 16, bottom: 20, right: 16)
-> **menuBackground**：菜单背景视图
-> **menuBackgroundDecoration**：菜单背景装饰视图
-> **menuSelectedItemDecoration**：菜单选中项装饰视图
+> **menuWidthType**: Menu width type, supports `.fixed(width:)` (fixed width) and `.auto(maxWidth:)` (auto width)
+> **menuItemLineSpace**: Menu item line spacing, default 10
+> **menuListInsets**: Menu list margins, default UIEdgeInsets(top: 20, left: 16, bottom: 20, right: 16)
+> **menuBackground**: Menu background view
+> **menuBackgroundDecoration**: Menu background decoration view
+> **menuSelectedItemDecoration**: Menu selected item decoration view
 
-## 使用方式
+## Usage
 
-### 1. 创建页面控制器
+### 1. Create Page Controllers
 
-首先需要创建实现`QuickSegmentPageViewDelegate`协议的页面控制器：
+First, create page controllers that implement the `QuickSegmentPageViewDelegate` protocol:
 
 ```swift
 class MyPageViewController: UIViewController, QuickSegmentPageViewDelegate {
-    // 页面对应的Tab Item
+    // Tab Item corresponding to the page
     lazy var pageTabItem: Item = {
-        let item = TitleValueItem("页面标题")
+        let item = TitleValueItem("Page Title")
         return item
     }()
     
-    // 返回页面的滚动视图
+    // Return the page's scroll view
     func listScrollView() -> QuickSegmentPageScrollViewType? {
-        return myScrollView // 返回你的滚动视图
+        return myScrollView // Return your scroll view
     }
     
-    // 你的页面内容
+    // Your page content
     let myScrollView = QuickListView()
 }
 ```
 
-### 2. 创建滚动管理器
+### 2. Create Scroll Manager
 
 ```swift
-// 创建滚动管理器
+// Create scroll manager
 let scrollManager = QuickSegmentScrollManager.create(
     rootScrollView: rootListView,
-    bouncesType: .root // 或 .page
+    bouncesType: .root // or .page
 )
 ```
 
-### 3. 创建SegmentPage Section
+### 3. Create SegmentPage Section
 
-#### 水平菜单（菜单在顶部）
+#### Horizontal Menu (Menu at Top)
 
 ```swift
-// 创建菜单配置
+// Create menu configuration
 let menuConfig = QuickSegmentHorizontalMenuConfig(
     menuHeight: 44,
     menuItemSpace: 30,
     menuListInsets: UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
 )
 
-// 创建页面控制器数组
+// Create page controller array
 let pageViewControllers = [
     MyPageViewController1(),
     MyPageViewController2(),
     MyPageViewController3()
 ]
 
-// 创建SegmentPage Section
+// Create SegmentPage Section
 let segmentSection = QuickSegmentSection(
     menuConfig: menuConfig,
     pageViewControllers: pageViewControllers,
-    pageContainerHeight: nil, // 使用默认高度
+    pageContainerHeight: nil, // Use default height
     pageScrollEnable: true,
     scrollManager: scrollManager
 ) { section in
-    // 可选的初始化配置
+    // Optional initialization configuration
     section.shouldScrollToTopWhenSelectedTab = true
 }
 ```
 
-#### 垂直菜单（菜单在左侧）
+#### Vertical Menu (Menu on Left)
 
 ```swift
-// 创建垂直菜单配置
+// Create vertical menu configuration
 let menuConfig = QuickSegmentVerticalMenuConfig(
     menuWidthType: .fixed(width: 200),
     menuItemLineSpace: 10,
     menuListInsets: UIEdgeInsets(top: 20, left: 16, bottom: 20, right: 16)
 )
 
-// 创建SegmentPage Section
+// Create SegmentPage Section
 let segmentSection = QuickSegmentSection(
     menuConfig: menuConfig,
     pageViewControllers: pageViewControllers,
@@ -135,26 +135,26 @@ let segmentSection = QuickSegmentSection(
 )
 ```
 
-### 4. 添加到Form中
+### 4. Add to Form
 
 ```swift
-// 添加到Form
+// Add to Form
 form +++ segmentSection
 
-// 或者使用运算符
-form +++! segmentSection // 添加并更新界面
+// Or use operators
+form +++! segmentSection // Add and update interface
 ```
 
-## 高级配置
+## Advanced Configuration
 
-### 自定义菜单样式
+### Custom Menu Styles
 
 ```swift
-// 创建自定义背景
+// Create custom background
 let menuBackground = UIView()
 menuBackground.backgroundColor = UIColor.systemBlue
 
-// 创建选中装饰视图
+// Create selected decoration view
 let selectedDecoration = UIView()
 selectedDecoration.backgroundColor = UIColor.white
 selectedDecoration.layer.cornerRadius = 4
@@ -168,34 +168,34 @@ let menuConfig = QuickSegmentHorizontalMenuConfig(
 )
 ```
 
-### 滚动管理器配置
+### Scroll Manager Configuration
 
 ```swift
-// 创建不同阻尼效果的滚动管理器
+// Create scroll managers with different bounce effects
 let rootScrollManager = QuickSegmentScrollManager.create(
     rootScrollView: rootListView,
-    bouncesType: .root // 总列表有阻尼效果
+    bouncesType: .root // Main list has bounce effect
 )
 
 let pageScrollManager = QuickSegmentScrollManager.create(
     rootScrollView: rootListView,
-    bouncesType: .page // 子列表有阻尼效果
+    bouncesType: .page // Sub list has bounce effect
 )
 ```
 
-## 注意事项
+## Notes
 
-1. **页面控制器生命周期**：SegmentPage会自动管理页面控制器的生命周期，包括`addChild`、`removeFromParent`等操作。
+1. **Page Controller Lifecycle**: SegmentPage automatically manages page controller lifecycle, including `addChild`, `removeFromParent` operations.
 
-2. **滚动视图要求**：页面控制器的滚动视图需要实现`QuickSegmentPageScrollViewType`协议。
+2. **Scroll View Requirements**: Page controller's scroll view needs to implement the `QuickSegmentPageScrollViewType` protocol.
 
-3. **内存管理**：页面控制器会被自动添加到父控制器中，注意避免循环引用。
+3. **Memory Management**: Page controllers are automatically added to parent controllers, be careful to avoid circular references.
 
-4. **布局约束**：SegmentPage会自动处理页面视图的布局约束，确保页面内容正确显示。
+4. **Layout Constraints**: SegmentPage automatically handles page view layout constraints to ensure page content displays correctly.
 
-5. **滚动交互**：滚动管理器会处理复杂的滚动交互逻辑，确保滚动体验流畅。
+5. **Scroll Interaction**: Scroll manager handles complex scroll interaction logic to ensure smooth scrolling experience.
 
-## 使用举例
+## Usage Example
 
 ```swift
 class ViewController: UIViewController {
@@ -204,26 +204,26 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // 创建滚动管理器
+        // Create scroll manager
         let scrollManager = QuickSegmentScrollManager.create(
             rootScrollView: listView,
             bouncesType: .root
         )
         
-        // 创建页面控制器
+        // Create page controllers
         let pageViewControllers = [
-            createPageViewController(title: "首页", color: .systemBlue),
-            createPageViewController(title: "发现", color: .systemGreen),
-            createPageViewController(title: "我的", color: .systemOrange)
+            createPageViewController(title: "Home", color: .systemBlue),
+            createPageViewController(title: "Discover", color: .systemGreen),
+            createPageViewController(title: "Profile", color: .systemOrange)
         ]
         
-        // 创建菜单配置
+        // Create menu configuration
         let menuConfig = QuickSegmentHorizontalMenuConfig(
             menuHeight: 44,
             menuItemSpace: 30
         )
         
-        // 创建SegmentPage Section
+        // Create SegmentPage Section
         let segmentSection = QuickSegmentSection(
             menuConfig: menuConfig,
             pageViewControllers: pageViewControllers,
@@ -231,7 +231,7 @@ class ViewController: UIViewController {
             scrollManager: scrollManager
         )
         
-        // 添加到Form
+        // Add to Form
         listView.form +++ segmentSection
     }
     
@@ -255,4 +255,4 @@ class ViewController: UIViewController {
 }
 ```
 
-通过以上配置，你就可以在QuickList中创建一个功能完整的分段页面控制器，支持菜单切换、页面滚动、自定义样式等丰富功能。
+Through the above configuration, you can create a fully functional segmented page controller in QuickList, supporting menu switching, page scrolling, custom styles, and other rich features.

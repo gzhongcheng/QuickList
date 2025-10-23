@@ -1,37 +1,37 @@
 # ImageItem
 
-纯图片展示Item，可设置图片预估比例、内容边距、圆角等，支持网络图片加载，可设置是否自动调整高度。采用了图片压缩缓存的策略，以解决大图片的卡顿问题，提升滑动的流畅度。
+Pure image display Item with customizable image aspect ratio, content margins, corner radius, etc., supports network image loading, can set whether to auto-adjust height. Uses image compression caching strategy to solve large image lag issues and improve scrolling smoothness.
 
 ![](./ImageRow.gif)
 
-## 属性
+## Properties
 
-> **aspectRatio**：图片预估比例
-> **autoSize**：是否自动调整尺寸，设置为true后，将在图片加载完成后，按实际图片的尺寸比例更新尺寸
+> **aspectRatio**: Image estimated aspect ratio
+> **autoSize**: Whether to auto-adjust size, when set to true, will update size based on actual image aspect ratio after image loads
 >
-> **imageUrl**：网络图片地址字符串
+> **imageUrl**: Network image address string
 >
-> **image**：本地图片UIImage
+> **image**: Local UIImage
 >
-> **loadingIndicatorType**：图片加载中的样式，`IndicatorType`类型，具体为：
+> **loadingIndicatorType**: Image loading style, `IndicatorType` type, specifically:
 > ```
-> .none 默认没有菊花
-> .activity 使用系统菊花
-> .image(imageData: Data) 使用一张图片作为菊花，支持gif图
-> .custom(indicator: Indicator) 使用自定义菊花，要遵循Indicator协议
+> .none Default no indicator
+> .activity Use system indicator
+> .image(imageData: Data) Use an image as indicator, supports gif
+> .custom(indicator: Indicator) Use custom indicator, must follow Indicator protocol
 > ```
 >
-> **placeholderImage**：加载中的占位图片
+> **placeholderImage**: Placeholder image while loading
 >
-> **loadFaildImage**：加载失败图片
+> **loadFaildImage**: Failed loading image
 >
-> **contentMode**：图片填充模式
+> **contentMode**: Image fill mode
 >
-> **corners**：图片圆角的数组，`[CornerType]`类型，如果要四个角全部圆角，可使用`CornerType.all(10)`
+> **corners**: Array of image corner radius, `[CornerType]` type, if all four corners need rounding, can use `CornerType.all(10)`
 
-## 使用举例
+## Usage Example
 ```
-Section("自动大小三列图片") { section in
+Section("Auto size three column images") { section in
     section.column = 3
     section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
     section.lineSpace = 5
@@ -39,10 +39,9 @@ Section("自动大小三列图片") { section in
 }
     <<< ImageItem() { row in
         row.imageUrl = "xxx"                                //url
-        row.corners = [.leftTop(10),.rightBottom(15)] 		// 左上、右下圆角
-        row.autoSize = true									// 自动调整大小
-        row.aspectRatio = CGSize(width: 1, height: 1) 		// 预设比例
-        row.loadFaildImage = UIImage(named: "load_faild")   // 加载失败图片
+        row.corners = [.leftTop(10),.rightBottom(15)] 		// Left top, right bottom corners
+        row.autoSize = true									// Auto adjust size
+        row.aspectRatio = CGSize(width: 1, height: 1) 		// Preset ratio
+        row.loadFaildImage = UIImage(named: "load_faild")   // Failed loading image
     }
 ```
-

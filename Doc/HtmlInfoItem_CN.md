@@ -1,16 +1,16 @@
 # HtmlInfoItem
 
-Item with webview for displaying html code, automatically adjusts final display size based on webpage content size and user settings
+带webview的item，用于展示html代码，会根据网页内容大小和用户设置自动调整最终展示大小
 
-## Properties
+## 属性
 
-> **value**: Html code content to display
+> **value**：要显示的html代码内容
 >
-> **contentInsets**: Margins around
+> **contentInsets**：四周边距
 >
-> **estimatedSize**: Preset size (if html code is an image and backend provides image size, can use this property to directly set size)
+> **estimatedSize**：预设大小（如html代码为图片，且后台有给出图片大小，可使用此属性直接设置大小）
 
-## Usage Example
+## 使用举例
 
 ### HtmlInfoItem
 
@@ -25,3 +25,4 @@ Section("HtmlInfoItem") { section in
     item.contentInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
 }
 ```
+

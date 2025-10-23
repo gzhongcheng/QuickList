@@ -1,19 +1,19 @@
 # LineItem
 
-Predefined separator line Item with customizable line width, corner radius, content margins, line color and background color
+定义好的分割线Item，可自定义线的宽度、圆角、内容边距、线的颜色以及背景色
 ![](./LineItem.png) 
 
-## Properties
+## 属性
 
-> **lineColor**: Line color
-> **lineRadius**: Line corner radius
-> **lineWidth**: Line width
-> **contentInsets**: Margins
+> **lineColor**：线的颜色
+> **lineRadius**：线的圆角
+> **lineWidth**：线宽
+> **contentInsets**：边距
 
-## Usage Example
+## 使用举例
 
 ```
-Section("LineItem(separator)") { section in
+Section("LineItem(分割线)") { section in
     section.lineSpace = 0
     section.column = 1
     section.header?.shouldSuspension = true
@@ -36,3 +36,4 @@ Section("LineItem(separator)") { section in
         item.contentInsets = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
     }
 ```
+

@@ -1,13 +1,13 @@
 # CustomViewItem
 
-Container for quickly wrapping existing Views into Items
+用于将已有的View快速包装成Item的容器
 
-## Properties
+## 属性
 
-> **identifier**: Custom identifier passed during initialization to avoid reuse
-> **customViewLayoutBuilder**: Custom view layout logic, need to add constraints here to expand the Item
+> **identifier**：初始化时传入的自定义identifier，避免被复用
+> **customViewLayoutBuilder**：自定义view的布局逻辑，需要在此添加约束，以撑开Item
 
-## Usage Example
+## 使用举例
 
 ```
 Section()
@@ -32,3 +32,4 @@ Section()
         }
     })
 ```
+

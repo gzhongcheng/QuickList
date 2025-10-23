@@ -1,102 +1,102 @@
 # TextViewItem
 
-添加了textview输入框的多行输入单元格，可展示左侧标题和右侧的输入框，同时提供自定义标题、输入框样式，自动调整高度
+Multi-line input cell with textview input field, can display left title and right input field, with customizable title, input field styles, auto-adjusting height
 
 ![](TextViewItem.gif)
 
-## 属性
+## Properties
 
-### 高度
+### Height
 
-> **minHeight**：最小高度
+> **minHeight**: Minimum height
 >
-> **autoHeight**：是否自动高度，默认为true
+> **autoHeight**: Whether auto height, defaults to true
 
-### 最外层Box
+### Outermost Box
 
-> **boxInsets**：box到cell的边距
+> **boxInsets**: Margins from box to cell
 >
-> **boxPadding**：内容部分到box的边距
+> **boxPadding**: Margins from content to box
 >
-> **boxBackgroundColor**：box的背景色
+> **boxBackgroundColor**: Box background color
 >
-> **boxBorderWidth**：box的边框宽度
+> **boxBorderWidth**: Box border width
 >
-> **boxBorderColor**：box的边框颜色
+> **boxBorderColor**: Box border color
 >
-> **boxCornerRadius**：box的边框圆角
+> **boxCornerRadius**: Box border corner radius
 >
-> **boxEditingBorderColor**：编辑时box的边框颜色
+> **boxEditingBorderColor**: Box border color when editing
 >
-> **boxEditingBorderWidth**：编辑时box的边框宽度
+> **boxEditingBorderWidth**: Box border width when editing
 
-### 左侧title
+### Left Title
 
-> **title**：row的title将会设置为左侧的title显示
+> **title**: Row's title will be set as left title display
 >
-> **titlePosition**：位置，TitlePosition类型，包括`.left`（居左自动宽度）和`.width(:)`（指定宽度）两种样式
+> **titlePosition**: Position, TitlePosition type, includes `.left` (left auto width) and `.width(:)` (specified width) styles
 >
-> **titleFont**：字体
+> **titleFont**: Font
 >
-> **titleTextColor**：颜色
+> **titleTextColor**: Color
 >
-> **titleLines**：行数
+> **titleLines**: Number of lines
 >
-> **titleAlignment**：对齐方式
+> **titleAlignment**: Alignment
 >
-> **attributeTitle**：富文本标题，如果设置了，则会替换掉title显示这个
+> **attributeTitle**: Rich text title, if set, will replace title to display this
 
-### 输入框
+### Input Field
 
-> **inputSpaceToTitle**：和title的间距
+> **inputSpaceToTitle**: Spacing to title
 >
-> **inputContentPadding**：输入内容到输入框的边距
+> **inputContentPadding**: Margins from input content to input field
 >
-> **inputFont**：字体
+> **inputFont**: Font
 >
-> **inputTextColor**：颜色
+> **inputTextColor**: Color
 >
-> **inputBackgroundColor**：输入框背景色
+> **inputBackgroundColor**: Input field background color
 >
-> **inputBorderWidth**：边框宽度
+> **inputBorderWidth**: Border width
 >
-> **inputBorderColor**：边框颜色
+> **inputBorderColor**: Border color
 >
-> **inputEditingBorderColor**：编辑时输入框的边框颜色
+> **inputEditingBorderColor**: Input field border color when editing
 >
-> **inputEditingBorderWidth**：编辑时输入框的边框宽度
+> **inputEditingBorderWidth**: Input field border width when editing
 >
-> **inputCornerRadius**：边框圆角
+> **inputCornerRadius**: Border corner radius
 >
-> **keyboardType**：键盘样式
+> **keyboardType**: Keyboard style
 >
-> **returnKeyType**：键盘确定按钮样式
+> **returnKeyType**: Keyboard confirm button style
 >
-> **placeHolder**：提示文字
+> **placeHolder**: Placeholder text
 >
-> **placeHolderColor**：提示文字颜色
+> **placeHolderColor**: Placeholder text color
 >
-> **inputPredicateFormat**：输入内容正则校验表达式，PredicateFormat中定义了常用的几个表达式，如纯数字、小数位数限制等，可以参考
+> **inputPredicateFormat**: Input content regex validation expression, PredicateFormat defines several common expressions like pure numbers, decimal places limit, etc., can be referenced
 >
-> **limitWords**：输入字数限制
+> **limitWords**: Input character limit
 >
-> **showLimit**：是否显示字数限制（输入框右下角）
+> **showLimit**: Whether to show character limit (bottom right of input field)
 
-### 输入框事件监听回调
+### Input Field Event Callbacks
 
-> **onTextDidChanged()**：输入框的值改变
+> **onTextDidChanged()**: Input field value changed
 
-## 使用举例
+## Usage Example
 
-***不建议***将TextViewItem添加到横向滚动的CollectionView中
+***Not recommended*** to add TextViewItem to horizontally scrolling CollectionView
 
 ```
-Section("TextViewItem(多行输入框)") { section in
+Section("TextViewItem(multi-line input field)") { section in
     section.lineSpace = 0
     section.column = 1
 }
-<<< TextViewItem("多行文本输入:\n(自动高度)") { row in
-    row.placeholder = "最多100个"
+<<< TextViewItem("Multi-line text input:\n(auto height)") { row in
+    row.placeholder = "Maximum 100"
     row.showLimit = true
     row.limitWords = 100
     row.inputBorderColor = .red
@@ -109,8 +109,8 @@ Section("TextViewItem(多行输入框)") { section in
     row.inputContentPadding = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
     row.minHeight = 100
 }
-<<< TextViewItem("多行文本输入:\n(自动高度)") { row in
-    row.placeholder = "不限制输入个数"
+<<< TextViewItem("Multi-line text input:\n(auto height)") { row in
+    row.placeholder = "No input limit"
     row.showLimit = false
     row.inputBorderColor = .gray
     row.inputBorderWidth = 2
@@ -119,7 +119,7 @@ Section("TextViewItem(多行输入框)") { section in
     row.minHeight = 100
 }
 <<< TextViewItem() { row in
-    row.placeholder = "不带标题的输入框，不限制输入字数"
+    row.placeholder = "Input field without title, no input character limit"
     row.showLimit = false
     row.inputBorderColor = .gray
     row.inputBorderWidth = 2
@@ -128,4 +128,3 @@ Section("TextViewItem(多行输入框)") { section in
     row.minHeight = 50
 }
 ```
-

@@ -1,101 +1,101 @@
 # TextFieldItem
 
-带textfield的单元格，可展示标题和输入框，同时提供自定义标题、输入框样式等属性
+Cell with textfield, can display title and input field, with customizable title, input field styles and other properties
 
 ![](./TextFieldItem.jpg)
 
-## 属性
+## Properties
 
-### 最外层Box
+### Outermost Box
 
-> **aspectHeight**：固定高度
+> **aspectHeight**: Fixed height
 >
-> **boxInsets**：box到cell的边距
+> **boxInsets**: Margins from box to cell
 >
-> **boxPadding**：内容部分到box的边距
+> **boxPadding**: Margins from content to box
 >
-> **boxBackgroundColor**：box的背景色
+> **boxBackgroundColor**: Box background color
 >
-> **boxBorderWidth**：box的边框宽度
+> **boxBorderWidth**: Box border width
 >
-> **boxHighlightBorderWidth**：编辑时box的边框宽度
+> **boxHighlightBorderWidth**: Box border width when editing
 >
-> **boxBorderColor**：box的边框颜色
+> **boxBorderColor**: Box border color
 >
-> **boxHighlightBorderColor**：编辑时box的边框颜色
+> **boxHighlightBorderColor**: Box border color when editing
 >
-> **boxCornerRadius**：box的边框圆角
+> **boxCornerRadius**: Box border corner radius
 
-### 左侧title
+### Left Title
 
-> **title**：row的title将会设置为左侧的title显示
+> **title**: Row's title will be set as left title display
 >
-> **titlePosition**：位置，TitlePosition类型，包括`.left`（居左自动宽度）和`.width(:)`（指定宽度）两种样式
+> **titlePosition**: Position, TitlePosition type, includes `.left` (left auto width) and `.width(:)` (specified width) styles
 >
-> **titleFont**：字体
+> **titleFont**: Font
 >
-> **titleTextColor**：颜色
+> **titleTextColor**: Color
 >
-> **titleLines**：行数
+> **titleLines**: Number of lines
 >
-> **titleAlignment**：对齐方式
+> **titleAlignment**: Alignment
 >
-> **attributeTitle**：富文本标题，如果设置了，则会替换掉title显示这个
+> **attributeTitle**: Rich text title, if set, will replace title to display this
 
-### 输入框
+### Input Field
 
-> **inputSpaceToTitle**：和title的间距
+> **inputSpaceToTitle**: Spacing to title
 >
-> **inputFont**：字体
+> **inputFont**: Font
 >
-> **inputTextColor**：颜色
+> **inputTextColor**: Color
 >
-> **inputAlignment**：对齐方式
+> **inputAlignment**: Alignment
 >
-> **keyboardType**：键盘样式
+> **keyboardType**: Keyboard style
 >
-> **returnKeyType**：键盘确定按钮样式
+> **returnKeyType**: Keyboard confirm button style
 >
-> **placeHolder**：提示文字
+> **placeHolder**: Placeholder text
 >
-> **placeHolderColor**：提示文字颜色
+> **placeHolderColor**: Placeholder text color
 >
-> **inputPredicateFormat**：输入内容正则校验表达式，PredicateFormat中定义了常用的几个表达式，如纯数字、小数位数限制等，可以参考
+> **inputPredicateFormat**: Input content regex validation expression, PredicateFormat defines several common expressions like pure numbers, decimal places limit, etc., can be referenced
 >
-> **limitWords**：输入字数限制
+> **limitWords**: Input character limit
 
-### 输入框事件监听回调
+### Input Field Event Callbacks
 
-> **onTextShouldChange()**：是否可以输入
+> **onTextShouldChange()**: Whether input is allowed
 >
-> **onTextDidChanged()**：输入框的值改变
+> **onTextDidChanged()**: Input field value changed
 >
-> **onTextFieldDidBeginEditing()**：开始编辑
+> **onTextFieldDidBeginEditing()**: Begin editing
 >
-> **onTextFieldDidEndEditing()**：结束编辑
+> **onTextFieldDidEndEditing()**: End editing
 >
-> **onTextFieldShouldReturn()**：是否可以return
+> **onTextFieldShouldReturn()**: Whether return is allowed
 >
-> **onTextFieldShouldClear()**：是否可以清空
+> **onTextFieldShouldClear()**: Whether clear is allowed
 
-## 使用举例
+## Usage Example
 
-***不建议***将TextFildItem添加到横向滚动的CollectionView中
+***Not recommended*** to add TextFieldItem to horizontally scrolling CollectionView
 
 ```
-Section("TextFieldItem(输入框)") { section in
+Section("TextFieldItem(input field)") { section in
     section.lineSpace = 0
     section.column = 1
 }
-    <<< TextFieldItem("输入框:") { row in
-        row.placeHolder = "提示信息"
+    <<< TextFieldItem("Input field:") { row in
+        row.placeHolder = "Hint information"
         row.placeHolderColor = .red
         row.aspectRatio = CGSize(width: 375, height: 50)
     }
-    <<< TextFieldItem("带边框的输入框:") { row in
+    <<< TextFieldItem("Input field with border:") { row in
         row.boxInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
         row.alignmentOfTextField = .left
-        row.placeHolder = "提示信息"
+        row.placeHolder = "Hint information"
         row.boxBorderWidth = 1.0
         row.boxBorderColor = .green
         row.boxHighlightBorderColor = .blue
@@ -103,39 +103,38 @@ Section("TextFieldItem(输入框)") { section in
         row.boxCornerRadius = 5
         row.aspectRatio = CGSize(width: 375, height: 50)
     }
-    <<< TextFieldItem("正则限制输入:") { row in
-        row.placeHolder = "限制输入两位小数"
+    <<< TextFieldItem("Regex limited input:") { row in
+        row.placeHolder = "Limit input to two decimal places"
         row.inputPredicateFormat = PredicateFormat.decimal2.rawValue
     }
-    <<< TextFieldItem("回调限制输入:") { row in
-        row.placeHolder = "只能输入a(删除都不行)"
+    <<< TextFieldItem("Callback limited input:") { row in
+        row.placeHolder = "Can only input 'a' (even delete is not allowed)"
         row.onTextShouldChange({ (row, textField, range, string) -> Bool in
             return string == "a"
         })
     }
-    <<< TextFieldItem("限制输入长度") { row in
-        row.placeHolder = "最多能输入10个字"
+    <<< TextFieldItem("Limit input length") { row in
+        row.placeHolder = "Maximum 10 characters"
         row.limitWords = 10
     }
-    <<< TextFieldItem("textField的各种回调") { row in
+    <<< TextFieldItem("Various textField callbacks") { row in
         row.onTextDidChanged { (r, textField) in
-            print("输入值改变:\(textField.text ?? "")")
+            print("Input value changed:\(textField.text ?? "")")
         }
         row.onTextFieldShouldReturn { (r, t) -> Bool in
-            /// 是否可以return
+            /// Whether return is allowed
             r.cell?.endEditing(true)
             return true
         }
         row.onTextFieldShouldClearBlock { (r, t) -> Bool in
-            /// 是否可以清空
+            /// Whether clear is allowed
             return true
         }
         row.onTextFieldDidEndEditing { (r, t) in
-            print("编辑完成")
+            print("Editing completed")
         }
         row.onTextFieldDidBeginEditing { (r, t) in
-            print("开始编辑")
+            print("Begin editing")
         }
     }
 ```
-

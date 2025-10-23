@@ -1,79 +1,79 @@
 # ButtonItem
 
-Button Item (entire Item is a button), can perform any operation when clicked (such as jumping to a new interface)
+按钮Item（整个Item为一个按钮），点击可以任意操作（如点击跳转到新的界面）
 
-Supports custom title styles, right arrow styles, can add left icons, and custom Views before the right arrow
+支持自定义标题样式、右侧箭头样式，同时可添加左侧图标，以及右侧箭头前的自定义View
 
-## Properties (Base class properties not listed)
+## 属性 (基类中已有属性未列出)
 
-### Arrow Style
+### 箭头样式
 
-> **arrowType**: Arrow style, enum type.
+> **arrowType**：箭头样式，枚举类型。
 >
-> * ButtonItem* includes two styles: `no arrow (.none) and custom (.custom(image:size:))`
+> * ButtonItem*包含`不带箭头(.none)和自定义(.custom(image:size:))`两种样式
 
-### Left Icon
+### 左侧图标
 
-> **iconImage**: Left icon image
+> **iconImage**：左侧图标图片
 >
-> **iconSize**: Left icon size
+> **iconSize**：左侧图标大小
 
-### Title
+### 标题
 
->**fontOfTitle**: Font
+>**fontOfTitle**：字体
 >
->**colorOfTitle**: Color
+>**colorOfTitle**：颜色
 >
->**alignmentOfTitle**: Alignment
+>**alignmentOfTitle**：对齐方式
 
-### Right Custom Control (between arrow and title, closer to arrow)
+### 右侧自定义控件（箭头与标题之间靠箭头）
 
->**rightView**: Right custom control
+>**rightView**：右侧自定义控件
 >
->**rightViewSize**: Right custom control size
+>**rightViewSize**：右侧自定义控件大小
 
-### Spacing Settings
+### 间距设置
 
->**spaceBetweenIconAndTitle**: Spacing between left icon and title
+>**spaceBetweenIconAndTitle**：左侧图标与标题之间的间距
 >
->**spaceBetweenTitleAndRightView**: Spacing between title and right custom control
+>**spaceBetweenTitleAndRightView**：标题与右侧自定义控件之间的间距
 >
->**spaceBetweenRightViewAndArrow**: Spacing between right custom control and arrow
+>**spaceBetweenRightViewAndArrow**：右侧自定义控件与箭头之间的间距
 
-### Click Navigation
+### 点击关联跳转
 
-> **presentationMode**: Property that defines how to navigate to controller after clicking, can be omitted
+> **presentationMode**：定义了点击如何后跳转控制器的属性，可以不传
 
 ## PresentationMode
-PresentationMode is a predefined enum for quick navigation and getting callbacks, defined as follows:
+PresentationMode是一个定义好的用于快速跳转和获取回调的枚举，定义如下：
 ```
 /**
- Define how controller is displayed
+ 定义控制器如何显示
 
- - Show?:                     Use `show(_:sender:)` method for navigation (automatically choose push and present)
- - PresentModally?:           Use Present method for navigation
- - SegueName?:                Use Segue identifier from StoryBoard for navigation
- - SegueClass?:               Use UIStoryboardSegue class for navigation
- - popover?:                  Use popoverPresentationController for display
+ - Show?:                     使用`show(_:sender:)`方法跳转（自动选择push和present）
+ - PresentModally?:           使用Present方式跳转
+ - SegueName?:                使用StoryBoard中的Segue identifier跳转
+ - SegueClass?:               使用UIStoryboardSegue类跳转
+ - popover?:                  使用popoverPresentationController方式展示
  */
 public enum PresentationMode<VCType: UIViewController> {
-    /// Create controller based on specified Provider and use `show(_:sender:)` method for navigation
+    /// 根据指定的Provider创建控制器，并使用`show(_:sender:)`方法进行跳转
     case show(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 
-    /// Create controller based on specified Provider and use Present method for navigation
+    /// 根据指定的Provider创建控制器，并使用Present方式跳转
     case presentModally(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 
-    /// Use Segue identifier from StoryBoard for navigation
+    /// 使用StoryBoard中的Segue identifier跳转
     case segueName(segueName: String, onDismiss: ((VCType) -> Void)?)
 
-    /// Use UIStoryboardSegue class for navigation
+    /// 使用UIStoryboardSegue类执行跳转
     case segueClass(segueClass: UIStoryboardSegue.Type, onDismiss: ((VCType) -> Void)?)
 
-    /// popoverPresentationController (small window) display method
+    /// popoverPresentationController(小窗口)方式展示
     case popover(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 }
 ```
-When using, the target VC should implement the `TypedItemControllerType` protocol to receive the item that triggered the controller, like:
+使用时，待跳转的VC实现`TypedItemControllerType`协议用以接收调起控制器的item,如：
 ```
 import QuickList
 
@@ -96,7 +96,7 @@ class ItemPresentViewController<Item: TypedCollectionValueItemType>: UIViewContr
     
     lazy var backButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setTitle("Back", for: .normal)
+        button.setTitle("返回", for: .normal)
         button.setTitleColor(.blue, for: .normal)
         button.addTarget(self, action: #selector(backAction), for: .touchUpInside)
         return button
@@ -123,20 +123,20 @@ class ItemPresentViewController<Item: TypedCollectionValueItemType>: UIViewContr
     }
 }
 ```
-Then you can use ButtonItem's `presentationMode` property for navigation and value passing logic.
+然后就可以使用ButtonItem的`presentationMode`属性做跳转传值的逻辑了。
 
-## Usage Example
+## 使用举例
 
 ```swift
 Section("Section")
-<<< ButtonItem("Click to navigate (show)") { row in
-    item.sendValue = "Pass value 1"
-    /// Set normal color
+<<< ButtonItem("点击跳转(show)") { row in
+    item.sendValue = "传值1"
+    /// 设置正常颜色
     item.titleColor = .black
     item.contentBgColor = UIColor(white: 0.9, alpha: 1.0)
-    /// Set text highlight color
+    /// 设置文本高亮颜色
     item.titleHighlightColor = .white
-    /// Automatically choose push and present
+    /// 自动选择push和present
     item.presentationMode = .show(controllerProvider: .callback(builder: { [weak item] () -> UIViewController in
         let vc = ItemPresentViewController<ButtonItem>()
         vc.modalPresentationStyle = .fullScreen
@@ -151,5 +151,6 @@ Section("Section")
     })
 }
 ```
+
 
 
