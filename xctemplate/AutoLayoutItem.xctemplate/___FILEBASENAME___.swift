@@ -19,7 +19,10 @@ class ___FILEBASENAMEASIDENTIFIER___Cell: ItemCell {
 // ___FILEBASENAMEASIDENTIFIER___
 final class ___FILEBASENAMEASIDENTIFIER___: AutolayoutItemOf<___FILEBASENAMEASIDENTIFIER___Cell>, ItemType {
     
-    // 更新cell的布局
+    /**
+     * 更新cell
+     * Update cell
+     */
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? ___FILEBASENAMEASIDENTIFIER___Cell else {
@@ -28,7 +31,10 @@ final class ___FILEBASENAMEASIDENTIFIER___: AutolayoutItemOf<___FILEBASENAMEASID
         updateCellData(cell)
     }
     
-    /// 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
+    /**
+     * 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
+     * When auto layout size calculation is needed, this method is used to set data first then calculate size, so the above updateCell method directly calls this method
+     */
     override func updateCellData(_ cell: ___FILEBASENAMEASIDENTIFIER___Cell) {
         
     }

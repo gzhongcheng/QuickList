@@ -19,7 +19,10 @@ class ___FILEBASENAMEASIDENTIFIER___Cell: ItemCell {
 // ___FILEBASENAMEASIDENTIFIER___
 final class ___FILEBASENAMEASIDENTIFIER___: ItemOf<___FILEBASENAMEASIDENTIFIER___Cell>, ItemType {
     
-    // 更新cell的布局
+    /**
+     * 更新cell
+     * Update cell
+     */
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? ___FILEBASENAMEASIDENTIFIER___Cell else {
@@ -32,7 +35,10 @@ final class ___FILEBASENAMEASIDENTIFIER___: ItemOf<___FILEBASENAMEASIDENTIFIER__
         return "___FILEBASENAMEASIDENTIFIER___"
     }
     
-    /// 计算尺寸
+    /**
+     * 计算尺寸
+     * Calculate size
+     */
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self
