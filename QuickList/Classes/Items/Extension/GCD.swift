@@ -8,9 +8,10 @@
 import Foundation
 
 /// 在主线程执行代码块
+/// Execute code block on main thread
 /// - Parameters:
-///   - after: 延迟时间
-///   - execute: 在主线程执行的代码块
+///   - after: 延迟时间 / Delay time
+///   - execute: 在主线程执行的代码块 / Code block to execute on main thread
 public func mainThread(after: Double = 0.0, main execute: @escaping () -> Void) {
     if Thread.isMainThread {
         execute()

@@ -26,27 +26,30 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        /// 支持两种方式创建（直接扔配置进去和后面再添加cell）
-        // MARK: - 直接在初始化时设置好sections
+        /**
+         * 支持两种方式创建（直接扔配置进去和后面再添加cell）
+         * Support two ways to create (throw configuration in and add cells later)
+         */
+        // MARK: - Set sections directly in initialization
 //        let formlist = QuickListView(sections: [
 //            Section(
-//                "自动换行",
+//                "Auto Wrap",
 //                items: [
-//                    ButtonItem("点击跳转(show)") { item in
-//                        item.sendValue = "传值1"
-//                        /// 设置圆角为高度的一半
+//                    ButtonItem("Jump (show)") { item in
+//                        item.sendValue = "Value 1"
+//                        /// Set corner radius to half of height
 //                        item.cornerScale = 0.5
-//                        /// 设置边框宽度
+//                        /// Set border width
 //                        item.borderWidth = 1
-//                        /// 设置正常颜色
+//                        /// Set normal color
 //                        item.titleColor = .black
 //                        item.contentBgColor = UIColor(white: 0.9, alpha: 1.0)
 //                        item.borderColor = UIColor(white: 0.5, alpha: 1.0)
-//                        /// 设置高亮颜色
+//                        /// Set highlight color
 //                        item.titleHighlightColor = .white
 //                        item.highlightContentBgColor = UIColor(red: 59/255.0, green: 138/255.0, blue: 250/255.0, alpha: 1)
 //                        item.highlightBorderColor = UIColor(red: 59/255.0, green: 138/255.0, blue: 250/255.0, alpha: 1)
-//                        /// 自动选择push和present
+//                        /// Automatically select push and present
 //                        item.presentationMode = .show(controllerProvider: .callback(builder: { [weak item] () -> UIViewController in
 //                            let vc = ItemPresentViewController<ButtonItem>()
 //                            vc.modalPresentationStyle = .fullScreen
@@ -70,7 +73,7 @@ class ViewController: UIViewController {
 //        ])
         self.view.addSubview(formlist)
         
-        /// 内容尺寸变化的回调
+        /// Callback for content size change
 //        formlist.listSizeChangedBlock = { newSize in
 //            formlist.snp.remakeConstraints { make in
 //                make.leading.top.trailing.equalToSuperview()
@@ -85,15 +88,27 @@ class ViewController: UIViewController {
         formlist.form.backgroundDecoration?.backgroundColor = UIColor(white: 0.95, alpha: 1)
         
         let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formHeader.shouldSuspension = false
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formHeader.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formHeader.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formHeader.displayType = .normal
         formlist.form.header = formHeader
         
@@ -106,20 +121,32 @@ class ViewController: UIViewController {
         
         
         let formFooter = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formFooter.shouldSuspension = false
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formFooter.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formFooter.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formFooter.displayType = .normal
 
         formlist.form.footer = formFooter
         
-        // MARK: - 创建完成后添加sections
+        // MARK: - Add sections after creation
         let swipItemSection = Section("测试左滑Icon") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -146,11 +173,17 @@ class ViewController: UIViewController {
             section.lineSpace = 10
             section.itemSpace = 10
             section.column = 3
-            /// 可以是自定义的UICollectionReusableView
+            /**
+             * 可以是自定义的UICollectionReusableView
+             * Can be a custom UICollectionReusableView
+             */
             section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
                 view.backgroundColor = .lightGray
             }
-            /// 高度计算方法
+            /**
+             * 高度计算方法
+             * Height calculation method
+             */
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
@@ -166,28 +199,37 @@ class ViewController: UIViewController {
             section.layout = RowEqualHeightLayout()
 //            section.isFormHeader = true
         }
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签标签标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签标签标签标签")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag")
+            <<< newTagItem("Tag Tag Tag Tag Tag")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag")
+            <<< newTagItem("Tag Tag Tag Tag")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag Tag Tag Tag Tag Tag")
         +++ Section("ButtonItem") { section in
             section.contentInset = .init(top: 20, left: 16, bottom: 20, right: 16)
         }
-            <<< ButtonItem("点击跳转(show)") { item in
-                item.sendValue = "传值1"
+            <<< ButtonItem("Jump (show)") { item in
+                item.sendValue = "Value 1"
                 item.arrowType = .custom(UIImage(named: "arrow"), size: CGSize(width: 16, height: 16))
-                /// 设置正常颜色
+                /**
+                 * 设置正常颜色
+                 * Set normal color
+                 */
                 item.titleColor = .black
 //                item.contentBgColor = UIColor(white: 0.9, alpha: 1.0)
-                /// 设置文字高亮颜色
+                /**
+                 * 设置文字高亮颜色
+                 * Set text highlight color
+                 */
                 item.titleHighlightColor = .white
-                /// 自动选择push和present
+                /**
+                 * 自动选择push和present
+                 * Automatically select push and present
+                 */
                 item.presentationMode = .show(controllerProvider: .callback(builder: { [weak item] () -> UIViewController in
                     let vc = ItemPresentViewController<ButtonItem>()
                     vc.modalPresentationStyle = .fullScreen
@@ -201,9 +243,12 @@ class ViewController: UIViewController {
                     }
                 })
             }
-            <<< ButtonItem("点击跳转(present)") { item in
-                item.sendValue = "传值2"
-                /// 指定present
+            <<< ButtonItem("Jump (present)") { item in
+                item.sendValue = "Value 2"
+                /**
+                 * 指定present
+                 * Specify present
+                 */
                 item.presentationMode = .presentModally(controllerProvider: .callback(builder: { [weak item] () -> UIViewController in
                     let vc = ItemPresentViewController<ButtonItem>()
                     vc.item = item
@@ -212,14 +257,20 @@ class ViewController: UIViewController {
                     vc.dismiss(animated: true)
                 })
             }
-            <<< ButtonItem("点击跳转(popover)") {[weak self] item in
-                item.sendValue = "传值3"
-                /// 指定popover
+            <<< ButtonItem("Jump (popover)") {[weak self] item in
+                item.sendValue = "Value 3"
+                /**
+                 * 指定popover
+                 * Specify popover
+                 */
                 item.presentationMode = .popover(controllerProvider: .callback(builder: { [weak item] () -> UIViewController in
                     let vc = ItemPresentViewController<ButtonItem>()
                     vc.preferredContentSize = CGSize(width: 150, height: 150)
                     vc.modalPresentationStyle = .popover
-                    // 必须实现delegate中的adaptivePresentationStyle方法***这里的self一定要用weak修饰，否则会造成循环引用***
+                    /**
+                     * 必须实现delegate中的adaptivePresentationStyle方法***这里的self一定要用weak修饰，否则会造成循环引用***
+                     * Must implement the adaptivePresentationStyle method in the delegate***weak self must be used here, otherwise it will cause circular references***
+                     */
                     if let weakSelf = self {
                         vc.popoverPresentationController?.delegate = weakSelf
                     }
@@ -232,7 +283,7 @@ class ViewController: UIViewController {
                     vc.dismiss(animated: true)
                 })
             }
-        +++ Section(header:"LineItem(分割线)", footer: "分割线结束") { section in
+        +++ Section(header:"LineItem(Line)", footer: "Line End") { section in
             section.lineSpace = 0
             section.column = 1
             section.header?.shouldSuspension = true
@@ -264,13 +315,13 @@ class ViewController: UIViewController {
 //            }
             section.header?.shouldSuspension = true
         }
-                <<< TitleValueItem("title加上value"){ item in
+                <<< TitleValueItem("Title + Value"){ item in
                     item.verticalAlignment = .top
                     item.spaceBetweenTitleAndValue = 8
                     item.valueAlignment = .left
-                    item.value = "这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value这是value"
+                    item.value = "This is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value"
                 }
-                <<< TitleValueItem("标题样式") { item in
+                <<< TitleValueItem("Title Style") { item in
                     item.verticalAlignment = .top
 
                     item.titlePosition = .left
@@ -280,14 +331,14 @@ class ViewController: UIViewController {
 
                     item.valueColor = .blue
                     item.valueAlignment = .left
-                    item.value = "value样式,然后这是一串比较长的字符串，我们看看能不能换行\n加个回车试试看"
+                    item.value = "This is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value, this is value"
                 }
-            <<< TitleValueItem("只有一串比较长的标题，试试看能不能正常的显示到充满，然后看看能不能自动换行, 四周的边距已设置为0") { item in
+            <<< TitleValueItem("A very long title, see if it can display normally, then see if it can automatically wrap, the四周的边距已设置为0") { item in
                 item.verticalAlignment = .top
                 item.contentInsets = .zero
             }
-            <<< TitleValueItem("这也是一串比较长的标题，把上下间距设为零，设置固定宽度",tag: "DEFAULT_LABEL") { item in
-                item.value = "标题与value都很长的时候，标题会挤压value的空间，因此需要给标题设置最大宽度，达到比较好的展示效果"
+            <<< TitleValueItem("This is a very long title, set the top and bottom spacing to 0, and set a fixed width",tag: "DEFAULT_LABEL") { item in
+                item.value = "When the title and value are both very long, the title will squeeze the space of the value, therefore, the title needs to be set to the maximum width, in order to achieve a better display效果"
                 item.titlePosition = .width(120)
             }
         
@@ -295,100 +346,103 @@ class ViewController: UIViewController {
             section.lineSpace = 0
             section.column = 1
         }
-            <<< SwitchItem("设为默认") { item in
+            <<< SwitchItem("Set as Default") { item in
                 item.contentInsets = UIEdgeInsets(top: 10, left: 15, bottom: 5, right: 15)
                 item.value = true
             }.onValueChanged({ (item) in
-                /// 值改变的回调
+                /**
+                 * 值改变的回调
+                 * Value changed callback
+                 */
                 guard let TitleValueItem = item.section?.form?.firstItem(for: "DEFAULT_LABEL") as? TitleValueItem else {
                     return
                 }
                 if item.value {
                     TitleValueItem.titlePosition = .width(200)
-                    TitleValueItem.value = "已设为默认"
+                    TitleValueItem.value = "Set as Default"
                 } else {
                     TitleValueItem.titlePosition = .left
-                    TitleValueItem.title = "value清空了，可以改成自动宽度，整行都能显示title的值"
+                    TitleValueItem.title = "Value is cleared, can be changed to automatic width, the entire line can display the value of the title"
                     TitleValueItem.value = ""
                 }
                 TitleValueItem.updateCell()
             })
-            <<< SwitchItem("自定义样式1") { item in
+            <<< SwitchItem("Custom Style 1") { item in
                 item.contentInsets = UIEdgeInsets(top: 5, left: 15, bottom: 5, right: 15)
                 item.switchOffBackgroundColor = .red
                 item.switchOnBackgroundColor = .blue
                 item.switchOffIndicatorColor = .yellow
                 item.switchOnIndicatorColor = .orange
-                item.switchOffText = "关"
-                item.switchOnText = "开"
+                item.switchOffText = "Off"
+                item.switchOnText = "On"
                 item.switchOffIndicatorTextColor = .darkGray
                 item.switchOnIndicatorTextColor = .white
             }
-            <<< SwitchItem("自定义样式2") { item in
+            <<< SwitchItem("Custom Style 2") { item in
                 item.contentInsets = UIEdgeInsets(top: 5, left: 15, bottom: 10, right: 15)
                 item.switchOffBackgroundColor = .red
                 item.switchOnBackgroundColor = .blue
                 item.switchOffIndicatorColor = .yellow
                 item.switchOnIndicatorColor = .orange
-                item.switchOffIndicatorText = "关"
-                item.switchOnIndicatorText = "开"
+                item.switchOffIndicatorText = "Off"
+                item.switchOnIndicatorText = "On"
                 item.switchOffIndicatorTextColor = .darkGray
                 item.switchOnIndicatorTextColor = .white
             }
-        +++ Section("TextFieldItem(输入框)") { section in
+        +++ Section("TextFieldItem(Text Field)") { section in
                 section.lineSpace = 0
                 section.column = 1
             }
-                <<< TextFieldItem("输入框:") { item in
-                    item.placeHolder = "提示信息"
+                <<< TextFieldItem("Text Field:") { item in
+                    item.placeHolder = "Placeholder"
                     item.placeHolderColor = .red
                 }
-                <<< TextFieldItem("带边框的输入框:") { item in
+                <<< TextFieldItem("Text Field with Border:") { item in
                     item.boxInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
                     item.inputAlignment = .left
-                    item.placeHolder = "提示信息"
+                    item.placeHolder = "Placeholder"
                     item.boxBorderWidth = 1.0
                     item.boxBorderColor = .green
                     item.boxHighlightBorderColor = .blue
                     item.boxBackgroundColor = .white
                     item.boxCornerRadius = 5
                 }
-                <<< TextFieldItem("回调限制输入:") { item in
-                    item.placeHolder = "只能输入a(删除都不行)"
+                <<< TextFieldItem("Callback to limit input:") { item in
+                    item.placeHolder = "Only input a(delete is not allowed)"
                     item.onTextShouldChange({ (item, textField, range, string) -> Bool in
                         return string == "a"
                     })
                 }
-                <<< TextFieldItem("限制输入长度") { item in
-                    item.placeHolder = "最多能输入10个字"
+                <<< TextFieldItem("Limit input length") { item in
+                    item.placeHolder = "Can input up to 10 characters"
                     item.limitWords = 10
                 }
-                <<< TextFieldItem("textField的各种回调") { item in
+                <<< TextFieldItem("All callbacks of textField") { item in
                     item.onTextDidChanged { (r, textField) in
-                        print("输入值改变:\(textField.text ?? "")")
+                        print("Value changed:\(textField.text ?? "")")
                     }
                     item.onTextFieldShouldReturn { (r, t) -> Bool in
-                        /// 是否可以return
+                        /// Whether to return
                         r.cell?.endEditing(true)
                         return true
                     }
                     item.onTextFieldShouldClearBlock { (r, t) -> Bool in
-                        /// 是否可以清空
+                        /// Whether to clear
                         return true
                     }
                     item.onTextFieldDidEndEditing { (r, t) in
-                        print("编辑完成")
+                        print("Editing completed")
                     }
                     item.onTextFieldDidBeginEditing { (r, t) in
-                        print("开始编辑")
+                        print("Editing started")
                     }
                 }
-        +++ Section("TextViewItem(多行输入框)") { section in
+        +++ Section("TextViewItem(Multi-line Input Field)") { section in
             section.lineSpace = 0
             section.column = 1
         }
-            <<< TextViewItem("多行文本输入:\n(自动高度)") { item in
-                item.placeholder = "最多100个"
+            <<< TextViewItem("Multi-line text input:\n(Automatic height)") { item in
+                item.placeholder = "Can input up to 100 characters"
                 item.showLimit = true
                 item.limitWords = 100
                 item.inputBorderColor = .red
@@ -402,8 +456,8 @@ class ViewController: UIViewController {
                 item.inputContentPadding = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
                 item.minHeight = 100
             }
-            <<< TextViewItem("多行文本输入:\n(固定高度)") { item in
-                item.placeholder = "不限制输入个数"
+            <<< TextViewItem("Multi-line text input:\n(Fixed height)") { item in
+                item.placeholder = "No limit on input count"
                 item.showLimit = false
                 item.inputBorderColor = .gray
                 item.inputBorderWidth = 2
@@ -413,7 +467,7 @@ class ViewController: UIViewController {
                 item.autoHeight = false
             }
             <<< TextViewItem() { item in
-                item.placeholder = "不带标题的输入框，不限制输入字数"
+                item.placeholder = "Input field without title, no limit on input characters"
                 item.showLimit = false
                 item.inputBorderColor = .gray
                 item.inputBorderWidth = 2
@@ -421,15 +475,18 @@ class ViewController: UIViewController {
                 item.inputContentPadding = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
                 item.minHeight = 50
             }
-        /// HtmlInfoItem可能会导致滚动时卡顿跳动，使用前请谨慎考虑
+        /**
+         * HtmlInfoItem可能会导致滚动时卡顿跳动，使用前请谨慎考虑
+         * HtmlInfoItem may cause scrolling to stutter and jump, use with caution before use
+         */
 //        +++ Section("HtmlInfoItem") { section in
 //            section.lineSpace = 0
 //            section.column = 1
 //        }
 //                <<< HtmlInfoItem() { item in
-//                    item.content = "HtmlInfoItem是用于展示Html代码字符串的Item，设置value为Html代码，即可展示\n展示出来后会自动调整高度，设置estimatedSize表示预估的size，会根据size的比例预先设置大小\n设置contentInsets可调整内容的四边间距"
+//                    item.content = "HtmlInfoItem is used to display the Html code string, set value to Html code, and it can be displayed\nAfter it is displayed, the height will be automatically adjusted, set estimatedSize to represent the estimated size, and the size will be set in advance according to the ratio of the size\nSet contentInsets to adjust the four-side spacing of the content"
 //                    item.contentInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-//                    /// 设置预估高度可以减少跳动
+//                    /// Set estimated height to reduce jumping
 //                    item.estimatedSize = CGSize(width: 100, height: 30)
 //                }
 //                <<< getHtmlImageItem(isFirst: true)
@@ -441,7 +498,7 @@ class ViewController: UIViewController {
             section.lineSpace = 0
             section.column = 1
         }
-        let towColumSection = Section("固定大小两列图片") { section in
+        let towColumSection = Section("Fixed Size Two Column Images") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
@@ -458,7 +515,7 @@ class ViewController: UIViewController {
         
         formlist.form +++ towColumSection
 
-        let threeColumSection = Section(header: "自动大小三列图片", footer: "没啦！") { section in
+        let threeColumSection = Section(header: "Automatic Size Three Column Images", footer: "No more!") { section in
             section.column = 3
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 5
@@ -470,7 +527,11 @@ class ViewController: UIViewController {
             threeColumSection <<< newImageItem(i, getRandomImage(), true)
         }
         formlist.form +++ threeColumSection
-//        数据更新需要刷新时，可手动调用reload接口
+        
+        /**
+        * 数据更新需要刷新时，可手动调用reload接口
+        * When data needs to be updated, the reload interface can be manually called
+        */
 //        formlist.reload()
     }
 

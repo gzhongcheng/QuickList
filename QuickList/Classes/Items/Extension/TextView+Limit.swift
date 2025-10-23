@@ -7,22 +7,24 @@
 
 import Foundation
 
-/// 中英文混编长度限制
+/**
+ * 中英文混编长度限制
+ * Limit text length of mixed Chinese and English characters
+ */
 public extension UITextView {
-    // 限制字符输入,按英文，数字来判断，中文算2个
+    /**
+     * 限制字符输入,按英文，数字来判断，中文算2个
+     * Limit text input,按英文，数字来判断，中文算2个
+     */
     func limitTextCount(_ limitCount: Int, endEditing: Bool = true, closure: (() -> Void)? = nil) -> Int {
-        // 总的数量
         let allCount = self.text.count
-        // 高亮的数量
         var markedCount = 0
         if let markedRange = self.markedTextRange, let markedText = self.text(in: markedRange) {
             markedCount = markedText.count
         }
-        // 剩下在显示的文本数量
         let remainCount = allCount - markedCount
         let remainText = String(self.text.prefix(remainCount))
         
-        /// 计算总数
         let  (totalCount, showText) = remainText.textCount(limitCount)
         if totalCount > limitCount {
             self.text = showText

@@ -8,14 +8,26 @@
 import Foundation
 
 public protocol FormDelegate : AnyObject {
-    /// 滚动方向
+    /**
+     * 滚动方向
+     * Scroll direction
+     */
     var scrollDirection: UICollectionView.ScrollDirection { get }
-    /// 列表控件
+    /**
+     * 列表控件
+     * List view
+     */
     var formView: QuickListView? { get }
-    /// 是否正在滚动
+    /**
+     * 是否正在滚动
+     * Whether scrolling
+     */
     var isScrolling: Bool { get }
     
-    /// 数据改变的后刷新界面
+    /**
+     * 数据改变的后刷新界面
+     * Refresh interface after data change
+     */
     func sectionsHaveBeenAdded(_ sections: [Section], at: IndexSet)
     func sectionsHaveBeenRemoved(_ sections: [Section], at: IndexSet)
     func sectionsHaveBeenReplaced(oldSections: [Section], newSections: [Section], at: IndexSet)
@@ -23,64 +35,124 @@ public protocol FormDelegate : AnyObject {
     func itemsHaveBeenRemoved(_ items: [Item], to section: Section, at: [IndexPath])
     func itemsHaveBeenReplaced(oldItems: [Item], newItems: [Item], to section: Section, at: [IndexPath])
     
-    /// 更新指定SectionIndex及之后的Section的Layout
+    /**
+     * 更新指定SectionIndex及之后的Section的Layout
+     * Update Layout for specified SectionIndex and subsequent Sections
+     */
     func updateLayout(withAnimation: Bool, afterSection: Int)
     
-    /// 获取控件尺寸
+    /**
+     * 获取控件尺寸
+     * Get view size
+     */
     func getViewSize() -> CGSize
-    /// 获取内容尺寸
+    /**
+     * 获取内容尺寸
+     * Get content size
+     */
     func getContentSize() -> CGSize
 }
 
-/// 选中item装饰view与item的关系
+/**
+ * 选中item装饰view与item的关系
+ * Relationship between selected item decoration view and item
+ */
 public enum ItemDecorationPosition {
-    /// 选中item装饰view在item图层之上
+    /**
+     * 选中item装饰view在item图层之上
+     * Selected item decoration view above item layer
+     */
     case above
-    /// 选中item装饰view在item图层之下
+    /**
+     * 选中item装饰view在item图层之下
+     * Selected item decoration view below item layer
+     */
     case below
 }
 
 public final class Form: NSObject {
     /// delegate
     public weak var delegate: FormDelegate?
-    /// 内容自定义布局（优先级 section.layout -> form.layout -> QuickListFlowLayout）
+    /**
+     * 内容自定义布局（优先级 section.layout -> form.layout -> QuickListFlowLayout）
+     * Custom layout for content (priority: section.layout -> form.layout -> QuickListFlowLayout)
+     */
     public var layout: QuickListBaseLayout?
-    /// 内容未填满列表时是否需要居中展示
+    /**
+     * 内容未填满列表时是否需要居中展示
+     * Whether to center display when content doesn't fill the list
+     */
     public var needCenterIfNotFull: Bool = false
-    /// 内容边距
+    /**
+     * 内容边距
+     * Content insets
+     */
     public var contentInset: UIEdgeInsets = .zero
-    /// 是否单选
+    /**
+     * 是否单选
+     * Whether single selection
+     */
     public var singleSelection: Bool = false
-    /// 列表通用的选中item的装饰view，展示在选中item图层之下，尺寸为item大小，设置后，列表将强制变成单选状态
+    /**
+     * 列表通用的选中item的装饰view，展示在选中item图层之下，尺寸为item大小，设置后，列表将强制变成单选状态
+     * Common decoration view for selected items in the list, displayed below the selected item layer, size is item size, after setting, the list will be forced to single selection state
+     */
     public var selectedItemDecoration: UIView?
-    /// 选中item装饰view与item的图层关系
+    /**
+     * 选中item装饰view与item的图层关系
+     * Layer relationship between selected item decoration view and item
+     */
     public var selectedItemDecorationPosition: ItemDecorationPosition = .below
-    /// 选中item装饰view的移动动画时长
+    /**
+     * 选中item装饰view的移动动画时长
+     * Movement animation duration for selected item decoration view
+     */
     public var selectedItemDecorationMoveDuration: TimeInterval = 0.25
-    /// 列表整体的背景装饰view，展示在列表最底层，尺寸为列表大小，且内部会将它的交互禁用
+    /**
+     * 列表整体的背景装饰view，展示在列表最底层，尺寸为列表大小，且内部会将它的交互禁用
+     * Overall background decoration view for the list, displayed at the bottom layer of the list, size is list size, and its interaction will be disabled internally
+     */
     public var backgroundDecoration: UIView? {
         didSet {
             backgroundDecoration?.isUserInteractionEnabled = false
         }
     }
     
-    /// 列表的Header
+    /**
+     * 列表的Header
+     * List's Header
+     */
     public var header: FormHeaderFooterReusable?
-    /// 列表的Footer
+    /**
+     * 列表的Footer
+     * List's Footer
+     */
     public var footer: FormHeaderFooterReusable?
     
-    /// 所有Section的数组
+    /**
+     * 所有Section的数组
+     * Array of all Sections
+     */
     public private(set) var sections = [Section]()
     
-    /// 可独立指定的item与cell的映射关系表（section中也可指定，且优先级高于这个）
+    /**
+     * 可独立指定的item与cell的映射关系表（section中也可指定，且优先级高于这个）
+     * Mapping table for items and cells that can be specified independently (can also be specified in section, with higher priority)
+     */
     public var itemCellBinders: [any ItemViewBinderRepresentable] = []
     
-    /// 获取tag对应的Section
+    /**
+     * 获取tag对应的Section
+     * Get Section corresponding to tag
+     */
     public func section(for tag: String) -> Section? {
         sections.first(where: { $0.tag == tag })
     }
     
-    /// 获取tag对应的第一个item
+    /**
+     * 获取tag对应的第一个item
+     * Get first item corresponding to tag
+     */
     public func firstItem(for tag: String) -> Item? {
         for section in sections {
             for item in section.items {
@@ -101,14 +173,20 @@ public final class Form: NSObject {
         self.append(contentsOf: sections)
     }
     
-    /// 仅刷新界面布局
+    /**
+     * 仅刷新界面布局
+     * Only refresh interface layout
+     */
     public func updateLayout(afterSection: Int, animation: Bool = false) {
         delegate?.formView?.setNeedUpdateLayout(afterSection: afterSection, useAnimation: animation)
     }
 }
 
 extension Form: Collection {
-    /// 根据indexPath获取Item
+    /**
+     * 根据indexPath获取Item
+     * Get Item based on indexPath
+     */
     public subscript(indexPath: IndexPath) -> Item? {
         guard indexPath.underestimatedCount > 1, self.count > indexPath.section ,self[indexPath.section].count > indexPath.row else {
             return nil
@@ -133,7 +211,6 @@ extension Form: MutableCollection {
                 if oldSection == newValue {
                     return
                 }
-                // form中移除旧Section
                 sections[position] = newValue
                 self.delegate?.sectionsHaveBeenRemoved([oldSection], at: IndexSet(integer: position))
             } else {
@@ -154,7 +231,6 @@ extension Form: MutableCollection {
 
 // MARK: - RangeReplaceableCollection
 extension Form : RangeReplaceableCollection {
-    /// 添加
     public func append(_ formSection: Section) {
         sections.append(formSection)
         formSection.form = self
@@ -182,7 +258,6 @@ extension Form : RangeReplaceableCollection {
         delegate?.sectionsHaveBeenAdded(sections, at: IndexSet(integersIn: firstIndex ..< sections.count))
     }
 
-    /// 替换
     public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C) where C.Iterator.Element == Section {
         let lower = Swift.max(0, Swift.min(subRange.lowerBound, sections.count - 1))
         let upper = Swift.min(subRange.upperBound, sections.count)
@@ -203,7 +278,6 @@ extension Form : RangeReplaceableCollection {
         self.delegate?.formView?.reloadData()
     }
     
-    /// 移除
     public func remove(at i: Int) -> Section {
         if i >= sections.count {
             assertionFailure("Form: Index out of bounds")

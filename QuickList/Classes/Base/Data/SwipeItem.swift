@@ -8,12 +8,21 @@
 import Foundation
 import SnapKit
 
-/// 支持左滑事件的cell
+/**
+ * 支持左滑事件的cell
+ * Cell that supports left swipe events
+ */
 open class SwipeItemCell: ItemCell {
-    /// 是否可以左滑
+    /**
+     * 是否可以左滑
+     * Whether can swipe left
+     */
     public var canSwiped: Bool = true
     
-    /// 左滑时显示的按钮
+    /**
+     * 左滑时显示的按钮
+     * Buttons displayed when swiping left
+     */
     public var swipedActionButtons: [SwipeActionButton] = [] {
         didSet {
             for button in buttonsContainerView.subviews {
@@ -41,15 +50,27 @@ open class SwipeItemCell: ItemCell {
         }
     }
     
-    /// 全部展示后继续左滑，是否自动触发第一个按钮的事件
+    /**
+     * 全部展示后继续左滑，是否自动触发第一个按钮的事件
+     * Whether to automatically trigger the first button's event when continuing to swipe left after all buttons are displayed
+     */
     public var autoTriggerFirstButton: Bool = false
-    /// 全部展示后继续左滑，自动触发第一个按钮的事件的阈值（需要固定负数，单位为px）
+    /**
+     * 全部展示后继续左滑，自动触发第一个按钮的事件的阈值（需要固定负数，单位为px）
+     * Threshold for automatically triggering the first button's event when continuing to swipe left after all buttons are displayed (fixed negative value, unit: px)
+     */
     public var autoTriggerFirstButtonThreshold: CGFloat = -60
     
-    /// 会跟随左滑的内容视图
+    /**
+     * 会跟随左滑的内容视图
+     * Content view that follows left swipe
+     */
     public var swipeContentView: UIView = UIView()
     
-    /// 左滑出现的按钮容器
+    /**
+     * 左滑出现的按钮容器
+     * Button container that appears when swiping left
+     */
     public var buttonsContainerView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -210,11 +231,20 @@ public protocol SwipeItemType {
 // MARK: - SwipedAutolayoutItemOf
 // SwipedAutolayoutItemOf
 open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, SwipeItemType {
-    /// 是否可以左滑
+    /**
+     * 是否可以左滑
+     * Whether can swipe left
+     */
     public var canSwiped: Bool = true
-    /// 左滑时显示的按钮
+    /**
+     * 左滑时显示的按钮
+     * Buttons displayed when swiping left
+     */
     public var swipedActionButtons: [SwipeActionButton] = []
-    /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+    /**
+     * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+     * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
+     */
     public var autoTriggerFirstButton: Bool = false
     
     public func configureSwipe() {
@@ -228,11 +258,20 @@ open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, S
 // MARK: - SwipedItemOf
 // SwipedAutolayoutItemOf
 open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
-    /// 是否可以左滑
+    /**
+     * 是否可以左滑
+     * Whether can swipe left
+     */
     public var canSwiped: Bool = true
-    /// 左滑时显示的按钮
+    /**
+     * 左滑时显示的按钮
+     * Buttons displayed when swiping left
+     */
     public var swipedActionButtons: [SwipeActionButton] = []
-    /// 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+    /**
+     * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+     * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
+     */
     public var autoTriggerFirstButton: Bool = false
     
     public func configureSwipe() {
@@ -244,18 +283,33 @@ open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
 }
 
 // MARK: - SwipedActionButton
-/// 左滑时显示的按钮
+/**
+ * 左滑时显示的按钮
+ * Button displayed when swiping left
+ */
 public class SwipeActionButton: UIControl {
-    /// 展示到cell上时的右侧距离
+    /**
+     * 展示到cell上时的右侧距离
+     * Right spacing to cell when displayed
+     */
     var rightSpacingToCell: CGFloat = 0
     
-    /// 点击按钮后是否自动收起
+    /**
+     * 点击按钮后是否自动收起
+     * Whether to automatically close after clicking button
+     */
     public var autoCloseSwipe: Bool = true
     
-    /// 按钮宽度
+    /**
+     * 按钮宽度
+     * Button width
+     */
     public var width: CGFloat = 80
     
-    /// 图标和文字的间距
+    /**
+     * 图标和文字的间距
+     * Spacing between icon and text
+     */
     public var iconTextSpace: CGFloat = 5 {
         didSet {
             titleLabel.snp.updateConstraints { _ in
@@ -264,7 +318,10 @@ public class SwipeActionButton: UIControl {
         }
     }
     
-    /// 文字
+    /**
+     * 文字
+     * Text
+     */
     public var title: String? {
         get { return titleLabel.text }
         set {
@@ -296,9 +353,15 @@ public class SwipeActionButton: UIControl {
         set { iconImageView.tintColor = newValue }
     }
     
-    /// 点击事件
+    /**
+     * 点击事件
+     * Click event
+     */
     public var touchUpInsideAction: (() -> Void)?
-    /// 点击事件完成回调
+    /**
+     * 点击事件完成回调
+     * Click event completion callback
+     */
     var didTouchUpInsideAction: (() -> Void)?
     
     public init(icon: UIImage? = nil, iconTintColor: UIColor = .white, title: String? = nil, titleColor: UIColor = .white, font: UIFont = .systemFont(ofSize: 14), backgroundColor: UIColor = .red, width: CGFloat = 80, autoCloseSwipe: Bool = true, touchUpInside: (() -> Void)? = nil) {

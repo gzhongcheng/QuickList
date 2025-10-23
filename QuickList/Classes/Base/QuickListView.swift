@@ -9,12 +9,21 @@ import UIKit
 import SnapKit
 
 open class QuickListView: UICollectionView {
-    /// 当前装饰控件（扩展属性）
+    /**
+     * 当前装饰控件（扩展属性）
+     * Current decoration control (extension property)
+     */
     var currentDecorationView: UIView?
-    /// 当前全局背景（扩展属性)
+    /**
+     * 当前全局背景（扩展属性)
+     * Current global background (extension property)
+     */
     var currentBackgroundView: UIView?
     
-    /// 添加全局装饰控件到全局背景之上，如果没有全局背景，则放在最底层
+    /**
+     * 添加全局装饰控件到全局背景之上，如果没有全局背景，则放在最底层
+     * Add global decoration control above global background, if no global background, place at bottom layer
+     */
     public func addDecorationViewIfNeeded(_ view: UIView) {
         if currentDecorationView != nil, currentDecorationView == view {
             return
@@ -25,7 +34,10 @@ open class QuickListView: UICollectionView {
         addSubview(view)
     }
     
-    /// 添加全局背景到最底层
+    /**
+     * 添加全局背景到最底层
+     * Add global background to bottom layer
+     */
     public func addBackgroundViewIfNeeded(_ view: UIView?) {
         if currentBackgroundView != nil, currentBackgroundView == view {
             return
@@ -43,14 +55,20 @@ open class QuickListView: UICollectionView {
         self.scrollToItem(at: indexPath, at: scrollPosition, animated: animation)
     }
     
-    // handler代理, 包括cell的value改变回调以及scrollviewDelegate相关方法
+    /**
+     * handler代理, 包括cell的value改变回调以及scrollviewDelegate相关方法
+     * Handler delegate, including cell value change callbacks and scrollviewDelegate related methods
+     */
     public weak var handerDelegate: FormViewHandlerDelegate? {
         didSet {
             handler.delegate = handerDelegate
         }
     }
     
-    // collectionView代理处理类
+    /**
+     * collectionView代理处理类
+     * CollectionView delegate handler class
+     */
     public var handler = FormViewHandler()
     public var form: Form {
         get {
@@ -69,18 +87,24 @@ open class QuickListView: UICollectionView {
         self.handler.layout.reloadAll()
     }
     
-    /// 滚动方向,默认为竖直方向滚动
+    /**
+     * 滚动方向,默认为竖直方向滚动
+     * Scroll direction, default is vertical scrolling
+     */
     open var scrollDirection: UICollectionView.ScrollDirection = .vertical {
         didSet {
             handler.scrollDirection = scrollDirection
         }
     }
     
-    /// 列表总尺寸变化回调
+    /**
+     * 列表总尺寸变化回调
+     * List total size change callback
+     */
     public var listSizeChangedBlock: ((CGSize) -> Void)?
     
     
-    // MARK:- 初始化方法
+    // MARK:- Initialization methods
     public convenience init(sections: [Section]? = nil) {
         self.init(frame: .zero)
         if let sections = sections {

@@ -7,21 +7,39 @@
 
 import Kingfisher
 
-/// 图片下载进度回调
+/**
+ * 图片下载进度回调
+ * Image download progress callback
+ */
 public typealias ImageDownloadProgressCallBack = (String, Int64, Int64) -> Void
-/// 图片下载完成回调
+/**
+ * 图片下载完成回调
+ * Image download completion callback
+ */
 public typealias ImageDownloadFinishCallBack = (String, Result<ImageLoadingResult, KingfisherError>) -> Void
 
-/// 下载完成结果回调
+/**
+ * 下载完成结果回调
+ * Download completion result callback
+ */
 public typealias ImageLoadResult = (Result<KFCrossPlatformImage?, KingfisherError>) -> Void
 
-/// 图片下载管理
+/**
+ * 图片下载管理
+ * Image download manager
+ */
 public class ImageDownloadManager {
     
-    /** 单例 */
+    /**
+     * 单例
+     * Singleton
+     */
     public static let shared: ImageDownloadManager = ImageDownloadManager()
     
-    /// 下载的最大线程数量
+    /**
+     * 下载的最大线程数量
+     * Maximum number of threads for downloading
+     */
     public var maxOperationCount: Int {
         set {
             queue.maxConcurrentOperationCount = newValue
@@ -38,7 +56,10 @@ public class ImageDownloadManager {
         return q
     }()
     
-    /// 添加下载任务
+    /**
+     * 添加下载任务
+     * Add download task
+     */
     public func addTask(
         url: URL,
         options: KingfisherOptionsInfo = [.fromMemoryCacheOrRefresh], //.backgroundDecode,
@@ -57,7 +78,10 @@ public class ImageDownloadManager {
     }
 }
 
-/// 下载的任务
+/**
+ * 下载的任务
+ * Download task
+ */
 public class ImageDownloadTask: Operation {
     public var url: URL
     public var options: KingfisherOptionsInfo
@@ -76,7 +100,10 @@ public class ImageDownloadTask: Operation {
         self.completionHandler = completionHandler
     }
     
-    // 状态
+    /**
+     * 状态
+     * State
+     */
     enum State: String {
         case ready, executing, finished
         fileprivate var keyPath: String {
@@ -84,7 +111,10 @@ public class ImageDownloadTask: Operation {
         }
     }
     
-    // 当前状态
+    /**
+     * 当前状态
+     * Current state
+     */
     var state = State.ready {
         willSet {
             willChangeValue(forKey: newValue.keyPath)
@@ -96,7 +126,11 @@ public class ImageDownloadTask: Operation {
     }
     
     public override var isReady: Bool {
-        return super.isReady && state == .ready // 一定要先检测isReady 因为它是受系统任务计划程序控制的
+        /**
+         * 一定要先检测isReady 因为它是受系统任务计划程序控制的
+         * It must be checked first because it is controlled by the system task scheduler
+         */
+        return super.isReady && state == .ready 
     }
     public override var isExecuting: Bool {
         return state == .executing
@@ -109,7 +143,10 @@ public class ImageDownloadTask: Operation {
     }
     
     public override func start() {
-        // 官方文档说明在重写start()的时候不可以调用super
+        /**
+         * 官方文档说明在重写start()的时候不可以调用super
+         * The official documentation states that super cannot be called when overriding start()
+         */
         if isCancelled {
             state = .finished
             return
@@ -118,7 +155,10 @@ public class ImageDownloadTask: Operation {
     }
     
     public override func main() {
-        /// 标记异步任务开始
+        /**
+         * 标记异步任务开始
+         * Mark the asynchronous task as started
+         */
         state = .executing
         ImageDownloader.default.downloadImage(with: url, options: options) {[weak self] (p, t) in
             if let callback = self?.progressBlock,
@@ -130,7 +170,10 @@ public class ImageDownloadTask: Operation {
                let key = self?.url.absoluteString {
                 callback(key, result)
             }
-            /// 标记异步任务完成
+            /**
+             * 标记异步任务完成
+             * Mark the asynchronous task as finished
+             */
             self?.state = .finished
         }
     }

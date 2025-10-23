@@ -25,13 +25,11 @@ open class CollectionButtonCell: ItemCell {
         contentView.addSubview(arrowImageView)
         
         titleLabel.numberOfLines = 0
-        /// 抗压缩
         titleLabel.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
         titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         rightView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         iconImageView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         arrowImageView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        /// 抗拉伸
         rightView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         iconImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         arrowImageView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
@@ -66,39 +64,69 @@ open class CollectionButtonCell: ItemCell {
 }
 
 // MARK: ButtonItem
-/// 按钮Item（整个Item为一个按钮），点击可以任意操作（如点击跳转到新的界面）
-/// 支持自定义标题样式、右侧箭头样式，同时可添加左侧图标，以及右侧箭头前的自定义View
-/// 文字内容展示为row.title，如需更改可以继承这个类并在super.customUpdateCell()之后设置cell.titleLabel.text为想要的值
+/**
+ * 按钮Item（整个Item为一个按钮），点击可以任意操作（如点击跳转到新的界面）
+ * 支持自定义标题样式、右侧箭头样式，同时可添加左侧图标，以及右侧箭头前的自定义View
+ * 文字内容展示为row.title，如需更改可以继承这个类并在super.customUpdateCell()之后设置cell.titleLabel.text为想要的值
+ * 
+ * Button Item (entire Item is a button), click can perform any operation (e.g., click to jump to new interface)
+ * Supports custom title style, right arrow style, can add left icon, and custom View before right arrow
+ * Text content displays as row.title, if you need to change, inherit this class and set cell.titleLabel.text to desired value after super.customUpdateCell()
+ */
 public final class ButtonItem: AutolayoutItemOf<CollectionButtonCell>, TypedCollectionValueItemType, ItemType {
     public var sendValue: String?
     
-    /// 定义了点击如何后跳转控制器的属性，可以不传
+    /**
+     * 定义了点击如何后跳转控制器的属性，可以不传
+     * Property that defines how to jump to controller after click, can be omitted
+     */
     public var presentationMode: PresentationMode<UIViewController>?
     
-    /// 箭头样式
+    /**
+     * 箭头样式
+     * Arrow style
+     */
     public enum ArrowType: Equatable {
-        /// 不带箭头
+        /**
+         * 不带箭头
+         * No arrow
+         */
         case none
-        /// 自定义
+        /**
+         * 自定义
+         * Custom
+         */
         case custom(_ image: UIImage?, size: CGSize)
     }
     public var arrowType: ArrowType = .none
     
-    /// 左侧图标
+    /**
+     * 左侧图标
+     * Left icon
+     */
     public var iconImage: UIImage?
     public var iconSize: CGSize = .zero
     
-    /// 标题样式
+    /**
+     * 标题样式
+     * Title style
+     */
     public var titleFont: UIFont = UIFont.systemFont(ofSize: 15)
     public var titleColor: UIColor = UIColor.black
     public var titleHighlightColor: UIColor?
     public var titleAlignment: NSTextAlignment = .left
     
-    /// 右侧视图
+    /**
+     * 右侧视图
+     * Right view
+     */
     public var rightView: UIView?
     public var rightViewSize: CGSize = .zero
     
-    /// 间距设置
+    /**
+     * 间距设置
+     * Spacing settings
+     */
     public var spaceBetweenIconAndTitle: CGFloat = 0
     public var spaceBetweenTitleAndRightView: CGFloat = 0
     public var spaceBetweenRightViewAndArrow: CGFloat = 0
@@ -177,7 +205,6 @@ public final class ButtonItem: AutolayoutItemOf<CollectionButtonCell>, TypedColl
         }
         
         if rightView != nil {
-            /// 复用，隐藏其他子view
             for v in cell.rightView.subviews {
                 v.isHidden = v != rightView
             }

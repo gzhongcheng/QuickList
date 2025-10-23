@@ -9,7 +9,10 @@ import UIKit
 import SnapKit
 
 // MARK:- LineCell
-/// 分割线的cell
+/**
+ * 分割线的cell
+ * Separator line cell
+ */
 open class CollectionLineCell: ItemCell {
     let lineView: UIView = UIView()
     
@@ -26,14 +29,26 @@ open class CollectionLineCell: ItemCell {
 }
 
 // MARK:- LineItem
-/// 定义好的分割线Item，可自定义线的宽度、圆角、内容边距、线的颜色以及背景色
+/**
+ * 定义好的分割线Item，可自定义线的宽度、圆角、内容边距、线的颜色以及背景色
+ * Predefined separator line Item with customizable width, corner radius, content margins, line color and background color
+ */
 public final class LineItem: ItemOf<CollectionLineCell>, ItemType {
     
-    /// 线的颜色
+    /**
+     * 线的颜色
+     * Line color
+     */
     public var lineColor: UIColor = .lightGray
-    /// 线的圆角
+    /**
+     * 线的圆角
+     * Line corner radius
+     */
     public var lineRadius: CGFloat = 0
-    /// 线的宽度
+    /**
+     * 线的宽度
+     * Line width
+     */
     public var lineWidth: CGFloat = 0.5 {
         didSet {
             guard let indexPath = self.indexPath else { return }
@@ -49,7 +64,10 @@ public final class LineItem: ItemOf<CollectionLineCell>, ItemType {
         }
     }
     
-    // 更新cell的布局
+    /**
+     * 更新cell的布局
+     * Update cell layout
+     */
     public override func updateCell() {
         super.updateCell()
         guard let cell = cell as? CollectionLineCell else {
@@ -80,7 +98,10 @@ public final class LineItem: ItemOf<CollectionLineCell>, ItemType {
         contentInsets = .zero
     }
     
-    /// 计算尺寸
+    /**
+     * 计算尺寸
+     * Calculate size
+     */
     public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self

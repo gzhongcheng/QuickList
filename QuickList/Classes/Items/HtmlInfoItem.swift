@@ -8,9 +8,15 @@
 import WebKit
 import SnapKit
 
-// 带webview的cell，用于展示html代码
+/**
+ * 带webview的cell，用于展示html代码
+ * Cell with webview for displaying html code
+ */
 open class CollectionHtmlInfoCell : ItemCell {
-    /// 当前展示内容
+    /**
+     * 当前展示内容
+     * Current content
+     */
     fileprivate var currentContent: String? {
         didSet {
             guard let currentContent = currentContent else {
@@ -21,7 +27,10 @@ open class CollectionHtmlInfoCell : ItemCell {
     }
     
     
-    // 设置展示区域,html的内容不用一次性全部展示,减少卡顿
+    /**
+     * 设置展示区域,html的内容不用一次性全部展示,减少卡顿
+     * Set display area, html content is not displayed at once to reduce lag
+     */
     open var showRect: CGRect = .zero {
         didSet {
             if showRect.minY + showRect.height <= contentView.frame.height {
@@ -78,21 +87,36 @@ open class CollectionHtmlInfoCell : ItemCell {
     
 }
 
-// 带webview的item，用于展示html代码，会根据网页内容大小和用户设置自动调整最终展示大小
+/**
+ * 带webview的item，用于展示html代码，会根据网页内容大小和用户设置自动调整最终展示大小
+ * Item with webview for displaying html code, will automatically adjust the final display size according to the size of the web page and user settings
+ */
 public final class HtmlInfoItem: ItemOf<CollectionHtmlInfoCell>, ItemType{
     
     public override var identifier: String {
         return "HtmlInfoItem"
     }
     
-    /// 预估大小
+    /**
+     * 预估大小
+     * Estimated size
+     */
     public var estimatedSize: CGSize?
-    /// 实际网页高度
+    /**
+     * 实际网页高度
+     * Actual web page height
+     */
     private var actualHeight: CGFloat?
-    /// 实际内容比例 (宽/高)
+    /**
+     * 实际内容比例 (宽/高)
+     * Actual content ratio (width/height)
+     */
     private var actualRatio: CGFloat?
     
-    /// 传入的内容
+    /**
+     * 传入的内容
+     * Input content
+     */
     public var content: String? {
         didSet {
             guard let content = content else {
@@ -102,7 +126,10 @@ public final class HtmlInfoItem: ItemOf<CollectionHtmlInfoCell>, ItemType{
             currentContent = formatHtml(content)
         }
     }
-    /// 当前展示内容
+    /**
+     * 当前展示内容
+     * Current content
+     */
     private var currentContent: String?
     
     public convenience init(content: String) {
@@ -114,9 +141,11 @@ public final class HtmlInfoItem: ItemOf<CollectionHtmlInfoCell>, ItemType{
         super.init(title: nil, tag: nil)
     }
     
-    /// 格式化html字符串
+    /**
+     * 格式化html字符串
+     * Format html string
+     */
     func formatHtml(_ body: String) -> String {
-        // 设置图片样式
         return  """
         <html>
             <head>
@@ -257,7 +286,10 @@ extension HtmlInfoItem: WKNavigationDelegate {
         if actualRatio != nil {
             return
         }
-        /// 修改高度
+        /**
+         * 修改高度
+         * Modify height
+         */
         webView.evaluateJavaScript("document.body.scrollWidth/document.body.scrollHeight") {[weak self] (value, error) in
             guard let ratio = value as? CGFloat else {
                 return

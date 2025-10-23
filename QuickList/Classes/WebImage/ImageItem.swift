@@ -10,7 +10,10 @@ import SnapKit
 import Kingfisher
 
 public extension ScrollObserverCellType where Self: UICollectionViewCell {
-    /// 所在的Scrollview是否正在滚动
+    /**
+     * 所在的Scrollview是否正在滚动
+     * Whether the Scrollview is scrolling
+     */
     func isScrolling() -> Bool {
         var superView = superview
         while superView != nil {
@@ -42,7 +45,10 @@ open class CollectionImageCell: ItemCell, ScrollObserverCellType {
         })
     }
     
-    /// 滚动时停止播放gif
+    /**
+     * 滚动时停止播放gif
+     * Stop playing gif when scrolling
+     */
     public func willBeginScrolling() {
         imageBoxView.stopAnimating()
     }
@@ -53,41 +59,73 @@ open class CollectionImageCell: ItemCell, ScrollObserverCellType {
 }
 
 // MARK: - ImageItem
-///  图片展示Item，可设置图片预估比例、内容边距、圆角等，支持网络图片加载
+/**
+ * 图片展示Item，可设置图片预估比例、内容边距、圆角等，支持网络图片加载
+ * Image display item, can set image estimated ratio, content margins, corners, etc., supports network image loading
+ */
 public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
     
-    /// 是否自动调整宽度/高度
+    /**
+     * 是否自动调整宽度/高度
+     * Whether to automatically adjust width/height
+     */
     public var autoSize: Bool = true
-    /// 固定宽高比
+    /**
+     * 固定宽高比
+     * Fixed aspect ratio
+     */
     public var aspectRatio: CGSize?
     
-    /// 图片url字符串
+    /**
+     * 图片url字符串
+     * Image url string
+     */
     public var imageUrl: String?
     
-    /// uiimage对象
+    /**
+     * uiimage对象
+     * uiimage object
+     */
     public var image: UIImage?
     
-    /** 加载中的样式
-     *  .none 默认没有菊花
-     *  .activity 使用系统菊花
-     *  .image(imageData: Data) 使用一张图片作为菊花，支持gif图
-     *  .custom(indicator: Indicator) 使用自定义菊花，要遵循Indicator协议
+    /** 
+     * 加载中的样式
+     * Loading style
+     *  .none 默认没有菊花 / Default no indicator
+     *  .activity 使用系统菊花 / Use system indicator
+     *  .image(imageData: Data) 使用一张图片作为菊花，支持gif图 / Use an image as indicator, supports gif
+     *  .custom(indicator: Indicator) 使用自定义菊花，要遵循Indicator协议 / Use custom indicator, must conform to Indicator protocol
      */
     public var loadingIndicatorType: IndicatorType = .activity
     
-    /// 加载中占位图片
+    /**
+     * 加载中占位图片
+     * Loading placeholder image
+     */
     public var placeholderImage: UIImage?
     
-    /// 加载失败图片
+    /**
+     * 加载失败图片
+     * Loading failed image
+     */
     public var loadFaildImage: UIImage?
     
-    /// 图片填充模式
+    /**
+     * 图片填充模式
+     * Image fill mode
+     */
     public var contentMode: UIView.ContentMode = .scaleAspectFill
     
-    /// 圆角
+    /**
+     * 圆角
+     * Corners
+     */
     public var corners: [CornerType] = []
  
-    // 更新cell的布局
+    /**
+     * 更新cell的布局
+     * Update cell layout
+     */
     public override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? CollectionImageCell else {
@@ -117,7 +155,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
         return "ImageItem"
     }
     
-    /// 设置内容边距默认为0
+    /**
+     * 设置内容边距默认为0
+     * Set content insets to 0 by default
+     */
     public required init(title: String? = nil, tag: String? = nil) {
         super.init(title: title, tag: tag)
         contentInsets = .zero
@@ -129,7 +170,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
         initializer(self)
     }
     
-    /// 加载图片
+    /**
+     * 加载图片
+     * Load image
+     */
     func loadImage() {
         guard let cell = cell as? CollectionImageCell else {
             return
@@ -174,7 +218,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
     
     func setImage(_ image: UIImage?, to cell: CollectionImageCell) {
         if cell.isScrolling() {
-            /// 正在滚动时不播放gif动画
+            /**
+             * 正在滚动时不播放gif动画
+             * Do not play gif animation when scrolling
+             */
             cell.imageBoxView.stopAnimating()
         }
         let estimateItemSize = self.section?.estimateItemSize(with: self.weight) ?? cell.bounds.size
@@ -183,7 +230,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
                 let imageWidth: CGFloat = estimateItemSize.width - contentInsets.left - contentInsets.right
                 let imageHeight = imageWidth * image.size.height / image.size.width
                 let cellHeight: Int = Int(imageHeight + contentInsets.top + contentInsets.bottom)
-                // 相差2以上才更新尺寸
+                /**
+                 * 相差2以上才更新尺寸
+                 * Update size if the difference is greater than 2
+                 */
                 if let ratio = aspectRatio, abs(cellHeight - Int(ratio.height)) > 2 || abs(Int(estimateItemSize.width) - Int(ratio.width)) > 2 {
                     aspectRatio = CGSize(width: Int(estimateItemSize.width), height: cellHeight)
                     updateLayout(animation: true)
@@ -196,7 +246,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
                 let imageHeight: CGFloat = estimateItemSize.height - contentInsets.top - contentInsets.bottom
                 let imageWidth = imageHeight * image.size.width / image.size.height
                 let cellWidth: Int = Int(imageWidth + contentInsets.left + contentInsets.right)
-                // 相差2以上才更新尺寸
+                /**
+                 * 相差2以上才更新尺寸
+                 * Update size if the difference is greater than 2
+                 */
                 if let ratio = aspectRatio, abs(Int(estimateItemSize.height) - Int(ratio.height)) > 2 || abs(cellWidth - Int(ratio.width)) > 2 {
                     aspectRatio = CGSize(width: cellWidth, height: Int(estimateItemSize.height))
                     updateLayout(animation: true)
@@ -228,13 +281,13 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
     }
 }
 
-// MARK: - 尺寸计算
+// MARK: - Size calculation
 extension ImageItem {
     private func cellHeight(for width: CGFloat) -> CGFloat {
         if let aspectHeight = aspectHeight(width) {
             return aspectHeight
         }
-        // 默认为1:1
+        // Default is 1:1
         return width
     }
     
@@ -242,11 +295,14 @@ extension ImageItem {
         if let aspectWidth = aspectWidth(height) {
             return aspectWidth
         }
-        // 默认为1:1
+        // Default is 1:1
         return height
     }
     
-    /// 根据设定好的宽高比计算宽/高值
+    /**
+     * 根据设定好的宽高比计算宽/高值
+     * Calculate width/height based on the set aspect ratio
+     */
     public func aspectWidth(_ height: CGFloat) -> CGFloat? {
         if aspectRatio != nil {
             let width = height * aspectRatio!.width / aspectRatio!.height

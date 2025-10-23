@@ -9,11 +9,20 @@ import UIKit
 import SnapKit
 
 
-// item的左侧标题样式
+/**
+ * item的左侧标题样式
+ * Item left title style
+ */
 public enum TitlePosition: Equatable {
-    /// 居左，自动宽度
+    /**
+     * 居左，自动宽度
+     * Left, automatic width
+     */
     case left
-    /// 居左，固定宽度
+    /**
+     * 居左，固定宽度
+     * Left, fixed width
+     */
     case width(_ width: CGFloat)
 }
 
@@ -54,32 +63,53 @@ open class CollectionLabelCell: ItemCell {
 // MARK: - TitleValueItem
 public final class TitleValueItem: AutolayoutItemOf<CollectionLabelCell>, ItemType {
     // 样式设置
-    /// 竖直方向排列方式
+    /**
+     * 竖直方向排列方式
+     * Vertical alignment
+     */
     public enum VerticalAlignment {
+        /**
+         * 顶部对齐
+         * Top alignment
+         */
         case top
+        /**
+         * 居中对齐
+         * Center alignment
+         */
         case center
+        /**
+         * 底部对齐
+         * Bottom alignment
+         */
         case bottom
     }
     
     public var verticalAlignment: VerticalAlignment = .center
     
-    /// title
+    // MARK: - title
     public var titlePosition: TitlePosition = .left
     public var titleFont: UIFont = UIFont.systemFont(ofSize: 15)
     public var titleColor: UIColor = UIColor.black
     public var titleHighlightColor: UIColor?
     public var titleLines: Int = 0
     public var titleAlignment: NSTextAlignment = .left
-    /// 富文本标题，如果设置了，则会替换掉title显示这个
+    /**
+     * 富文本标题，如果设置了，则会替换掉title显示这个
+     * Rich text title, if set, will replace title display this
+     */
     public var attributeTitle: NSAttributedString?
     
-    /// value
+    // MARK: - value
     public enum ValuePosition {
         case left(_ spaceToTitle: CGFloat)
         case center
         case right
     }
-    /// Value和Title的间距
+    /**
+     * Value和Title的间距
+     * Space between Value and Title
+     */
     public var spaceBetweenTitleAndValue: CGFloat = 0
     public var valueFont: UIFont = UIFont.systemFont(ofSize: 14)
     public var valueColor: UIColor = UIColor.gray
@@ -87,19 +117,24 @@ public final class TitleValueItem: AutolayoutItemOf<CollectionLabelCell>, ItemTy
     public var valueLines: Int = 0
     public var valueAlignment: NSTextAlignment = .right
     
-    /// 值
+    /**
+     * 值
+     * Value
+     */
     public var value: String?
-    /// 富文本value，如果设置了，则会替换掉value显示这个
+    /**
+     * 富文本value，如果设置了，则会替换掉value显示这个
+     * Rich text value, if set, will replace value display this
+     */
     public var attributeValue: NSAttributedString?
     
-    /// 初始化方法
+    
     public convenience init(title: String? = nil, value: String? = nil, tag: String? = nil, weight: Int = 1, _ initializer: (TitleValueItem) -> Void = { _ in }) {
         self.init(title, tag: tag, weight: weight)
         self.value = value
         initializer(self)
     }
     
-    // 更新cell的布局
     public override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? CollectionLabelCell else {

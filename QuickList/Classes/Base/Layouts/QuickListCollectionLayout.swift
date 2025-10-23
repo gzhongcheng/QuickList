@@ -22,7 +22,10 @@ extension UICollectionViewLayoutAttributes {
         @UniqueAddress static var caculatedFrameIdentifier
     }
     
-    /// 计算得到的初始位置
+    /**
+     * 计算得到的初始位置
+     * Calculated initial position
+     */
     public var caculatedFrame: CGRect? {
         get {
             return objc_getAssociatedObject(self, AssociatedKey.caculatedFrameIdentifier) as? CGRect
@@ -34,37 +37,67 @@ extension UICollectionViewLayoutAttributes {
 }
 
 public protocol QuickListCollectionLayoutDelegate: AnyObject {
-    /// 更新完成回调
+    /**
+     * 更新完成回调
+     * Update completion callback
+     */
     func collectionLayoutDidFinishLayout(_ layout: QuickListCollectionLayout)
 }
 
 public class QuickListCollectionLayout: UICollectionViewLayout {
-    /// 滚动方向
+    /**
+     * 滚动方向
+     * Scroll direction
+     */
     public var scrollDirection: UICollectionView.ScrollDirection = .vertical
-    /// 是否需要更新全部布局
+    /**
+     * 是否需要更新全部布局
+     * Whether need to update all layout
+     */
     public var needReloadAll: Bool = true
-    /// 数据from
+    /**
+     * 数据from
+     * Data from
+     */
     public var form: Form? {
         didSet {
             resetData()
         }
     }
     
-    /// 更新类型
+    /**
+     * 更新类型
+     * Update type
+     */
     var dataChangeType: QuickListDataChangeType = .all
-    /// 整个form的Header和Footer的尺寸
+    /**
+     * 整个form的Header和Footer的尺寸
+     * Size of entire form's Header and Footer
+     */
     var headerAttributes: UICollectionViewLayoutAttributes?
     var footerAttributes: UICollectionViewLayoutAttributes?
-    /// 悬浮headerSection的尺寸，用于支持isFormHeader，如果isFormHeader为false，则该值为nil
+    /**
+     * 悬浮headerSection的尺寸，用于支持isFormHeader，如果isFormHeader为false，则该值为nil
+     * Floating headerSection size, used to support isFormHeader, if isFormHeader is false, this value is nil
+     */
     var suspensionHeaderSectionSize: CGSize?
-    /// 存放各section位置等数据的数组
+    /**
+     * 存放各section位置等数据的数组
+     * Array storing position data for each section
+     */
     var sectionAttributes: [Int: QuickListSectionAttribute] = [:]
-    /// 存放各section位置等数据的数组
+    /**
+     * 存放各section位置等数据的数组
+     * Array storing position data for each section
+     */
     var oldSectionAttributes: [Int: QuickListSectionAttribute] = [:]
-    /// 计算中的中间量，用于定位各个section的开始位置
+    /**
+     * 计算中的中间量，用于定位各个section的开始位置
+     * Intermediate variable in calculation, used to locate the starting position of each section
+     */
     var currentOffset: CGPoint = .zero
     
-    // MARK: - 多播代理
+    // MARK: - Multi-cast delegate
     private let multiDelegate: NSHashTable<AnyObject> = NSHashTable.weakObjects()
     
     func add(_ delegate: QuickListCollectionLayoutDelegate) {
@@ -79,7 +112,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
     }
     
-    /// 通知布局完成
+    /**
+     * 通知布局完成
+     * Notify layout completion
+     */
     func noticeDidFinishLayout() {
         invoke {
             $0.collectionLayoutDidFinishLayout(self)
@@ -92,13 +128,16 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
     }
     
-    // MARK: - 布局计算
+    // MARK: - Layout calculation
     func reloadAll() {
         reloadSectionsAfter(index: 0)
     }
     
     func reloadSectionsAfter(index: Int, needOldSectionAttributes: Bool = false) {
-        //前一段布局改变后，会影响其后的所有布局，该段后面的都要刷新
+        /**
+         * 前一段布局改变后，会影响其后的所有布局，该段后面的都要刷新
+         * After the previous layout changes, it will affect all subsequent layouts, all sections after this need to be refreshed
+         */
         guard let form = self.form else {
             return
         }
@@ -112,7 +151,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         
         if index == 0 {
             resetData()
-            /// 计算整个列表的Header
+            /**
+             * 计算整个列表的Header
+             * Calculate the Header of the entire list
+             */
             if
                 let collectionView = self.collectionView,
                 let header = form.header
@@ -155,7 +197,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             self.addSection(section: section, isFirst: i == index)
         }
         
-        /// 取最大位置设置
+        /**
+         * 取最大位置设置
+         * Take maximum position setting
+         */
         if let maxPoint = sectionAttributes.values.max(by: { section1, section2 in
             if self.scrollDirection == .horizontal {
                 return section1.endPoint.x < section2.endPoint.x
@@ -165,14 +210,20 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             currentOffset = maxPoint
         }
         
-        /// 添加尾部间距
+        /**
+         * 添加尾部间距
+         * Add trailing spacing
+         */
         if self.scrollDirection == .vertical {
             currentOffset.y += form.contentInset.bottom
         } else {
             currentOffset.x += form.contentInset.right
         }
         
-        /// 计算整个列表的Footer
+        /**
+         * 计算整个列表的Footer
+         * Calculate the Footer of the entire list
+         */
         if let collectionView = self.collectionView {
             if let footer = form.footer {
                 footerAttributes = UICollectionViewLayoutAttributes(
@@ -198,10 +249,19 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         if form.needCenterIfNotFull {
             if scrollDirection == .vertical {
                 if currentOffset.y < form.delegate?.formView?.bounds.height ?? 0 {
-                    /// 如果内容高度小于视图高度，居中显示
-                    /// 计算内容需要偏移的位置
+                    /**
+                     * 如果内容高度小于视图高度，居中显示
+                     * If content height is less than view height, center display
+                     */
+                    /**
+                     * 计算内容需要偏移的位置
+                     * Calculate the offset position needed for content
+                     */
                     let offsetY = ((form.delegate?.formView?.bounds.height ?? 0) - currentOffset.y) * 0.5
-                    /// 设置所有内容偏移
+                    /**
+                     * 设置所有内容偏移
+                     * Set all content offset
+                     */
                     for section in sectionAttributes.values {
                         section.startPoint.y += offsetY
                         section.endPoint.y += offsetY
@@ -214,10 +274,19 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
             } else {
                 if currentOffset.x < form.delegate?.formView?.bounds.width ?? 0 {
-                    /// 如果内容宽度小于视图宽度，居中显示
-                    /// 计算内容需要偏移的位置
+                    /**
+                     * 如果内容宽度小于视图宽度，居中显示
+                     * If content width is less than view width, center display
+                     */
+                    /**
+                     * 计算内容需要偏移的位置
+                     * Calculate the offset position needed for content
+                     */
                     let offsetX = ((form.delegate?.formView?.bounds.width ?? 0) - currentOffset.x) * 0.5
-                    /// 设置所有内容偏移
+                    /**
+                     * 设置所有内容偏移
+                     * Set all content offset
+                     */
                     for section in sectionAttributes.values {
                         section.startPoint.x += offsetX
                         section.endPoint.x += offsetX
@@ -296,7 +365,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     } else {
                         self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: collectionView.bounds.height)
                     }
-                    /// 记录初始位置
+                    /**
+                     * 记录初始位置
+                     * Record initial position
+                     */
                     sectionAttr.headerAttributes?.caculatedFrame = sectionAttr.headerAttributes?.frame
                     sectionAttr.footerAttributes?.caculatedFrame = sectionAttr.footerAttributes?.frame
                     sectionAttr.decorationAttributes?.caculatedFrame = sectionAttr.decorationAttributes?.frame
@@ -337,7 +409,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
     }
     
-    /// 获取范围内的元素位置数组
+    /**
+     * 获取范围内的元素位置数组
+     * Get array of element positions within range
+     */
     public override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         guard let formView = self.form?.delegate?.formView else { return nil }
         var rect = rect
@@ -347,7 +422,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         if rect.size.height < 1 {
             rect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: formView.bounds.height)
         }
-        /// 向两侧扩展一些距离
+        /**
+         * 向两侧扩展一些距离
+         * Extend some distance to both sides
+         */
         switch scrollDirection {
         case .vertical:
             rect.origin.y -= 50
@@ -358,9 +436,15 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         @unknown default:
             break
         }
-        /// 获取位置数组
+        /**
+         * 获取位置数组
+         * Get position array
+         */
         var resultAttrs: [UICollectionViewLayoutAttributes] = []
-        /// 整体的header和footer
+        /**
+         * 整体的header和footer
+         * Overall header and footer
+         */
         var headerSize: CGSize = .zero
         var footerSize: CGSize = .zero
         var suspensionHeader: Bool = false
@@ -389,7 +473,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
         
         for sectionAttr in sectionAttributes.values {
-            /// 添加item位置
+            /**
+             * 添加item位置
+             * Add item position
+             */
             resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(
                 in: rect,
                 for: formView,
@@ -401,7 +488,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 scrollDirection: self.scrollDirection
             ) ?? [])
             
-            /// 如果有装饰view，也需要悬浮
+            /**
+             * 如果有装饰view，也需要悬浮
+             * If there are decoration views, they also need to float
+             */
             if
                 sectionAttr.isFormHeader,
                 let selectedItemDecoration = form?.selectedItemDecoration,
@@ -530,12 +620,18 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             form?.header?.shouldSuspension == true ||
             form?.footer?.shouldSuspension == true
         {
-            /// 如果有可压缩的header/footer，或者悬浮的header/footer，需要重新布局
+            /**
+             * 如果有可压缩的header/footer，或者悬浮的header/footer，需要重新布局
+             * If there are compressible header/footer or floating header/footer, need to relayout
+             */
             return true
         }
         for section in sectionAttributes.values {
             if section.isFormHeader {
-                /// 如果是表单头部，始终需要重新布局
+                /**
+                 * 如果是表单头部，始终需要重新布局
+                 * If it's form header, always need to relayout
+                 */
                 return true
             }
             if section.shouldSuspensionHeader || section.shouldSuspensionFooter {
@@ -719,19 +815,20 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
 }
 
-// MARK: - QuickListSectionAttribute位置获取扩展
+// MARK: - QuickListSectionAttribute position acquisition extension
 extension QuickListSectionAttribute {
     /**
-    获取section内所有元素的布局属性
-    - Parameters:
-        - rect: 需要获取的范围
-        - view: QuickListView实例
-        - headerSize: form header的尺寸
-        - suspensionHeader: 是否悬停form header
-        - suspensionHeaderSectionSize: 悬停的header section尺寸
-        - footerSize: form footer的尺寸
-        - suspensionFooter: 是否悬停form footer
-        - scrollDirection: 滚动方向
+     * 获取section内所有元素的布局属性
+     * Get layout attributes for all elements within section
+     * - Parameters:
+     *   - rect: 需要获取的范围 / Range to get
+     *   - view: QuickListView实例 / QuickListView instance
+     *   - headerSize: form header的尺寸 / form header size
+     *   - suspensionHeader: 是否悬停form header / Whether form header is floating
+     *   - suspensionHeaderSectionSize: 悬停的header section尺寸 / Floating header section size
+     *   - footerSize: form footer的尺寸 / form footer size
+     *   - suspensionFooter: 是否悬停form footer / Whether form footer is floating
+     *   - scrollDirection: 滚动方向 / Scroll direction
      */
     func layoutAttributesForElements(
         in rect: CGRect,
@@ -751,7 +848,10 @@ extension QuickListSectionAttribute {
             sectionArea = CGRect(x: startPoint.x, y: startPoint.y, width: endPoint.x - startPoint.x, height: view.bounds.height)
         }
         if self.isFormHeader {
-            /// 设置整个section悬停
+            /**
+             * 设置整个section悬停
+             * Set entire section floating
+             */
             if var headerAttributes = self.headerAttributes {
                 suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(headerAttributes)
@@ -815,13 +915,14 @@ extension QuickListSectionAttribute {
     }
     
     /**
-     设置整个section悬停
-        - Parameters:
-            - attributes: 布局属性
-            - zIndex: zIndex值
-            - view: QuickListView实例
-            - headerSize: form header的尺寸
-            - scrollDirection: 滚动方向
+     * 设置整个section悬停
+     * Set entire section floating
+     * - Parameters:
+     *   - attributes: 布局属性 / Layout attributes
+     *   - zIndex: zIndex值 / zIndex value
+     *   - view: QuickListView实例 / QuickListView instance
+     *   - headerSize: form header的尺寸 / form header size
+     *   - scrollDirection: 滚动方向 / Scroll direction
      */
     func suspensionAttributes(
         _ attributes: inout UICollectionViewLayoutAttributes,
@@ -834,14 +935,20 @@ extension QuickListSectionAttribute {
             let offset = view.contentOffset.y + view.adjustedContentInset.top
             var frame = attributes.caculatedFrame ?? attributes.frame
             if offset > headerSize.height {
-                /// 如果还没有滚动到悬停位置，直接返回原始的frame
+                /**
+                 * 如果还没有滚动到悬停位置，直接返回原始的frame
+                 * If not scrolled to floating position yet, return original frame directly
+                 */
                 frame.origin.y += offset - headerSize.height
             }
             attributes.frame = frame
         } else {
             var frame = attributes.caculatedFrame ?? attributes.frame
             if view.contentOffset.x >= headerSize.width {
-                /// 如果还没有滚动到悬停位置，直接返回原始的frame
+                /**
+                 * 如果还没有滚动到悬停位置，直接返回原始的frame
+                 * If not scrolled to floating position yet, return original frame directly
+                 */
                 frame.origin.x += view.contentOffset.x - headerSize.width
             }
             attributes.frame = frame
@@ -850,15 +957,16 @@ extension QuickListSectionAttribute {
     }
     
     /**
-    设置header悬停
-    - Parameters:
-        - headerAttributes: header的布局属性
-        - view: QuickListView实例
-        - headerSize: form header的尺寸
-        - suspensionHeader: 是否悬停form header
-        - suspensionHeaderSectionSize: 悬停的header section尺寸
-        - scrollDirection: 滚动方向
-    */
+     * 设置header悬停
+     * Set header floating
+     * - Parameters:
+     *   - headerAttributes: header的布局属性 / header layout attributes
+     *   - view: QuickListView实例 / QuickListView instance
+     *   - headerSize: form header的尺寸 / form header size
+     *   - suspensionHeader: 是否悬停form header / Whether form header is floating
+     *   - suspensionHeaderSectionSize: 悬停的header section尺寸 / Floating header section size
+     *   - scrollDirection: 滚动方向 / Scroll direction
+     */
     func suspensionHeaderAttributes(
         _ headerAttributes: inout UICollectionViewLayoutAttributes,
         for view: QuickListView,
@@ -891,7 +999,10 @@ extension QuickListSectionAttribute {
                 }
             }
         }
-        /// 还没有滚动到需要悬停的位置，直接返回原始的frame
+        /**
+         * 还没有滚动到需要悬停的位置，直接返回原始的frame
+         * Haven't scrolled to the position that needs floating yet, return original frame directly
+         */
         if scrollDirection == .vertical, startPoint.y >= offset.y  {
             var frame = headerAttributes.frame
             frame.origin.y = startPoint.y
@@ -904,19 +1015,28 @@ extension QuickListSectionAttribute {
             headerAttributes.frame = frame
             return
         }
-        /// 下一个元素的位置
+        /**
+         * 下一个元素的位置
+         * Next element position
+         */
         var nextAttrPosition: CGPoint = endPoint
         if let footerStartPoint = footerAttributes?.frame.origin {
             nextAttrPosition = footerStartPoint
         }
-        /// 已经滚动到下一个，直接跳过
+        /**
+         * 已经滚动到下一个，直接跳过
+         * Already scrolled to next, skip directly
+         */
         if scrollDirection == .vertical, offset.y > nextAttrPosition.y {
             return
         }
         if scrollDirection == .horizontal, offset.x > nextAttrPosition.x {
             return
         }
-        /// 设置header悬浮位置
+        /**
+         * 设置header悬浮位置
+         * Set header floating position
+         */
         if scrollDirection == .vertical {
             let width: CGFloat = headerAttributes.frame.width
             let height: CGFloat = headerAttributes.frame.height
@@ -949,13 +1069,14 @@ extension QuickListSectionAttribute {
     }
     
     /**
-     设置footer悬停
-        - Parameters:
-            - footerAttributes: footer的布局属性
-            - view: QuickListView实例
-            - footerSize: form footer的尺寸
-            - suspensionFooter: 是否悬停form footer
-            - scrollDirection: 滚动方向
+     * 设置footer悬停
+     * Set footer floating
+     * - Parameters:
+     *   - footerAttributes: footer的布局属性 / footer layout attributes
+     *   - view: QuickListView实例 / QuickListView instance
+     *   - footerSize: form footer的尺寸 / form footer size
+     *   - suspensionFooter: 是否悬停form footer / Whether form footer is floating
+     *   - scrollDirection: 滚动方向 / Scroll direction
      */
     func suspensionFooterAttributes(
         _ footerAttributes: inout UICollectionViewLayoutAttributes,
@@ -966,9 +1087,15 @@ extension QuickListSectionAttribute {
     ) {
         let offset = view.contentOffset
         var footerSuspensionSize: CGSize = suspensionFooter ? footerSize : .zero
-        /// 添加底部安全区域尺寸（视为一直悬浮）
+        /**
+         * 添加底部安全区域尺寸（视为一直悬浮）
+         * Add bottom safe area size (considered as always floating)
+         */
         footerSuspensionSize.height += view.adjustedContentInset.bottom
-        /// 还没有滚动到需要悬停的位置，直接返回原始的frame
+        /**
+         * 还没有滚动到需要悬停的位置，直接返回原始的frame
+         * Haven't scrolled to the position that needs floating yet, return original frame directly
+         */
         if scrollDirection == .vertical, endPoint.y < offset.y + view.bounds.height - footerSuspensionSize.height  {
             var frame = footerAttributes.frame
             frame.origin.y = endPoint.y - footerAttributes.size.height
@@ -981,19 +1108,28 @@ extension QuickListSectionAttribute {
             footerAttributes.frame = frame
             return
         }
-        /// 上一个元素的位置
+        /**
+         * 上一个元素的位置
+         * Previous element position
+         */
         var lastAttrPosition: CGPoint = startPoint
         if let headerFrame = self.headerAttributes?.frame {
             lastAttrPosition = CGPoint(x: headerFrame.maxX, y: headerFrame.maxY)
         } else
-        /// 已经滚动到上一个section，跳过
+        /**
+         * 已经滚动到上一个section，跳过
+         * Already scrolled to previous section, skip
+         */
         if scrollDirection == .vertical, lastAttrPosition.y > offset.y + view.bounds.height - footerSuspensionSize.height {
             return
         }
         if scrollDirection == .horizontal, lastAttrPosition.x > offset.x + view.bounds.width - footerSuspensionSize.width {
             return
         }
-        /// 设置footer悬浮位置
+        /**
+         * 设置footer悬浮位置
+         * Set footer floating position
+         */
         if scrollDirection == .vertical {
             let width = footerAttributes.frame.width
             let height = footerAttributes.frame.height

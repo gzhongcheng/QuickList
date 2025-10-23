@@ -28,12 +28,21 @@ public class CustomViewItemCell: ItemCell {
 }
 
 // MARK:- CustomViewItem
-/// 用于将已有的View快速包装成Item的容器
+/**
+ * 用于将已有的View快速包装成Item的容器
+ * Container for quickly wrapping existing Views into Items
+ */
 public final class CustomViewItem: AutolayoutItemOf<CustomViewItemCell>, ItemType {
     var customIdentifier: String = "CustomViewItemCell"
-    /// 当前的自定义view
+    /**
+     * 当前的自定义view
+     * Current custom view
+     */
     public var customView: UIView?
-    /// 自定义view的布局逻辑
+    /**
+     * 自定义view的布局逻辑
+     * Custom view layout logic
+     */
     public var customViewLayoutBuilder: ((UIView) -> Void)? = { view in
         view.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -51,7 +60,10 @@ public final class CustomViewItem: AutolayoutItemOf<CustomViewItemCell>, ItemTyp
         super.init(title: title, tag: tag)
     }
     
-    // 更新cell的布局
+    /**
+     * 更新cell的布局
+     * Update cell layout
+     */
     public override func updateCell() {
         super.updateCell()
         guard let cell = cell as? CustomViewItemCell else {
@@ -60,7 +72,10 @@ public final class CustomViewItem: AutolayoutItemOf<CustomViewItemCell>, ItemTyp
         updateCellData(cell)
     }
     
-    /// 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
+    /**
+     * 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
+     * This method is needed for auto layout size calculation, setting data first then calculating size, so the above updateCell method directly calls this method
+     */
     public override func updateCellData(_ cell: CustomViewItemCell) {
         guard let customView = customView else { return }
         cell.addCustomViewIfNeeded(customView)

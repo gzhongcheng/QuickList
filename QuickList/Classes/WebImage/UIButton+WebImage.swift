@@ -8,7 +8,7 @@
 import Kingfisher
 import KingfisherWebP
 
-// MARK: - 网络图片加载
+// MARK: - Network image loading
 private var imageDownloadUrlKey: Void?
 private var imageDownloadTaskKey: Void?
 private var imageCacheKeyKey: Void?
@@ -41,16 +41,16 @@ public extension UIButton {
     
     /// 为减少列表加载图片的卡顿，加载网络图片时使用自己的缓存策略，限制图片的最大宽高进行缓存（宽高超过的话会先压缩再缓存压缩后的图片，并且设置独立的缓存Key）
     /// - Parameters:
-    ///   - urlString: 图片地址，可为空，传cacheKey来获取已缓存的图片
-    ///   - placeholderImage: 加载中的图片
-    ///   - loadFaildImage: 加载失败展示的图片
-    ///   - cacheOriginImage: 是否缓存原图，默认为true
-    ///   - cacheKey: 缓存key，不传则对压缩的图片采用原地址+_resize_+限制的宽度/高度 格式进行缓存
-    ///   - maxWidth: 限制的最大宽度，可不传，内部会自动乘上屏幕的scale
-    ///   - maxHeight: 限制的最大高度，可不传，内部会自动乘上屏幕的scale
-    ///   - options: 下载图片时用到，默认为[], 如果不设置processor的话，默认会使用.processor(WebPProcessor.default)进行解码
-    ///   - progressBlock: 进度回调
-    ///   - completionHandler: 加载完成回调
+    ///   - urlString: 图片地址，可为空，传cacheKey来获取已缓存的图片 / Image URL, can be empty, pass cacheKey to get cached image
+    ///   - placeholderImage: 加载中的图片 / Loading image
+    ///   - loadFaildImage: 加载失败展示的图片 / Failed loading image
+    ///   - cacheOriginImage: 是否缓存原图，默认为true / Whether to cache original image, default true
+    ///   - cacheKey: 缓存key，不传则对压缩的图片采用原地址+_resize_+限制的宽度/高度 格式进行缓存 / Cache key, if not passed, use original URL + _resize_ + limited width/height format for compressed images
+    ///   - maxWidth: 限制的最大宽度，可不传，内部会自动乘上屏幕的scale / Maximum width limit, optional, will automatically multiply by screen scale
+    ///   - maxHeight: 限制的最大高度，可不传，内部会自动乘上屏幕的scale / Maximum height limit, optional, will automatically multiply by screen scale
+    ///   - options: 下载图片时用到，默认为[], 如果不设置processor的话，默认会使用.processor(WebPProcessor.default)进行解码 / Used when downloading images, default [], if processor is not set, will use .processor(WebPProcessor.default) for decoding
+    ///   - progressBlock: 进度回调 / Progress callback
+    ///   - completionHandler: 加载完成回调 / Loading completion callback
     func loadWebImage(
         _ urlString: String? = nil,
         cacheKey: String? = nil,
@@ -323,9 +323,9 @@ public extension UIButton {
     
     /// 展示加载失败并回调
     /// - Parameters:
-    ///   - faildImage: 加载失败图片
-    ///   - error: 失败信息
-    ///   - completionHandler: 回调函数
+    ///   - faildImage: 加载失败图片 / Failed loading image
+    ///   - error: 失败信息 / Error information
+    ///   - completionHandler: 回调函数 / Callback function
     private func noticeLoadImageFaild(
         faildImage: UIImage?,
         for state: UIControl.State = .normal,

@@ -32,28 +32,52 @@ class SegmentViewController: UIViewController {
         }
         
         let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formHeader.shouldSuspension = false
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formHeader.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formHeader.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formHeader.displayType = .stretch
         formlist.form.header = formHeader
         
         let formFooter = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formFooter.shouldSuspension = false
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formFooter.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formFooter.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formFooter.displayType = .normal
 
         formlist.form.footer = formFooter
@@ -109,7 +133,7 @@ class SegmentViewController: UIViewController {
 
 class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate {
     var pageTabItem: QuickList.Item = TitleValueItem() { item in
-        item.value = "测试页面"
+        item.value = "Test Page"
     }
     
     func listScrollView() -> QuickSegmentPageScrollViewType? {
@@ -128,36 +152,48 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
         }
         
         let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formHeader.shouldSuspension = false
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formHeader.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formHeader.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formHeader.displayType = .normal
         formlist.form.header = formHeader
         
-        let swipItemSection = Section("测试左滑Icon") { section in
+        let swipItemSection = Section("Test Swipe Icon") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
         }
         for i in 0 ... 30 {
-            swipItemSection <<< TestSwipeItem("左滑删除\(i)") { item in
+            swipItemSection <<< TestSwipeItem("Left Swipe Delete \(i)") { item in
                 item.swipedActionButtons = [
                     SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red),
-                    SwipeActionButton(title: "添加收藏", backgroundColor: .yellow),
-                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "更多说明", backgroundColor: .lightGray)
+                    SwipeActionButton(title: "Add Favorite", backgroundColor: .yellow),
+                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "More Information", backgroundColor: .lightGray)
                 ]
             }
         }
         formlist.form +++ swipItemSection
         
-        let towColumSection = Section("固定大小两列图片") { section in
+        let towColumSection = Section("Fixed Size Two Column Images") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
@@ -189,7 +225,7 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
 
 class SegmentPageViewController1: UIViewController, QuickSegmentPageViewDelegate {
     var pageTabItem: QuickList.Item = TitleValueItem() { item in
-        item.value = "测试页面1"
+        item.value = "Test Page 1"
     }
     
     func listScrollView() -> QuickSegmentPageScrollViewType? {
@@ -230,7 +266,7 @@ class SegmentPageViewController1: UIViewController, QuickSegmentPageViewDelegate
 
 class SegmentPageViewController2: UIViewController, QuickSegmentPageViewDelegate {
     var pageTabItem: QuickList.Item = TitleValueItem() { item in
-        item.value = "测试页面2"
+        item.value = "Test Page 2"
     }
     
     let tableView = QuickSegmentPageTableView()
@@ -270,14 +306,14 @@ extension SegmentPageViewController2: UITableViewDelegate, UITableViewDataSource
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
-        cell.textLabel?.text = "测试数据\(indexPath.row)"
+        cell.textLabel?.text = "Test Data \(indexPath.row)"
         return cell
     }
 }
 
 class SegmentPageViewController3: UIViewController, QuickSegmentPageViewDelegate {
     var pageTabItem: QuickList.Item = TitleValueItem() { item in
-        item.value = "测试页面1"
+        item.value = "Test Page 3"
     }
     
     func listScrollView() -> QuickSegmentPageScrollViewType? {

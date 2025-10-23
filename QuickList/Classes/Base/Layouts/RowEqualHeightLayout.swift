@@ -7,7 +7,10 @@
 
 import Foundation
 
-/// 多列布局，且行的所有元素都强制为最高的元素的高度
+/**
+ * 多列布局，且行的所有元素都强制为最高的元素的高度
+ * Multi-column layout with all elements in a row forced to the height of the tallest element
+ */
 public class RowEqualHeightLayout: QuickListBaseLayout {
     public override init() {
         super.init()
@@ -34,32 +37,44 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
             return attribute
         }
         
-        // 设置startPoint
         attribute.startPoint = currentStart
         
-        /// 列数
         let column = section.column
-        /// 行间距
         let lineSpace = section.lineSpace
-        /// 当前计算位置
+        /**
+         * 当前计算位置
+         * Current calculation position
+         */
         var tempStart = currentStart
-        // 添加header的位置
+        /**
+         * 添加header的位置
+         * Add header position
+         */
         addHeaderAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
-        /// item展示区域起点
+        /**
+         * item展示区域起点
+         * Item display area starting point
+         */
         let itemStartPoint = CGPoint(x: tempStart.x + sectionContentInset.left, y: tempStart.y + sectionContentInset.top)
         if layout.scrollDirection == .vertical {
             tempStart.y += sectionContentInset.top
         } else {
             tempStart.x += sectionContentInset.left
         }
-        // 添加每个元素的位置
-        /// 展示范围
+        // 添加每个元素的位置 / Add position for each element
+        /**
+         * 展示范围
+         * Display range
+         */
         let itemTotalWidth = maxWidth - sectionContentInset.left - sectionContentInset.right
         let itemTotalHeight = maxHeight - sectionContentInset.top - sectionContentInset.bottom
         let singleItemWidth: CGFloat = (itemTotalWidth - (section.column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
         let singleItemHeight: CGFloat = (itemTotalHeight - (section.column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
-        /// 最后一行元素的结束偏移量
+        /**
+         * 最后一行元素的结束偏移量
+         * End offset of elements in the last row
+         */
         var tempOffset: CGFloat = 0
         attribute.itemAttributes.removeAll()
         var currentRowMaxHeight: CGFloat = 0
@@ -92,10 +107,16 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
             var itemOffsetY: CGFloat = 0
             
             if section.column <= item.weight {
-                /// 填满整行
+                /**
+                 * 填满整行
+                 * Fill entire row
+                 */
                 if layout.scrollDirection == .vertical {
                     if !item.isHidden {
-                        /// 如果上一个还未填满一行，换行
+                        /**
+                         * 如果上一个还未填满一行，换行
+                         * If previous item hasn't filled a row, wrap to next line
+                         */
                         if itemIndex != 0 {
                             itemIndex = 0
                             rowAttrs.forEach({ $0.frame.size.height = currentRowMaxHeight })
@@ -108,14 +129,20 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
                     itemOffsetY = tempOffset
                     itemOffsetX = 0
                     if !item.isHidden {
-                        /// 占用行/列的位置调整
+                        /**
+                         * 占用行/列的位置调整
+                         * Position adjustment for occupied rows/columns
+                         */
                         tempOffset = itemOffsetY + lineSpace + itemSize.height
                         visibleLineCount += 1
                     }
                     itemSize.width = itemTotalWidth
                 } else {
                     if !item.isHidden {
-                        /// 如果上一个还未填满一行，换行
+                        /**
+                         * 如果上一个还未填满一行，换行
+                         * If previous item hasn't filled a row, wrap to next line
+                         */
                         if itemIndex != 0 {
                             itemIndex = 0
                             rowAttrs.forEach({ $0.frame.size.width = currentRowMaxHeight })
@@ -128,7 +155,10 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
                     itemOffsetX = tempOffset
                     itemOffsetY = 0
                     if !item.isHidden {
-                        /// 占用行/列的位置调整
+                        /**
+                         * 占用行/列的位置调整
+                         * Position adjustment for occupied rows/columns
+                         */
                         tempOffset = itemOffsetX + lineSpace + itemSize.width
                         visibleLineCount += 1
                     }
@@ -138,7 +168,10 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
                 if itemIndex + item.weight > section.column {
                     if layout.scrollDirection == .vertical {
                         if !item.isHidden {
-                            /// 没有足够的空间可以插入item，就换行
+                            /**
+                             * 没有足够的空间可以插入item，就换行
+                             * If there's not enough space to insert item, wrap to next line
+                             */
                             itemIndex = item.weight
                             rowAttrs.forEach({ $0.frame.size.height = currentRowMaxHeight })
                             tempOffset += currentRowMaxHeight + lineSpace
@@ -151,7 +184,10 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
                         itemOffsetX = 0
                     } else {
                         if !item.isHidden {
-                            /// 没有足够的空间可以插入item，就换行
+                            /**
+                             * 没有足够的空间可以插入item，就换行
+                             * If there's not enough space to insert item, wrap to next line
+                             */
                             itemIndex = item.weight
                             rowAttrs.forEach({ $0.frame.size.width = currentRowMaxHeight })
                             tempOffset += currentRowMaxHeight + lineSpace
@@ -190,7 +226,10 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         
         if layout.scrollDirection == .vertical {
             if rowAttrs.count > 0 {
-                /// 换行
+                /**
+                 * 换行
+                 * Line break
+                 */
                 rowAttrs.forEach({ $0.frame.size.height = currentRowMaxHeight })
                 tempOffset += currentRowMaxHeight + lineSpace
                 currentRowMaxHeight = 0
@@ -203,7 +242,10 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
             }
         } else {
             if rowAttrs.count > 0 {
-                /// 换行
+                /**
+                 * 换行
+                 * Line break
+                 */
                 rowAttrs.forEach({ $0.frame.size.width = currentRowMaxHeight })
                 tempOffset += currentRowMaxHeight + lineSpace
                 currentRowMaxHeight = 0
@@ -216,16 +258,24 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
             }
         }
         
-        // 添加footer的位置
+        /**
+         * 添加footer的位置
+         * Add footer position
+         */
         addFooterAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
-        // 设置endPoint
         attribute.endPoint = tempStart
         
-        /// 添加decoration的位置
+        /**
+         * 添加decoration的位置
+         * Add decoration position
+         */
         addDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         
-        /// 添加suspensionDecoration的位置
+        /**
+         * 添加suspensionDecoration的位置
+         * Add suspensionDecoration position
+         */
         addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         return attribute
     }

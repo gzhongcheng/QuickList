@@ -10,7 +10,7 @@ import SnapKit
 
 public class PlaceholderTextView: UIView {
 
-    //MARK: - 懒加载属性
+    //MARK: - Lazy properties
     lazy public var plaleLabel = UILabel()
     lazy var countLabel = UILabel()
     lazy public var inputTextView: UITextView = {
@@ -58,9 +58,11 @@ public class PlaceholderTextView: UIView {
             make.bottom.lessThanOrEqualTo(-placeholderInset.bottom - contentInset.bottom)
         }
     }
-
-    //储存属性
-    @objc public var placeholderGlobal: String? {     //提示文字
+    /**
+     * 提示文字
+     * Placeholder text
+     */
+    @objc public var placeholderGlobal: String? {     
         didSet{
             plaleLabel.text = placeholderGlobal
         }
@@ -70,16 +72,31 @@ public class PlaceholderTextView: UIView {
             plaleLabel.textColor = placeholderColorGlobal
         }
     }
-    @objc var isReturnHidden:Bool = false     //是否点击返回失去响应
-    @objc public var isShowCountLabel:Bool = false { //是否显示计算个数的Label
+    /**
+     * 是否点击返回失去响应
+     * Whether to lose response when clicking return
+     */
+    @objc var isReturnHidden:Bool = false     
+    /**
+     * 是否显示计算个数的Label
+     * Whether to show count label
+     */
+    @objc public var isShowCountLabel:Bool = false { 
         didSet{
             countLabel.isHidden = !isShowCountLabel
         }
     }
-    @objc public var limitWords: UInt = 999999             //限制输入个数   默认为999999，不限制输入
+    /**
+     * 限制输入个数   默认为999999，不限制输入
+     * Limit input count, default 999999, no limit
+     */
+    @objc public var limitWords: UInt = 999999             
     
-    //MARK: - 系统方法
-    /// PlaceholerTextView 唯一初始化方法
+    //MARK: - System methods
+    /**
+     * PlaceholerTextView 唯一初始化方法
+     * PlaceholerTextView unique initialization method
+     */
     public convenience init(placeholder:String?,placeholderColor:UIColor?) {
         self.init(frame: .zero)
         setup(placeholder: placeholder, placeholderColor: placeholderColor)
@@ -91,13 +108,15 @@ public class PlaceholderTextView: UIView {
         super.init(frame: frame)
     }
     
-    //XIB 调用
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setup(placeholder: nil, placeholderColor: nil)
     }
     
-    /// 设置光标颜色
+    /**
+     * 设置光标颜色
+     * Set cursor color
+     */
     public override var tintColor: UIColor! {
         didSet {
             inputTextView.tintColor = tintColor
@@ -105,11 +124,10 @@ public class PlaceholderTextView: UIView {
     }
 }
 
-//MARK: - 自定义UI
+//MARK: - Custom UI
 extension PlaceholderTextView {
     
-    /// placeholder Label Setup
-    private func setup(placeholder:String?,placeholderColor:UIColor?){
+    private func setup(placeholder: String?, placeholderColor: UIColor?){
         inputTextView.delegate = self
         inputTextView.textContainer.lineFragmentPadding = 0
         inputTextView.layoutManager.allowsNonContiguousLayout = false
@@ -149,12 +167,15 @@ extension PlaceholderTextView {
     
 }
 
-//MARK: - UITextViewDelegate代理方法
+//MARK: - UITextViewDelegate delegate methods
 extension PlaceholderTextView : UITextViewDelegate{
     
     public func textViewDidChange(_ textView: UITextView) {
         checkShowHiddenPlaceholder()
-        //检查输入框的文字是否超长，如果超出长度则做截短
+        /**
+         检查输入框的文字是否超长，如果超出长度则做截短
+         Check if text is too long, truncate if exceeds length
+         */
         let totalCount = textView.limitTextCount(Int(limitWords), endEditing: false)
         countLabel.text = "\(min(totalCount, Int(limitWords)))/\(limitWords)"
         if textDidChangeBlock != nil {
@@ -195,11 +216,14 @@ extension PlaceholderTextView : UITextViewDelegate{
     }
 }
 
-//MARK : - 工具方法
+//MARK : - Utility methods
 
 extension PlaceholderTextView {
     
-    ///根据textView是否有内容显示placeholder
+    /**
+     * 根据textView是否有内容显示placeholder
+     * Show placeholder based on whether textView has content
+     */
     public func checkShowHiddenPlaceholder(){
         if self.inputTextView.hasText {
             mainThread {
@@ -219,7 +243,10 @@ extension PlaceholderTextView {
 // MARK: - UITextViewExtension
 extension UITextView {
 
-    /// 滚动到顶部
+    /**
+     * 滚动到顶部
+     * Scroll to top
+     */
     func scrollToTop() {
         // swiftlint:disable:next legacy_constructor
         let range = NSMakeRange(0, 1)

@@ -8,7 +8,10 @@
 import Foundation
 
 extension IndexPath {
-    /// 获取section
+    /**
+     * 获取section
+     * Get section
+     */
     func safeSection() -> Int? {
         if self.count == 0 {
             return nil

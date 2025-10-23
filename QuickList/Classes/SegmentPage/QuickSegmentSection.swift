@@ -16,7 +16,10 @@ public protocol QuickSegmentTabProtocol {
     var menuItemSpace: CGFloat { get set }
     
     func reloadMenu(to pageViewControllers: [QuickSegmentPageViewDelegate])
-    /// 更新选中状态到指定位置
+    /**
+     * 更新选中状态到指定位置
+     * Update the selected state to the specified position
+     */
     func updateSelectedDecorationTo(position: CGFloat)
 }
 
@@ -79,14 +82,20 @@ public struct QuickSegmentVerticalMenuConfig: QuickSegmentMenuConfig {
 }
 
 public class QuickSegmentSection: Section {
-    /// 选择tab时是否置顶
+    /**
+     * 选择tab时是否置顶
+     * Whether to scroll to the top when the tab is selected
+     */
     public var shouldScrollToTopWhenSelectedTab: Bool = true {
         didSet {
             self.pagesItem.shouldScrollToTopWhenPageDisappear = shouldScrollToTopWhenSelectedTab
         }
     }
     
-    /// 页面是否可以滚动切换，默认false
+    /**
+     * 页面是否可以滚动切换，默认false
+     * Whether the page can be switched by scrolling, default false
+     */
     public var pageScrollEnable: Bool {
         set {
             self.pagesItem.scrollEnable = newValue
@@ -96,10 +105,16 @@ public class QuickSegmentSection: Section {
         }
     }
     
-    /// 页面控制器列表
+    /**
+     * 页面控制器列表
+     * Page controller list
+     */
     var pageViewControllers: [QuickSegmentPageViewDelegate] = []
     
-    /// 页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高)
+    /**
+     * 页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高)
+     * Page controller container height (default nil, means the remaining area after subtracting the menu height from the parent view is equal height)
+     */
     var pageContainerHeight: CGFloat?
     
     var scrollManager: QuickSegmentScrollManager?
@@ -120,13 +135,14 @@ public class QuickSegmentSection: Section {
     }
     
     /**
-    初始化一个分段页面Section
+     * 初始化一个分段页面Section
+     * Initialize a segmented page section
      - Parameters:
-        - menuConfig: 菜单配置
-        - pageViewControllers: 页面控制器列表
-        - pageContainerHeight: 页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高)
-        - pageScrollEnable: 页面是否可以滚动切换，默认false
-        - initializer: 初始化配置完成回调
+        - menuConfig: 菜单配置 / Menu configuration
+        - pageViewControllers: 页面控制器列表 / Page controller list
+        - pageContainerHeight: 页面控制器容器高度(默认为nil，表示和父视图扣去菜单高度后的剩余区域等高) / Page controller container height (default nil, means the remaining area after subtracting the menu height from the parent view is equal height)
+        - pageScrollEnable: 页面是否可以滚动切换，默认false / Whether the page can be switched by scrolling, default false
+        - initializer: 初始化配置完成回调 / Initialization configuration completed callback
      */
     public convenience init(
         menuConfig: QuickSegmentMenuConfig,
@@ -304,7 +320,10 @@ public class QuickSegmentSection: Section {
         self.append(menuItem)
     }
     
-    /// 菜单列表Tab
+    /**
+     * 菜单列表Tab
+     * Menu list Tab
+     */
     public let menuTabList: QuickListView = {
         let listView = QuickListView()
         listView.scrollDirection = .horizontal
@@ -315,7 +334,10 @@ public class QuickSegmentSection: Section {
     
     internal weak var currentPageScrollView: QuickSegmentScrollViewType?
     
-    /// 页面item
+    /**
+     * 页面item
+     * Page item
+     */
     public lazy var pagesItem: QuickSegmentPagesItem = {
         let item = QuickSegmentPagesItem(pageViewControllers: self.pageViewControllers, pageContainerHeight: self.pageContainerHeight)
         item.delegate = self

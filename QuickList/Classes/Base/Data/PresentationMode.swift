@@ -9,48 +9,74 @@ import Foundation
 import UIKit
 
 /**
- *  Item弹出的Controller的基础协议
+ * Item弹出的Controller的基础协议
+ * Base protocol for Item popup Controller
  */
 public protocol ItemControllerType: NSObjectProtocol {
 
-    /// Controller消失时回调的block
+    /**
+     * Controller消失时回调的block
+     * Block callback when Controller disappears
+     */
     var onDismissCallback: ((UIViewController) -> Void)? { get set }
 }
 
 /**
- *  Item弹出控制器的关联协议
+ * Item弹出控制器的关联协议
+ * Association protocol for Item popup controller
  */
 public protocol TypedItemControllerType: ItemControllerType {
-    /// 弹出这个控制器的item
+    /**
+     * 弹出这个控制器的item
+     * Item that pops up this controller
+     */
     var item: Item! { get set }
 }
 
 /**
- *  Item弹出控制器传值的关联协议
+ * Item弹出控制器传值的关联协议
+ * Association protocol for Item popup controller value passing
  */
 public protocol TypedCollectionValueItemType {
     associatedtype Value: Equatable
     
-    /// Value
+    /**
+     * Value
+     * 值
+     */
     var sendValue: Value? { get set }
 }
 
 /**
- 定义应如何创建控制器的枚举
-
- - Callback -> VCType:    由block代码的返回值创建控制器
- - NibFile:                         由xib文件创建控制器
- - StoryBoard:                  由StoryBoard中的storyboard id创建控制器
+ * 定义应如何创建控制器的枚举
+ * Define enumeration for how to create controllers
+ *
+ * - Callback -> VCType:    由block代码的返回值创建控制器
+ * - NibFile:               由xib文件创建控制器
+ * - StoryBoard:            由StoryBoard中的storyboard id创建控制器
+ *
+ * - Callback -> VCType:    Create controller from block code return value
+ * - NibFile:               Create controller from xib file
+ * - StoryBoard:            Create controller from StoryBoard storyboard id
  */
 public enum ControllerProvider<VCType: UIViewController> {
 
-    /// 指定block中创建控制器
+    /**
+     * 指定block中创建控制器
+     * Create controller in specified block
+     */
     case callback(builder: (() -> VCType))
 
-    /// 指定xibName和Bundle
+    /**
+     * 指定xibName和Bundle
+     * Specify xibName and Bundle
+     */
     case nibFile(name: String, bundle: Bundle?)
 
-    /// 指定storyboardName、Bundle和其中的storyboard id
+    /**
+     * 指定storyboardName、Bundle和其中的storyboard id
+     * Specify storyboardName, Bundle and storyboard id in it
+     */
     case storyBoard(storyboardId: String, storyboardName: String, bundle: Bundle?)
 
     func makeController() -> VCType {
@@ -67,29 +93,51 @@ public enum ControllerProvider<VCType: UIViewController> {
 }
 
 /**
- 定义控制器如何显示
-
- - Show?:                       使用`show(_:sender:)`方法跳转（自动选择push和present）
- - PresentModally?:       使用Present方式跳转
- - SegueName?:            使用StoryBoard中的Segue identifier跳转
- - SegueClass?:            使用UIStoryboardSegue类跳转
- - popover?:                  使用popoverPresentationController方式展示
+ * 定义控制器如何显示
+ * Define how controllers are displayed
+ *
+ * - Show?:                 使用`show(_:sender:)`方法跳转（自动选择push和present）
+ * - PresentModally?:       使用Present方式跳转
+ * - SegueName?:            使用StoryBoard中的Segue identifier跳转
+ * - SegueClass?:           使用UIStoryboardSegue类跳转
+ * - popover?:              使用popoverPresentationController方式展示
+ *
+ * - Show?:                 Use `show(_:sender:)` method to jump (automatically choose push and present)
+ * - PresentModally?:       Use Present method to jump
+ * - SegueName?:            Use Segue identifier in StoryBoard to jump
+ * - SegueClass?:           Use UIStoryboardSegue class to jump
+ * - popover?:              Use popoverPresentationController method to display
  */
 public enum PresentationMode<VCType: UIViewController> {
 
-    /// 根据指定的Provider创建控制器，并使用`show(_:sender:)`方法进行跳转
+    /**
+     * 根据指定的Provider创建控制器，并使用`show(_:sender:)`方法进行跳转
+     * Create controller based on specified Provider and jump using `show(_:sender:)` method
+     */
     case show(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 
-    /// 根据指定的Provider创建控制器，并使用Present方式跳转
+    /**
+     * 根据指定的Provider创建控制器，并使用Present方式跳转
+     * Create controller based on specified Provider and jump using Present method
+     */
     case presentModally(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 
-    /// 使用StoryBoard中的Segue identifier跳转
+    /**
+     * 使用StoryBoard中的Segue identifier跳转
+     * Jump using Segue identifier in StoryBoard
+     */
     case segueName(segueName: String, onDismiss: ((VCType) -> Void)?)
 
-    /// 使用UIStoryboardSegue类执行跳转
+    /**
+     * 使用UIStoryboardSegue类执行跳转
+     * Execute jump using UIStoryboardSegue class
+     */
     case segueClass(segueClass: UIStoryboardSegue.Type, onDismiss: ((VCType) -> Void)?)
 
-    /// popoverPresentationController(小窗口)方式展示
+    /**
+     * popoverPresentationController(小窗口)方式展示
+     * Display using popoverPresentationController (small window) method
+     */
     case popover(controllerProvider: ControllerProvider<VCType>, onDismiss: ((VCType) -> Void)?)
 
     public var onDismissCallback: ((VCType) -> Void)? {
@@ -108,11 +156,16 @@ public enum PresentationMode<VCType: UIViewController> {
     }
 
     /**
-     自定义Item的点击事件中调用此方法进行跳转
-     
-     - parameter viewController:           跳转目标控制器
-     - parameter item:                     关联的Item
-     - parameter presentingViewController: 跳转来源，通常当前控制器
+     * 自定义Item的点击事件中调用此方法进行跳转
+     * Call this method in custom Item click event to jump
+     *
+     * - parameter viewController:           跳转目标控制器
+     * - parameter item:                     关联的Item
+     * - parameter presentingViewController: 跳转来源，通常当前控制器
+     *
+     * - parameter viewController:           Target controller to jump to
+     * - parameter item:                     Associated Item
+     * - parameter presentingViewController: Source of jump, usually current controller
      */
     public func present(_ viewController: VCType!, item: Item, presentingController: UIViewController) {
         switch self {
@@ -136,9 +189,11 @@ public enum PresentationMode<VCType: UIViewController> {
     }
 
     /**
-     自定义Item中获取控制器的方法，会根据当前枚举的值获取对应的控制器
-
-     - returns: 创建好的控制器，或nil
+     * 自定义Item中获取控制器的方法，会根据当前枚举的值获取对应的控制器
+     * Method to get controller in custom Item, will get corresponding controller based on current enumeration value
+     *
+     * - returns: 创建好的控制器，或nil
+     * - returns: Created controller, or nil
      */
     public func makeController() -> VCType? {
         switch self {

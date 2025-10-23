@@ -5,7 +5,7 @@
 //  Created by ZhongCheng Guo on 2024/8/7.
 //
 
-// MARK: - 自定义运算符
+// MARK: - Custom operators
 /// 定义优先级组
 precedencegroup FormPrecedence {
     associativity: left                      // 结合方向:left, right or none
@@ -18,37 +18,62 @@ precedencegroup  SectionPrecedence {
     higherThan: FormPrecedence      // 优先级,比Form高
 }
 
-// MARK: - 声明操作符
-// 增加
-/// +++  返回结果为 Form
+// MARK: - Operators
+// MARK: Add
+/**
+ * +++  返回结果为 Form
+ * +++  returns result as Form
+ */
 infix operator +++ : FormPrecedence
-/// +++! 返回结果为 Form，并通知代理
+/**
+ * +++! 返回结果为 Form，并通知代理
+ * +++! returns result as Form, and notify delegate
+ */
 infix operator +++! : FormPrecedence
-/// <<< 返回结果为 Section
+/**
+ * <<< 返回结果为 Section
+ * <<< returns result as Section
+ */
 infix operator <<< :  SectionPrecedence
-/// <<< 返回结果为 Section，并通知代理
+/**
+ * <<< 返回结果为 Section，并通知代理
+ * <<< returns result as Section, and notify delegate
+ */
 infix operator <<<! :  SectionPrecedence
 
-// 替换
-/// >>> 替换 元素
+// MARK: Replace
+/**
+ * >>> 替换 元素
+ * >>> replaces elements
+ */
 infix operator >>> : FormPrecedence
-/// >>> 替换 元素 并通知代理
+/**
+ * >>> 替换 元素 并通知代理
+ * >>> replaces elements and notifies delegate
+ */
 infix operator >>>! : FormPrecedence
 
-// 移除
-/// ---- 移除所有元素
+// MARK: Remove
+/**
+ * ---- 移除所有元素
+ * ---- removes all elements
+ */
 postfix operator ---
-/// ---- 移除所有元素并通知代理
+/**
+ * ---- 移除所有元素并通知代理
+ * ---- removes all elements and notifies delegate
+ */
 postfix operator ---!
 
-// MARK: - +++
+// MARK: - Function
 /**
- 添加 Section 到 Form
+ * 添加 Section 到 Form
+ * Add Section to Form
  
- - parameter left:  form
- - parameter right: 需要添加的 section
- 
- - returns: 添加后的 form
+ * - parameter left:  form
+ * - parameter right: 需要添加的 section
+ * 
+ * - returns: 添加后的 form
  */
 @discardableResult
 public func +++ (left: Form, right: Section) -> Form {
@@ -56,10 +81,11 @@ public func +++ (left: Form, right: Section) -> Form {
     return left
 }
 /**
- 添加 Item 到 Form 的最后一个 Section
+ * 添加 Item 到 Form 的最后一个 Section
+ * Add Item to the last Section of Form
  
- - parameter left:  form
- - parameter right: item
+ * - parameter left:  form
+ * - parameter right: item
  */
 @discardableResult
 public func +++ (left: Form, right: Item) -> Form {
@@ -73,12 +99,13 @@ public func +++ (left: Form, right: Item) -> Form {
     return left
 }
 /**
- 用两个Section相加创建Form
+ * 用两个Section相加创建Form
+ * Create Form by adding two Sections
  
- - parameter left:  第一个 section
- - parameter right: 第二个 section
- 
- - returns: 创建好的Form
+ * - parameter left:  第一个 section
+ * - parameter right: 第二个 section
+ * 
+ * - returns: 创建好的Form
  */
 @discardableResult
 public func +++ (left: Section, right: Section) -> Form {
@@ -89,12 +116,13 @@ public func +++ (left: Section, right: Section) -> Form {
 }
 
 /**
- 用两个Section相加创建Form, 每个Section中包含一个Item
+ * 用两个Section相加创建Form, 每个Section中包含一个Item
+ * Create Form by adding two Sections, each Section contains one Item
  
- - parameter left:  第一个Section中的Item
- - parameter right: 第二个Section中的Item
- 
- - returns: 创建好的Form
+ * - parameter left:  第一个Section中的Item
+ * - parameter right: 第二个Section中的Item
+ * 
+ * - returns: 创建好的Form
  */
 @discardableResult
 public func +++ (left: Item, right: Item) -> Form {
@@ -110,12 +138,13 @@ public func +++ (left: Item, right: Item) -> Form {
 
 // MARK: - +++!
 /**
- 添加 Section 到 Form, 并通知到代理
+ * 添加 Section 到 Form, 并通知到代理
+ * Add Section to Form, and notify delegate
  
- - parameter left:  form
- - parameter right: 需要添加的 section
- 
- - returns: 添加后的 form
+ * - parameter left:  form
+ * - parameter right: 需要添加的 section
+ * 
+ * - returns: 添加后的 form
  */
 @discardableResult
 public func +++! (left: Form, right: Section) -> Form {
@@ -123,7 +152,8 @@ public func +++! (left: Form, right: Section) -> Form {
     return left
 }
 /**
- 添加 Item 到 Form 的最后一个 Section, 并通知到代理
+ * 添加 Item 到 Form 的最后一个 Section, 并通知到代理
+ * Add Item to the last Section of Form, and notify delegate
  
  - parameter left:  form
  - parameter right: item
@@ -142,12 +172,13 @@ public func +++! (left: Form, right: Item) -> Form {
 
 // MARK: - <<<
 /**
- 添加Item到Section
- 
- - parameter left:  section
- - parameter right: item
- 
- - returns: section
+ * 添加Item到Section
+ * Add Item to Section
+ * 
+ * - parameter left:  section
+ * - parameter right: item
+ * 
+ * - returns: section
  */
 @discardableResult
 public func <<< (left: Section, right: Item) -> Section {
@@ -156,12 +187,13 @@ public func <<< (left: Section, right: Item) -> Section {
 }
 
 /**
- 两个Item创建Section
- 
- - parameter left:  第一个 item
- - parameter right: 第二个 item
- 
- - returns: 创建好的 section
+ * 用两个Item创建一个Section
+ * Create Section by adding two Items
+ *
+ * - parameter left:  第一个 item
+ * - parameter right: 第二个 item
+ * 
+ * - returns: 创建好的 section
  */
 @discardableResult
 public func <<< (left: Item, right: Item) -> Section {
@@ -173,15 +205,22 @@ public func <<< (left: Item, right: Item) -> Section {
 
 // MARK: - <<<!
 /**
- 添加Item到Section, 并通知到代理
- 使用 <<<!前，
- ***如果section已经被添加到form中***，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
- ***如果section还没有被添加到form中***，就没关系
- 
- - parameter left:  section
- - parameter right: item
- 
- - returns: section
+ * 添加Item到Section, 并通知到代理
+ * Add Item to Section, and notify delegate
+ * 
+ * 使用 <<<!前，
+ * 如果section已经被添加到form中，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
+ * 如果section还没有被添加到form中，就没关系
+ *
+ * Add Item to Section, and notify delegate
+ * before using <<<!, 
+ * if the section has been added to the form, please confirm that the collectionView has been refreshed (the section information is already on the collectionView, otherwise it will crash)
+ * if the section has not been added to the form, it's ok
+ * 
+ * - parameter left:  section
+ * - parameter right: item
+ * 
+ * - returns: section
  */
 @discardableResult
 public func <<<! (left: Section, right: Item) -> Section {
@@ -190,15 +229,22 @@ public func <<<! (left: Section, right: Item) -> Section {
 }
 
 /**
- 添加Item数组到Section, 并通知到代理
- 使用 <<<!前，
- ***如果section已经被添加到form中***，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
- ***如果section还没有被添加到form中***，就没关系
- 
- - parameter left:  section
- - parameter right: item数组
- 
- - returns: section
+ * 添加Item数组到Section, 并通知到代理
+ * Add Item array to Section, and notify delegate
+ * 
+ * 使用 <<<!前，
+ * 如果section已经被添加到form中，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
+ * 如果section还没有被添加到form中，就没关系
+ *
+ * Add Item array to Section, and notify delegate
+ * before using <<<!, 
+ * if the section has been added to the form, please confirm that the collectionView has been refreshed (the section information is already on the collectionView, otherwise it will crash)
+ * if the section has not been added to the form, it's ok
+ * 
+ * - parameter left:  section
+ * - parameter right: items
+ * 
+ * - returns: section
  */
 @discardableResult
 public func <<<! (left: Section, right: [Item]) -> Section {
@@ -208,12 +254,13 @@ public func <<<! (left: Section, right: [Item]) -> Section {
 
 // MARK: - >>>
 /**
- 替换Form的所有Section
-
-- parameter left:  form
-- parameter right: 要替换的Section数组
-
-- returns: form
+ * 替换Form的所有Section
+ * Replace all Sections of Form
+ *
+ * - parameter left:  form
+ * - parameter right: sections
+ * 
+ * - returns: form
 */
 @discardableResult
 public func >>> (left: Form, right: [Section]) -> Form {
@@ -222,12 +269,13 @@ public func >>> (left: Form, right: [Section]) -> Form {
     return left
 }
 /**
- 替换Form的所有Section, 并通知到代理
-
-- parameter left:  form
-- parameter right: 要替换的Section数组
-
-- returns: form
+ * 替换Form的所有Section, 并通知到代理
+ * Replace all Sections of Form, and notify delegate
+ * 
+ * - parameter left:  form
+ * - parameter right: sections
+ * 
+ * - returns: form
 */
 @discardableResult
 public func >>>! (left: Form, right: [Section]) -> Form {
@@ -237,26 +285,14 @@ public func >>>! (left: Form, right: [Section]) -> Form {
 }
 
 /**
- 替换Section数组到指定范围
-
-- parameter left:  form
-- parameter right: 元组，( 范围 ，要替换的Section数组 )
-
-- returns: form
-*/
-@discardableResult
-public func >>> (left: Form, right: (Range<Int>, [Section])) -> Form {
-    left.replaceSubrange(right.0, with: right.1)
-    return left
-}
-/**
- 替换Section数组到指定范围, 并通知到代理
-
-- parameter left:  form
-- parameter right: 元组，( 范围 ，要替换的Section数组 )
-
-- returns: form
-*/
+ * 替换Section数组到指定范围
+ * Replace Section array to specified range
+ * 
+ * - parameter left:  form
+ * - parameter right: 元组，( 范围 ，要替换的Section数组 )
+ * 
+ * - returns: form
+ */
 @discardableResult
 public func >>>! (left: Form, right: (Range<Int>, [Section])) -> Form {
     left.replaceSubrange(right.0, with: right.1, updateUI: true)
@@ -264,13 +300,14 @@ public func >>>! (left: Form, right: (Range<Int>, [Section])) -> Form {
 }
 
 /**
- 替换Section的所有Item
-
-- parameter left:  section
-- parameter right: 要替换的Item数组
-
-- returns: section
-*/
+ * 替换Section的所有Item
+ * Replace all Items of Section
+ * 
+ * - parameter left:  section
+ * - parameter right: items
+ * 
+ * - returns: section
+ */
 @discardableResult
 public func >>> (left: Section, newItems: [Item]) -> Section {
     left.removeAll()
@@ -278,13 +315,14 @@ public func >>> (left: Section, newItems: [Item]) -> Section {
     return left
 }
 /**
- 替换Section的所有Item，并通知到代理
-
-- parameter left:  section
-- parameter right: 要替换的Item数组
-
-- returns: section
-*/
+ * 替换Section的所有Item，并通知到代理
+ * Replace all Items of Section, and notify delegate
+ * 
+ * - parameter left:  section
+ * - parameter right: items
+ * 
+ * - returns: section
+ */
 @discardableResult
 public func >>>! (left: Section, newItems: [Item]) -> Section {
     left.removeAll(updateUI: true)
@@ -293,26 +331,28 @@ public func >>>! (left: Section, newItems: [Item]) -> Section {
 }
 
 /**
- 替换Item数组到指定范围
-
-- parameter left:  section
-- parameter right: 元组，( 范围 ，要替换的Item数组 )
-
-- returns: section
-*/
+ * 替换Item数组到指定范围
+ * Replace Item array to specified range
+ * 
+ * - parameter left:  section
+ * - parameter right: tuple, ( range, items )
+ * 
+ * - returns: section
+ */
 @discardableResult
 public func >>> (left: Section, right: (Range<Int>, [Item])) -> Section {
     left.replaceSubrange(right.0, with: right.1)
     return left
 }
 /**
- 替换Item数组到指定范围, 并通知到代理
-
-- parameter left:  section
-- parameter right: 元组，( 范围 ，要替换的Item数组 )
-
-- returns: section
-*/
+ * 替换Item数组到指定范围, 并通知到代理
+ * Replace Item array to specified range, and notify delegate
+ * 
+ * - parameter left:  section
+ * - parameter right: tuple, ( range, items )
+ * 
+ * - returns: section
+ */
 @discardableResult
 public func >>>! (left: Section, right: (Range<Int>, [Item])) -> Section {
     left.replaceSubrange(right.0, with: right.1, updateUI: true)
@@ -320,21 +360,13 @@ public func >>>! (left: Section, right: (Range<Int>, [Item])) -> Section {
 }
 
 /**
- 添加 Item 的集合到 Section
- 
- - parameter lhs: section
- - parameter rhs: items 的集合
+ * 添加 Item 的集合到 Section
+ * Add Item collection to Section
+ * 
+ * - parameter lhs: section
+ * - parameter rhs: items collection
+ * 
+ * - returns: section
  */
 public func += <C: Collection>(lhs: inout Section, rhs: C) where C.Iterator.Element == Item {
     lhs.append(contentsOf: rhs)
-}
-
-/**
- 添加 Section 的集合到 Form
- 
- - parameter lhs: form
- - parameter rhs: sections 的集合
- */
-public func += <C: Collection>(lhs: inout Form, rhs: C) where C.Iterator.Element == Section {
-    lhs.append(contentsOf: rhs)
-}

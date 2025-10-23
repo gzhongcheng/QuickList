@@ -18,7 +18,6 @@ open class CollectionTextViewCell : ItemCell {
     let markInput: PlaceholderTextView = {
         let textView = PlaceholderTextView(placeholder: nil, placeholderColor: nil)
         textView.isShowCountLabel = false
-        // 往下偏移1个像素
         textView.placeholderInset = UIEdgeInsets(top: 1, left: 0, bottom: 0, right: 0)
         return textView
     }()
@@ -39,97 +38,196 @@ open class CollectionTextViewCell : ItemCell {
 }
 
 // MARK: TextViewItem
-/// textview输入框Item，可展示左侧标题和右侧的输入框，同时提供自定义标题、输入框样式，自动调整高度,  不推荐在横向的Collection中使用
+/**
+ * textview输入框Item，可展示左侧标题和右侧的输入框，同时提供自定义标题、输入框样式，自动调整高度,  不推荐在横向的Collection中使用
+ * TextView input field item, can display left title and right input field, provide custom title, input field style, automatic height adjustment, not recommended in horizontal Collection
+ */
 public final class TextViewItem : ItemOf<CollectionTextViewCell>, ItemType {
     public override var identifier: String {
         return "TextViewItem"
     }
     
-    /// 已输入的文本
+    /**
+     * 已输入的文本
+     * Text that has been input
+     */
     var value: String?
     
-    // MARK: - cell设置
-    /// 是否自动高度
+    // MARK: - cell settings
+    /**
+     * 是否自动高度
+     * Whether to automatically adjust height
+     */
     public var autoHeight: Bool = true
     
-    /// 最小高度
+    /**
+     * 最小高度
+     * Minimum height
+     */
     public var minHeight: CGFloat = 44 {
         didSet {
             realHeight = max(minHeight, realHeight)
         }
     }
-    /// 实际高度
+    /**
+     * 实际高度
+     * Actual height
+     */
     var realHeight: CGFloat = 44
     
-    // box边框
-    /// 边框宽度
+    // MARK: - Box settings
+    /**
+     * 边框宽度
+     * Border width
+     */
     public var boxBorderWidth: CGFloat = 0
-    /// 边框颜色
+    /**
+     * 边框颜色
+     * Border color
+     */
     public var boxBorderColor: UIColor = .clear
-    /// 圆角
+    /**
+     * 圆角
+     * Corner radius
+     */
     public var boxCornerRadius: CGFloat = 0
-    /// box到cell的边距
+    /**
+     * box到cell的边距
+     * Box to cell insets
+     */
     public var boxInsets: UIEdgeInsets = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
-    /// 内容到box的边距
+    /**
+     * 内容到box的边距
+     * Content to box insets
+     */
     public var boxPadding: UIEdgeInsets = UIEdgeInsets.zero
-    /// box的背景色
+    /**
+     * box的背景色
+     * Box background color
+     */
     public var boxBackgroundColor: UIColor = .clear
     
-    // 左侧标题
-    /// 富文本标题，如果设置了，则会替换掉title显示这个
+    // MARK: - Title settings
+    /**
+     * 富文本标题，如果设置了，则会替换掉title显示这个
+     * Rich text title, if set, will replace title display this
+     */
     public var attributeTitle: NSAttributedString?
-    /// 标题设置
+    /**
+     * 标题设置
+     * Title settings
+     */
     public var titlePosition: TitlePosition = .left
-    /// 标题字体
+    /**
+     * 标题字体
+     * Title font
+     */
     public var titleFont: UIFont = UIFont.systemFont(ofSize: 15)
-    /// 标题颜色
+    /**
+     * 标题颜色
+     * Title color
+     */
     public var titleTextColor: UIColor = UIColor.black
-    /// 标题字体行数
+    /**
+     * 标题字体行数
+     * Title font line count
+     */
     public var titleLines: Int = 0
-    /// 标题对齐方式
+    /**
+     * 标题对齐方式
+     * Title alignment
+     */
     public var titleAlignment: NSTextAlignment = .left
     
-    // 输入框
-    /// 输入框与标题的间距
+    // MARK: - Input settings
+    /**
+     * 输入框与标题的间距
+     * Input field to title spacing
+     */
     public var inputSpaceToTitle: CGFloat = 5
-    /// 输入内容到输入框的边距
+    /**
+     * 输入内容到输入框的边距
+     * Input content to input field insets
+     */
     public var inputContentPadding: UIEdgeInsets = UIEdgeInsets.zero
-    /// 提示文字
+    /**
+     * 提示文字
+     * Placeholder text
+     */
     public var placeholder: String?
-    /// 提示文字颜色
+    /**
+     * 提示文字颜色
+     * Placeholder text color
+     */
     public var placeholderColor: UIColor = .gray
-    /// 是否显示字数限制
+    /**
+     * 是否显示字数限制
+     * Whether to show character limit
+     */
     public var showLimit: Bool = false
-    /// 限制输入个数   默认为999999，不限制输入
+    /**
+     * 限制输入个数   默认为999999，不限制输入
+     * Limit input count, default is 999999, no limit input
+     */
     public var limitWords: UInt = 999999
-    /// 背景色
+    /**
+     * 背景色
+     * Background color
+     */
     public var inputBackgroundColor: UIColor = .white
-    /// 边框宽度
+    /**
+     * 边框宽度
+     * Border width
+     */
     public var inputBorderWidth: CGFloat = 0
-    /// 边框颜色
+    /**
+     * 边框颜色
+     * Border color
+     */
     public var inputBorderColor: UIColor = .clear
-    /// 圆角
+    /**
+     * 圆角
+     * Corner radius
+     */
     public var inputCornerRadius: CGFloat = 0
-    /// 字体
+    /**
+     * 字体
+     * Font
+     */
     public var inputFont: UIFont = UIFont.systemFont(ofSize: 14)
-    /// 字体颜色
+    /**
+     * 字体颜色
+     * Font color
+     */
     public var inputTextColor: UIColor = .black
-    /// 光标颜色
+    /**
+     * 光标颜色
+     * Cursor color
+     */
     public var inputCursorColor: UIColor = UIColor.systemBlue
     
     public var inputAlignment: NSTextAlignment = .left
     public var keyboardType: UIKeyboardType = .default
     public var returnKeyType: UIReturnKeyType = .default
     
-    /// 是否正在编辑
+    /**
+     * 是否正在编辑
+     * Whether is editing
+     */
     var isEditing: Bool = false
-    /// 编辑
+    /**
+     * 编辑时box的边框颜色
+     * Editing border color
+     */
     public var boxEditingBorderColor: UIColor?
     public var boxEditingBorderWidth: CGFloat?
     public var inputEditingBorderColor: UIColor?
     public var inputEditingBorderWidth: CGFloat?
     
-    /// 值改变的回调事件
+    /**
+     * 值改变的回调事件
+     * Value change callback event
+     */
     var onTextDidChangeBlock: ((_ newText: String) -> Void)?
     
     public func onTextDidChanged(_ callBack: @escaping ((_ item: TextViewItem, _ newText: String) -> Void)) {
@@ -138,12 +236,18 @@ public final class TextViewItem : ItemOf<CollectionTextViewCell>, ItemType {
         }
     }
     
-    /// 计算高度
+    /**
+     * 计算高度
+     * Calculate height
+     */
     public func cellHeight(for width: CGFloat) -> CGFloat {
         return realHeight
     }
     
-    // MARK:- 更新cell的布局
+    /**
+     * 更新cell的布局
+     * Update cell layout
+     */
     public override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? CollectionTextViewCell else {

@@ -43,7 +43,6 @@ final class QuickSegmentHorizontalMenuItem: ItemOf<QuickSegmentHorizontalMenuIte
         self.menuTabList = menuTabList
     }
     
-    // 更新cell的布局
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? QuickSegmentHorizontalMenuItemCell else {
@@ -71,8 +70,6 @@ final class QuickSegmentHorizontalMenuItem: ItemOf<QuickSegmentHorizontalMenuIte
         return _identifier
     }
     
-    
-    /// 计算尺寸
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         return CGSize(width: pageContainerHeight ?? view.bounds.width, height: config?.menuHeight ?? 44)
     }

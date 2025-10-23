@@ -30,7 +30,6 @@ public class QuickSegmentPagesItemCell: ItemCell {
         pageList.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height)
     }
     
-    /// 页面控制器展示列表
     public let pageList: QuickSegmentPagesListView = {
         let listView = QuickSegmentPagesListView()
         listView.isQuickSegmentSubPage = true
@@ -108,7 +107,6 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         initializer?(self)
     }
     
-    // 更新cell的布局
     public override func updateCell() {
         super.updateCell()
         guard let cell = cell as? QuickSegmentPagesItemCell else {
@@ -131,8 +129,6 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         return "QuickSegmentPagesItem_\(self.section?.index ?? 0)"
     }
     
-    
-    /// 计算尺寸
     public override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         let size = CGSize(width: view.bounds.width - view.adjustedContentInset.left, height: view.bounds.height - view.adjustedContentInset.top)
         switch layoutType {

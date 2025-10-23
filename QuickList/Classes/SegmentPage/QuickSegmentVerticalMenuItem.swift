@@ -23,11 +23,20 @@ class QuickSegmentVerticalMenuItemCell: ItemCell {
 // MARK: - QuickSegmentVerticalMenuItem
 // QuickSegmentVerticalMenuItem
 final class QuickSegmentVerticalMenuItem: ItemOf<QuickSegmentVerticalMenuItemCell>, ItemType {
-    /// 计算得到的最大宽度
+    /**
+     * 计算得到的最大宽度
+     * Calculated maximum width
+     */
     var maxItemWidth: CGFloat?
-    /// 配置
+    /**
+     * 配置
+     * Configuration
+     */
     var config: QuickSegmentVerticalMenuConfig?
-    /// 页面容器高度
+    /**
+     * 页面容器高度
+     * Page container height
+     */
     var pageContainerHeight: CGFloat?
     
     weak var menuTabList: QuickListView?
@@ -45,7 +54,6 @@ final class QuickSegmentVerticalMenuItem: ItemOf<QuickSegmentVerticalMenuItemCel
         self.menuTabList = menuTabList
     }
     
-    // 更新cell的布局
     override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? QuickSegmentVerticalMenuItemCell else {
@@ -73,7 +81,6 @@ final class QuickSegmentVerticalMenuItem: ItemOf<QuickSegmentVerticalMenuItemCel
         return _identifier
     }
     
-    /// 计算尺寸
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         let height = pageContainerHeight ?? view.bounds.height
         guard let config = config else {

@@ -35,44 +35,74 @@ class HorizontalViewController: UIViewController {
         formlist.form.backgroundDecoration?.backgroundColor = UIColor(white: 0.95, alpha: 1)
         
         let formHeader = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formHeader.shouldSuspension = true
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formHeader.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formHeader.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formHeader.displayType = .top
         formlist.form.header = formHeader
         
         
         let formFooter = FormCompressibleDecorationView<CompressibleHeaderView>()
-        /// 设置悬浮
+        /**
+         * 设置悬浮
+         * Set suspension
+         */
         formFooter.shouldSuspension = true
-        /// 设置压缩
+        /**
+         * 设置压缩
+         * Set compression
+         */
         formFooter.minSize = CGSize(width: 40, height: 40)
-        /// 设置默认尺寸
+        /**
+         * 设置默认尺寸
+         * Set default size
+         */
         formFooter.height = { _, _, _ in
             80
         }
-        /// 设置拉伸时的逻辑
+        /**
+         * 设置拉伸时的逻辑
+         * Set the logic for stretching
+         */
         formFooter.displayType = .bottom
 
         formlist.form.footer = formFooter
         
-        // MARK: - 创建完成后添加sections
+        // MARK: - Add sections after creation
         formlist.form +++ Section(header: "自动换行", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
             section.column = 3
-            /// 可以是自定义的UICollectionReusableView
+            /**
+             * 可以是自定义的UICollectionReusableView
+             * Can be a custom UICollectionReusableView
+             */
             section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
                 view.backgroundColor = .lightGray
             }
-            /// 高度计算方法
+            /**
+             * 高度计算方法
+             * Height calculation method
+             */
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
@@ -87,17 +117,17 @@ class HorizontalViewController: UIViewController {
 //            section.layout = RowEqualHeightLayout()
             section.isFormHeader = true
         }
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag")
+            <<< newTagItem("Tag Tag Tag Tag")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag")
             <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签标签标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签")
-            <<< newTagItem("标签标签标签")
-            <<< newTagItem("标签")
-            <<< newTagItem("标签标签标签标签标签")
-        +++ Section(header:"LineItem(分割线)", footer: "分割线结束") { section in
+            <<< newTagItem("Tag Tag")
+            <<< newTagItem("Tag Tag Tag")
+            <<< newTagItem("Tag")
+            <<< newTagItem("Tag Tag Tag Tag Tag")
+        +++ Section(header:"LineItem", footer: "LineItem End") { section in
             section.lineSpace = 0
             section.column = 1
             section.header?.shouldSuspension = true
@@ -124,7 +154,7 @@ class HorizontalViewController: UIViewController {
             section.lineSpace = 0
             section.column = 1
         }
-        let towColumSection = Section("固定大小两列图片") { section in
+        let towColumSection = Section("Fixed Size Two Column Images") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
@@ -143,7 +173,7 @@ class HorizontalViewController: UIViewController {
         
         formlist.form +++ towColumSection
 
-        let threeColumSection = Section(header: "自动大小三列图片", footer: "没啦！") { section in
+        let threeColumSection = Section(header: "Automatic Size Three Column Images", footer: "No more!") { section in
             section.column = 3
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 5
@@ -193,7 +223,10 @@ class HorizontalViewController: UIViewController {
         }
     }
 
-    /// 获取html图片item
+    /**
+     * 获取html图片item
+     * Get html image item
+     */
     func getHtmlImageItem(isFirst: Bool = false, isLast: Bool = false) -> HtmlInfoItem {
         return HtmlInfoItem() { item in
             item.content = getHtmlImage()
@@ -208,7 +241,10 @@ class HorizontalViewController: UIViewController {
         }
     }
 
-    /// 获取随机图片
+    /**
+     * 获取随机图片
+     * Get random image
+     */
     func getRandomImage() -> String {
         let width:Int = Int.random(in: 1000 ... 2000)
         let height: Int = Int.random(in: 1000 ... 2000)
@@ -216,23 +252,35 @@ class HorizontalViewController: UIViewController {
     }
 
 
-    /// html字符串
+    /**
+     * html字符串
+     * Html string
+     */
     func getHtmlImage() -> String {
         return "<img src = \"\(getNumberImage(Int.random(in: 0 ... numberImages.count)))\"/>"
     }
     
-    /// 获取数字图片
+    /**
+     * 获取数字图片
+     * Get number image
+     */
     func getNumberImage(_ number: Int) -> String {
         return numberImages[number % numberImages.count]
     }
     
-    /// 获取随机gif图片
+    /**
+     * 获取随机gif图片
+     * Get random gif image
+     */
     func getRandomGif() -> String {
         let index:Int = Int(arc4random() % UInt32(gifImages.count))
         return gifImages[index]
     }
     
-    /// 数字图片
+    /**
+     * 数字图片
+     * Number image
+     */
     let numberImages = [
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBQFf-a7RNVY_UmC4wWxNc3DruB7Rj3kum_Q&usqp=CAU",
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAicnETuEvxtX8EzrQyPPA7teboS0QWsbp4g&usqp=CAU",
@@ -249,7 +297,10 @@ class HorizontalViewController: UIViewController {
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMBJLkcBA4-HKgAbAiO6pbstwK3mGMe7zH0Q&usqp=CAU"
     ]
     
-    /// gif图片
+    /**
+     * gif图片
+     * Gif image
+     */
     let gifImages = [
         "http://hbimg.huabanimg.com/3fee54d0b2e0b7a132319a8e104f5fdc2edd3d35d03ee-93Jmdq_fw658",
         "http://5b0988e595225.cdn.sohucs.com/images/20180510/c861c0e9509546f98c25ef09419f1b81.gif",

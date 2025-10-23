@@ -10,7 +10,6 @@ import SnapKit
 
 // MARK:- SwitchCell
 open class CollectionSwitchCell: ItemCell {
-    /// 标题
     var title: String? {
         didSet {
             titleLabel.text = title
@@ -35,8 +34,10 @@ open class CollectionSwitchCell: ItemCell {
 // MARK:- SwitchItem
 public final class SwitchItem: AutolayoutItemOf<CollectionSwitchCell>, ItemType {
     
-    // 样式设置
-    /// 竖直方向对齐方式
+    /**
+     * 竖直方向对齐方式
+     * Vertical alignment
+     */
     public enum VerticalAlignment {
         case top
         case center
@@ -51,38 +52,72 @@ public final class SwitchItem: AutolayoutItemOf<CollectionSwitchCell>, ItemType 
     public var titleColor: UIColor = UIColor.black
     public var titleLines: Int = 0
     public var titleAlignment: NSTextAlignment = .left
-    /// 富文本标题，如果设置了，则会替换掉title显示这个
+    /**
+     * 富文本标题，如果设置了，则会替换掉title显示这个
+     * Rich text title, if set, will replace title display this
+     */
     public var attributeTitle: NSAttributedString?
     
     // switch
-    /// 开关的背景颜色
+    /**
+     * 开关的背景颜色
+     * Switch background color
+     */
     public var switchOffBackgroundColor: UIColor = .lightGray
     public var switchOnBackgroundColor: UIColor = .systemGreen
-    /// 开关的滑块颜色
+    /**
+     * 开关的滑块颜色
+     * Switch indicator color
+     */
     public var switchOnIndicatorColor: UIColor = .white
     public var switchOffIndicatorColor: UIColor = .white
-    /// 开关滑块文字
+    /**
+     * 开关滑块文字
+     * Switch indicator text
+     */
     public var switchOnIndicatorText: String?
     public var switchOffIndicatorText: String?
-    /// 开关未选中时文字
+    /**
+     * 开关未选中时文字
+     * Switch off text
+     */
     public var switchOffText: String?
-    /// 开关选中时文字
+    /**
+     * 开关选中时文字
+     * Switch on text
+     */
     public var switchOnText: String?
-    /// 开关的滑块内文字颜色
+    /**
+     * 开关的滑块内文字颜色
+     * Switch indicator text color
+     */
     public var switchOffIndicatorTextColor: UIColor = .black
     public var switchOnIndicatorTextColor: UIColor = .white
-    /// 开关的最小尺寸（如果内容文本尺寸超过会撑大）
+    /**
+     * 开关的最小尺寸（如果内容文本尺寸超过会撑大）
+     * Minimum switch size (if content text size exceeds, it will expand)
+     */
     public var minimumSwitchSize: CGSize = CGSize(width: 50, height: 30)
-    /// 开关内间距
+    /**
+     * 开关内间距
+     * Switch content insets
+     */
     public var switchContentInsets: UIEdgeInsets = UIEdgeInsets(top: 1.5, left: 1.5, bottom: 1.5, right: 1.5)
     
+    /**
+     * 开关状态
+     * Switch state
+     */
     public var value: Bool = false
     
     public override var identifier: String {
         return "_SwitchItem"
     }
     
-    // 更新cell
+    /**
+     * 更新cell
+     * Update cell
+     */
     public override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? CollectionSwitchCell else {

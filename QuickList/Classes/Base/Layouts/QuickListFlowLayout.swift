@@ -7,7 +7,10 @@
 
 import Foundation
 
-/// 瀑布流布局
+/**
+ * 瀑布流布局
+ * Waterfall layout
+ */
 public class QuickListFlowLayout: QuickListBaseLayout {
     public override init() {
         super.init()
@@ -35,18 +38,32 @@ public class QuickListFlowLayout: QuickListBaseLayout {
         }
         
         // 设置startPoint
+        // Set startPoint
         attribute.startPoint = currentStart
         
-        /// 列数
+        /**
+         * 列数
+         * Number of columns
+         */
         let column = section.column
-        /// 行间距
+        /**
+         * 行间距
+         * Row spacing
+         */
         let lineSpace = section.lineSpace
-        /// 当前计算位置
+        /**
+         * 当前计算位置
+         * Current calculation position
+         */
         var tempStart = currentStart
         // 添加header的位置
+        // Add header position
         addHeaderAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
-        /// item展示区域起点
+        /**
+         * item展示区域起点
+         * Item display area starting point
+         */
         let itemStartPoint = CGPoint(x: tempStart.x + sectionContentInset.left, y: tempStart.y + sectionContentInset.top)
         if layout.scrollDirection == .vertical {
             tempStart.y += sectionContentInset.top
@@ -54,12 +71,19 @@ public class QuickListFlowLayout: QuickListBaseLayout {
             tempStart.x += sectionContentInset.left
         }
         // 添加每个元素的位置
-        /// 展示范围
+        // Add position for each element
+        /**
+         * 展示范围
+         * Display range
+         */
         let itemTotalWidth = maxWidth - sectionContentInset.left - sectionContentInset.right
         let itemTotalHeight = maxHeight - sectionContentInset.top - sectionContentInset.bottom
         let singleItemWidth: CGFloat = (itemTotalWidth - (column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
         let singleItemHeight: CGFloat = (itemTotalHeight - (column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
-        /// 每列的最后一个元素的结束偏移量（相对于itemStartPoint）
+        /**
+         * 每列的最后一个元素的结束偏移量（相对于itemStartPoint）
+         * End offset of the last element in each column (relative to itemStartPoint)
+         */
         var tempOffsets: [CGFloat] = (0..<column).map({ _ in 0 })
         var visibleLineCount: Int = 0
         attribute.itemAttributes.removeAll()
@@ -90,12 +114,18 @@ public class QuickListFlowLayout: QuickListBaseLayout {
             var itemIndex: Int = 0
             
             if tempOffsets.count <= item.weight {
-                /// 填满整行
+                /**
+                 * 填满整行
+                 * Fill entire row
+                 */
                 if layout.scrollDirection == .vertical {
                     itemOffsetY = tempOffsets.sorted().last!
                     itemOffsetX = 0
                     if !item.isHidden {
-                        /// 占用行/列的位置调整
+                        /**
+                         * 占用行/列的位置调整
+                         * Position adjustment for occupied rows/columns
+                         */
                         for i in 0 ..< tempOffsets.count {
                             tempOffsets[i] = itemOffsetY + lineSpace + itemSize.height
                             visibleLineCount += 1
@@ -106,7 +136,10 @@ public class QuickListFlowLayout: QuickListBaseLayout {
                     itemOffsetX = tempOffsets.sorted().last!
                     itemOffsetY = 0
                     if !item.isHidden {
-                        /// 占用行/列的位置调整
+                        /**
+                         * 占用行/列的位置调整
+                         * Position adjustment for occupied rows/columns
+                         */
                         for i in 0 ..< tempOffsets.count {
                             tempOffsets[i] = itemOffsetX + lineSpace + itemSize.width
                             visibleLineCount += 1
@@ -115,7 +148,10 @@ public class QuickListFlowLayout: QuickListBaseLayout {
                     itemSize.height = itemTotalHeight
                 }
             } else {
-                /// 先记录最底部位置
+                /**
+                 * 先记录最底部位置
+                 * First record the bottommost position
+                 */
                 for (i, offset) in tempOffsets.enumerated() {
                     if layout.scrollDirection == .vertical {
                         if offset > itemOffsetY {
@@ -131,9 +167,15 @@ public class QuickListFlowLayout: QuickListBaseLayout {
                 }
                 
                 var haveSpace: Bool = false
-                /// 不填满整行
+                /**
+                 * 不填满整行
+                 * Don't fill entire row
+                 */
                 for i in 0 ... tempOffsets.count - item.weight {
-                    /// 找到当前位置对应的可以塞下的最低位置
+                    /**
+                     * 找到当前位置对应的可以塞下的最低位置
+                     * Find the lowest position that can fit at current position
+                     */
                     var currentMaxOffset: CGFloat = 0
                     for j in 0 ..< item.weight {
                         currentMaxOffset = max(tempOffsets[i + j], currentMaxOffset)
@@ -154,12 +196,15 @@ public class QuickListFlowLayout: QuickListBaseLayout {
                 }
                 
                 if !haveSpace {
-                    /// 没有找到可以插入的位置，就从头开始占格子
+                    /**
+                     * 没有找到可以插入的位置，就从头开始占格子
+                     * No suitable insertion position found, start occupying slots from the beginning
+                     */
                     itemIndex = 0
                 }
                 
                 if !item.isHidden {
-                    /// 占用行/列的位置调整
+                    /// 占用行/列的位置调整 | Position adjustment for occupied rows/columns
                     for i in itemIndex ..< itemIndex + item.weight {
                         if layout.scrollDirection == .vertical {
                             tempOffsets[i] = itemOffsetY + lineSpace + itemSize.height
@@ -199,15 +244,23 @@ public class QuickListFlowLayout: QuickListBaseLayout {
         }
         
         // 添加footer的位置
+        // Add footer position
         addFooterAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
         
         // 设置endPoint
+        // Set endPoint
         attribute.endPoint = tempStart
         
-        /// 添加decoration的位置
+        /**
+         * 添加decoration的位置
+         * Add decoration position
+         */
         addDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         
-        /// 添加suspensionDecoration的位置
+        /**
+         * 添加suspensionDecoration的位置
+         * Add suspensionDecoration position
+         */
         addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         
         return attribute

@@ -57,7 +57,10 @@ extension QuickSegmentPagesListView: UIGestureRecognizerDelegate {
     }
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        /// 如果正在滚动的过程中，强行停止滚动
+        /**
+         * 如果正在滚动的过程中，强行停止滚动
+         * If the scrolling is in progress, forcibly stop scrolling
+         */
         if
             gestureRecognizer.state == .possible,
             self.isDecelerating

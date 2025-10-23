@@ -9,8 +9,15 @@
 import Foundation
 import QuickList
 
-/// 方便Demo使用，直接用了全局方法，实际项目中不要这么用
+/**
+ * 方便Demo使用，直接用了全局方法，实际项目中不要这么用
+ * Convenient for Demo use, directly used global methods, do not use this in actual projects
+ */
 
+/**
+ * 创建图片item
+ * Create a new image item
+ */
 func newImageItem(_ index: Int, _ url: String,_ autoSize: Bool = false) -> ImageItem {
     return ImageItem(tag: "\(index + 1)") { item in
         item.imageUrl = url
@@ -23,6 +30,10 @@ func newImageItem(_ index: Int, _ url: String,_ autoSize: Bool = false) -> Image
     }
 }
 
+/**
+ * 创建标签item
+ * Create a new tag item
+ */
 func newTagItem(_ title: String) -> TitleValueItem {
     return TitleValueItem(title) { item in
         item.value = "x"
@@ -43,7 +54,10 @@ func newTagItem(_ title: String) -> TitleValueItem {
     }
 }
 
-/// 获取html图片item
+/**
+ * 获取html图片item
+ * Get html image item
+ */
 func getHtmlImageItem(isFirst: Bool = false, isLast: Bool = false) -> HtmlInfoItem {
     return HtmlInfoItem() { item in
         item.content = getHtmlImage()
@@ -58,7 +72,10 @@ func getHtmlImageItem(isFirst: Bool = false, isLast: Bool = false) -> HtmlInfoIt
     }
 }
 
-/// 获取随机图片
+/**
+ * 获取随机图片
+ * Get random image
+ */
 func getRandomImage() -> String {
     let width:Int = Int.random(in: 1000 ... 2000)
     let height: Int = Int.random(in: 1000 ... 2000)
@@ -66,23 +83,35 @@ func getRandomImage() -> String {
 }
 
 
-/// html字符串
+/**
+ * html字符串
+ * Html string
+ */
 func getHtmlImage() -> String {
     return "<img src = \"\(getNumberImage(Int.random(in: 0 ... numberImages.count)))\"/>"
 }
 
-/// 获取数字图片
+/**
+ * 获取数字图片
+ * Get number image
+ */
 func getNumberImage(_ number: Int) -> String {
     return numberImages[number % numberImages.count]
 }
 
-/// 获取随机gif图片
+/**
+ * 获取随机gif图片
+ * Get random gif image
+ */
 func getRandomGif() -> String {
     let index:Int = Int(arc4random() % UInt32(gifImages.count))
     return gifImages[index]
 }
 
-/// 数字图片
+/**
+ * 数字图片
+ * Number image
+ */
 let numberImages = [
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBQFf-a7RNVY_UmC4wWxNc3DruB7Rj3kum_Q&usqp=CAU",
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAicnETuEvxtX8EzrQyPPA7teboS0QWsbp4g&usqp=CAU",
@@ -99,7 +128,10 @@ let numberImages = [
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMBJLkcBA4-HKgAbAiO6pbstwK3mGMe7zH0Q&usqp=CAU"
 ]
 
-/// gif图片
+/**
+ * gif图片
+ * Gif image
+ */
 let gifImages = [
     "http://hbimg.huabanimg.com/3fee54d0b2e0b7a132319a8e104f5fdc2edd3d35d03ee-93Jmdq_fw658",
     "http://5b0988e595225.cdn.sohucs.com/images/20180510/c861c0e9509546f98c25ef09419f1b81.gif",

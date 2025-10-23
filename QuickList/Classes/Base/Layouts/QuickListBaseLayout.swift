@@ -8,25 +8,52 @@
 import Foundation
 
 public class QuickListSectionAttribute: NSObject {
-    /// 悬停时展示的装饰位置
+    /**
+     * 悬停时展示的装饰位置
+     * Decoration position when floating
+     */
     public var suspensionDecorationAttributes: UICollectionViewLayoutAttributes?
-    /// 背景装饰位置
+    /**
+     * 背景装饰位置
+     * Background decoration position
+     */
     public var decorationAttributes: UICollectionViewLayoutAttributes?
-    /// header位置
+    /**
+     * header位置
+     * Header position
+     */
     public var headerAttributes: UICollectionViewLayoutAttributes?
-    /// footer位置
+    /**
+     * footer位置
+     * Footer position
+     */
     public var footerAttributes: UICollectionViewLayoutAttributes?
-    /// 存放item位置的数组
+    /**
+     * 存放item位置的数组
+     * Array storing item positions
+     */
     public var itemAttributes: [UICollectionViewLayoutAttributes] = []
-    /// 存放当前选中item位置（仅在单选状态下有效）
+    /**
+     * 存放当前选中item位置（仅在单选状态下有效）
+     * Store current selected item position (only valid in single selection state)
+     */
     public var selectedItemAttributes: UICollectionViewLayoutAttributes?
     
-    /// 是否为整个form的悬停header
+    /**
+     * 是否为整个form的悬停header
+     * Whether is the floating header of the entire form
+     */
     public var isFormHeader: Bool = false
     
-    /// 是否需要悬停header
+    /**
+     * 是否需要悬停header
+     * Whether needs floating header
+     */
     public var shouldSuspensionHeader: Bool = false
-    /// 是否需要悬停footer
+    /**
+     * 是否需要悬停footer
+     * Whether needs floating footer
+     */
     public var shouldSuspensionFooter: Bool = false
     
     public var startPoint: CGPoint = .zero
@@ -37,7 +64,10 @@ open class QuickListBaseLayout {
     var needUpdate: Bool = true
     var cacheAttr: QuickListSectionAttribute = QuickListSectionAttribute()
     
-    /// layout获取布局对象
+    /**
+     * layout获取布局对象
+     * Layout gets layout object
+     */
     func getAttsWithLayout(_ layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint, isFirstSection: Bool) -> QuickListSectionAttribute {
         let oldStart = cacheAttr.startPoint
         cacheAttr.startPoint = currentStart
@@ -76,7 +106,10 @@ open class QuickListBaseLayout {
         return self.cacheAttr
     }
     
-    /// 创建新的布局对象
+    /**
+     * 创建新的布局对象
+     * Create new layout object
+     */
     open func layoutWith(layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint) -> QuickListSectionAttribute {
         #if DEBUG
         assertionFailure("Method must be override!")
@@ -84,10 +117,16 @@ open class QuickListBaseLayout {
         return QuickListSectionAttribute()
     }
     
-    /// 仅需更新所有frame的x和y位置
+    /**
+     * 仅需更新所有frame的x和y位置
+     * Only need to update x and y positions of all frames
+     */
     private func update(with offsetXY: CGPoint, start: CGPoint, section: Section) -> QuickListSectionAttribute {
         guard let sectionIndex = section.index else { return cacheAttr }
-        /// 更新header、footer、items
+        /**
+         * 更新header、footer、items
+         * Update header, footer, items
+         */
         if let headerAttr = cacheAttr.headerAttributes {
             headerAttr.frame = moveXY(offsetXY: offsetXY, to: headerAttr.frame)
             headerAttr.indexPath = IndexPath(index: sectionIndex)
@@ -123,7 +162,10 @@ open class QuickListBaseLayout {
         )
     }
     
-    /// 添加Header的位置
+    /**
+     * 添加Header的位置
+     * Add Header position
+     */
     func addHeaderAttributes(
         to attribute: QuickListSectionAttribute,
         layout: QuickListCollectionLayout,
@@ -154,7 +196,10 @@ open class QuickListBaseLayout {
         }
     }
     
-    /// 添加Footer的位置
+    /**
+     * 添加Footer的位置
+     * Add Footer position
+     */
     func addFooterAttributes(
         to attribute: QuickListSectionAttribute,
         layout: QuickListCollectionLayout,
@@ -183,7 +228,10 @@ open class QuickListBaseLayout {
         }
     }
     
-    /// 添加decoration的位置
+    /**
+     * 添加decoration的位置
+     * Add decoration position
+     */
     func addDecorationAttributes(
         to attribute: QuickListSectionAttribute,
         layout: QuickListCollectionLayout,
@@ -214,7 +262,10 @@ open class QuickListBaseLayout {
         }
     }
     
-    /// 添加suspensionDecoration的布局属性
+    /**
+     * 添加suspensionDecoration的布局属性
+     * Add suspensionDecoration layout attributes
+     */
     func addSuspensionDecorationAttributes(
         to attribute: QuickListSectionAttribute,
         layout: QuickListCollectionLayout,

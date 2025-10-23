@@ -32,18 +32,36 @@ public class FormViewHandler: NSObject {
     
     public weak var delegate: FormViewHandlerDelegate?
     
-    // 用于存储已注册的header对应的identifier
+    /**
+     * 用于存储已注册的header对应的identifier
+     * Store registered header identifiers
+     */
     var registedHeaderIdentifier = [String]()
-    // 用于存储已注册的footer对应的identifier
+    /**
+     * 用于存储已注册的footer对应的identifier
+     * Store registered footer identifiers
+     */
     var registedFooterIdentifier = [String]()
-    // 用于存储已注册的decoration对应的identifier
+    /**
+     * 用于存储已注册的decoration对应的identifier
+     * Store registered decoration identifiers
+     */
     var registedDecorationIdentifier = [String]()
-    // 用于存储已注册的Cell对应的identifier
+    /**
+     * 用于存储已注册的Cell对应的identifier
+     * Store registered cell identifiers
+     */
     var registedCellIdentifier = [String]()
-    // 当前已展开左滑按钮的cell
+    /**
+     * 当前已展开左滑按钮的cell
+     * Currently opened swipe button cell
+     */
     public var currentOpenedSwipeCell: SwipeItemCell?
     
-    /// 滚动方向,默认为竖直方向滚动
+    /**
+     * 滚动方向,默认为竖直方向滚动
+     * Scroll direction, default is vertical scrolling
+     */
     public var scrollDirection: UICollectionView.ScrollDirection = .vertical {
         didSet {
             layout.scrollDirection = scrollDirection
@@ -51,7 +69,10 @@ public class FormViewHandler: NSObject {
         }
     }
     
-    /// 是否正在滚动
+    /**
+     * 是否正在滚动
+     * Whether is currently scrolling
+     */
     public var isScrolling: Bool = false
     
     public override init() {
@@ -70,25 +91,34 @@ public class FormViewHandler: NSObject {
         self.delegate = delegate
     }
     
-    // 刷新数据
+    // 刷新数据 / Refresh data
     public func reloadCollection() {
         UIView.performWithoutAnimation {
             formView?.reloadData()
         }
         self.layout.reloadAll()
     }
-    /// 仅刷新Layout
+    /**
+     * 仅刷新Layout
+     * Only refresh layout
+     */
     public func updateLayout() {
         self.layout.reloadAll()
     }
     
-    /// 更新背景控件
+    /**
+     * 更新背景控件
+     * Update background control
+     */
     public func updateBackgroundDecoration(contentSize: CGSize) {
         formView?.addBackgroundViewIfNeeded(form.backgroundDecoration)
         form.backgroundDecoration?.frame = CGRect(x: 0, y: 0, width: contentSize.width, height: contentSize.height)
     }
     
-    /// 更新选中状态
+    /**
+     * 更新选中状态
+     * Update selected state
+     */
     public func updateSelectedItemDecorationIfNeeded() {
         var indexPath: IndexPath?
         var isItemHidden = false
@@ -105,7 +135,10 @@ public class FormViewHandler: NSObject {
             }
         }
         
-        /// 设置单选状态装饰view
+        /**
+         * 设置单选状态装饰view
+         * Set single selection state decoration view
+         */
         if
             let selectedItemDecoration = form.selectedItemDecoration,
             let formView = formView,
@@ -145,7 +178,10 @@ public class FormViewHandler: NSObject {
         }
     }
     
-    /// 更新选中状态到指定位置
+    /**
+     * 更新选中状态到指定位置
+     * Update selected state to specified position
+     */
     public func updateSelectedItemDecorationTo(position: CGFloat) {
         guard
             let selectedItemDecoration = form.selectedItemDecoration,
@@ -203,7 +239,10 @@ public class FormViewHandler: NSObject {
     }
     
     
-    // 滚动显示Item
+    /**
+     * 滚动显示Item
+     * Scroll to show Item
+     */
     func makeItemVisible(_ item: Item, animation: Bool = true) {
         guard
             let collectionView = formView
@@ -309,10 +348,13 @@ public class FormViewHandler: NSObject {
 ////        cell.item?.updateCell()
 //    }
     
-    /// 在主线程执行代码块
-    /// - Parameters:
-    ///   - isAsync: 是否异步执行，默认为`true`
-    ///   - execute: 在主线程执行的代码块
+    /**
+     * 在主线程执行代码块
+     * Execute code block on main thread
+     * - Parameters:
+     *   - isAsync: 是否异步执行，默认为`true` / Whether to execute asynchronously, default `true`
+     *   - execute: 在主线程执行的代码块 / Code block to execute on main thread
+     */
     private func mainThread(isAsync: Bool = true, main execute: @escaping () -> Void) {
         if Thread.isMainThread {
             execute()
@@ -431,7 +473,6 @@ extension FormViewHandler: UICollectionViewDataSource {
         else {
             return emptyCell(collectionView, cellForItemAt: indexPath)
         }
-        // 未注册先注册
         if !registedCellIdentifier.contains(representableItem.identifier) {
             representableItem.regist(to: collectionView)
             registedCellIdentifier.append(representableItem.identifier)
@@ -464,7 +505,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = header.identifier
-            // 未注册先注册
             if !registedHeaderIdentifier.contains(identifier) {
                 header.regist(to: collectionView, for: .formHeader)
                 registedHeaderIdentifier.append(identifier)
@@ -478,7 +518,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = footer.identifier
-            // 未注册先注册
             if !registedFooterIdentifier.contains(identifier) {
                 footer.regist(to: collectionView, for: .formFooter)
                 registedFooterIdentifier.append(identifier)
@@ -495,7 +534,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = header.identifier
-            // 未注册先注册
             if !registedHeaderIdentifier.contains(identifier) {
                 header.regist(to: collectionView, for: .sectionHeader)
                 registedHeaderIdentifier.append(identifier)
@@ -511,7 +549,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = footer.identifier
-            // 未注册先注册
             if !registedFooterIdentifier.contains(identifier) {
                 footer.regist(to: collectionView, for: .sectionFooter)
                 registedFooterIdentifier.append(identifier)
@@ -527,7 +564,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = decoration.identifier
-            // 未注册先注册
             if !registedDecorationIdentifier.contains(identifier) {
                 decoration.regist(to: collectionView, for: .decoration)
                 registedDecorationIdentifier.append(identifier)
@@ -543,7 +579,6 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = decoration.identifier
-            // 未注册先注册
             if !registedDecorationIdentifier.contains(identifier) {
                 decoration.regist(to: collectionView, for: .suspensionDecoration)
                 registedDecorationIdentifier.append(identifier)
@@ -555,7 +590,10 @@ extension FormViewHandler: UICollectionViewDataSource {
         return UICollectionReusableView()
     }
     
-    // 设置是否可以移动
+    /**
+     * 设置是否可以移动
+     * Set whether can move
+     */
     public func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
         guard
             let item = form[indexPath],
@@ -573,7 +611,10 @@ extension FormViewHandler: UICollectionViewDataSource {
         return true
     }
     
-    // 移动后交换数据
+    /**
+     * 移动后交换数据
+     * Exchange data after moving
+     */
     public func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         guard
             let formSectionIndex = sourceIndexPath.safeSection(),
@@ -589,7 +630,10 @@ extension FormViewHandler: UICollectionViewDataSource {
             toSection.insert(fromItem, at: destinationIndexPath.row)
             
             collectionView.reloadSections(IndexSet(integersIn: min(formSectionIndex, toSectionIndex) ... max(formSectionIndex, toSectionIndex)))
-            // 动画结束后刷新布局（避免使用瀑布流时发生布局错乱）
+            /**
+             * 动画结束后刷新布局（避免使用瀑布流时发生布局错乱）
+             * Refresh layout after animation (avoid layout disorder when using waterfall flow)
+             */
             let deadline = DispatchTime.now() + 0.25
             DispatchQueue.main.asyncAfter(deadline: deadline) {
                 self.layout.reloadAll()
@@ -600,7 +644,7 @@ extension FormViewHandler: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate（含 UIScrollViewDelegate）
+// MARK: - UICollectionViewDelegate (including UIScrollViewDelegate)
 extension FormViewHandler: UICollectionViewDelegate {
     public func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
         guard
@@ -643,7 +687,10 @@ extension FormViewHandler: UICollectionViewDelegate {
     }
     
     public func selectItem(item: Item) {
-        /// 设置选中状态
+        /**
+         * 设置选中状态
+         * Set selected state
+         */
         if item.isSelectable {
             var needUpdateLayout: Bool = false
             for section in form.sections {
@@ -671,9 +718,11 @@ extension FormViewHandler: UICollectionViewDelegate {
         item.didSelect()
         item.unHighlightCell()
         
-        /// 设置单选状态装饰view
+        /**
+         * 设置单选状态装饰view
+         * Set single selection state decoration view
+         */
         if item.isSelectable {
-            /// 滚动到item
             if item.scrollToSelected {
                 formView?.scrollToItem(item, at: [.centeredHorizontally, .centeredVertically], animation: true)
                 DispatchQueue.main.async {
@@ -820,7 +869,10 @@ extension FormViewHandler: UICollectionViewDelegate {
         delegate?.scrollViewDidChangeAdjustedContentInset?(scrollView)
     }
     
-    /// 通知滚动开始
+    /**
+     * 通知滚动开始
+     * Notify scroll begin
+     */
     func notifyBeginScroll() {
         if !isScrolling {
             isScrolling = true
@@ -832,7 +884,10 @@ extension FormViewHandler: UICollectionViewDelegate {
         }
     }
     
-    /// 通知滚动结束
+    /**
+     * 通知滚动结束
+     * Notify scroll end
+     */
     func notifyEndScroll() {
         if isScrolling {
             isScrolling = false

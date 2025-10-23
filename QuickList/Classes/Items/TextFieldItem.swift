@@ -20,7 +20,10 @@ open class CollectionTextFieldCell: ItemCell {
         return field
     }()
     
-    /// 文字改变回调
+    /**
+     * 文字改变回调
+     * Text change callback
+     */
     var onTextDidChangeBlock: ((_ textField: UITextField) -> Void)?
 
     open override func setup() {
@@ -65,64 +68,133 @@ open class CollectionTextFieldCell: ItemCell {
 
 // MARK:- TextFieldItem
 public final class TextFieldItem: ItemOf<CollectionTextFieldCell>, UITextFieldDelegate, ItemType {
-    /// 输入值
+    /**
+     * 输入值
+     * Input value
+     */
     public var value: String?
     
-    /// 固定高度
+    /**
+     * 固定高度
+     * Fixed height
+     */
     public var aspectHeight: CGFloat = 44
     
-    /// box到cell的边距
+    /**
+     * box到cell的边距
+     * Box to cell insets
+     */
     public var boxInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
-    /// 内容到box的边距
+    /**
+     * 内容到box的边距
+     * Content to box insets
+     */
     public var boxPadding: UIEdgeInsets = UIEdgeInsets.zero
-    /// box的背景色
+    /**
+     * box的背景色
+     * Box background color
+     */
     public var boxBackgroundColor: UIColor = .clear
-    // 边框
+    /**
+     * 边框
+     * Border
+     */
     public var boxBorderWidth: CGFloat = 0.0
     public var boxBorderColor: UIColor = .clear
+    /**
+     * 边框圆角
+     * Border corner radius
+     */
     public var boxCornerRadius: CGFloat = 0.0
-    /// 高亮
+    /**
+     * 高亮
+     * Highlight
+     */
     public var boxHighlightBorderColor: UIColor?
     public var boxHighlightBorderWidth: CGFloat?
     
-    // 样式设置
-    /// title
+    /**
+     * 样式设置
+     * Style settings
+     */
     public var titlePosition: TitlePosition = .left
     public var titleFont: UIFont = UIFont.systemFont(ofSize: 15)
     public var titleTextColor: UIColor = UIColor.black
     public var titleLines: Int = 0
     public var titleAlignment: NSTextAlignment = .left
-    /// 富文本标题，如果设置了，则会替换掉title显示这个
+    /**
+     * 富文本标题，如果设置了，则会替换掉title显示这个
+     * Rich text title, if set, will replace title display
+     */
     public var attributeTitle: NSAttributedString?
     
-    /// 输入框
-    /// 输入框和Title的间距
+    /**
+     * 输入框
+     * Input field
+     */
+    /**
+     * 输入框和Title的间距
+     * Spacing between input field and Title
+     */
     public var inputSpaceToTitle: CGFloat = 5
-    /// 输入框字体
+    /**
+     * 输入框字体
+     * Input field font
+     */
     public var inputFont: UIFont = UIFont.systemFont(ofSize: 14)
-    /// 光标颜色
+    /**
+     * 光标颜色
+     * Cursor color
+     */
     public var inputCursorColor: UIColor = UIColor.systemBlue
-    /// 输入框字体颜色
+    /**
+     * 输入框字体颜色
+     * Input field font color
+     */
     public var inputTextColor: UIColor = UIColor.black
-    /// 输入框对齐方式
+    /**
+     * 输入框对齐方式
+     * Input field alignment
+     */
     public var inputAlignment: NSTextAlignment = .right
-    /// 键盘样式
+    /**
+     * 键盘样式
+     * Keyboard style
+     */
     public var keyboardType: UIKeyboardType = .default
-    /// 回车键样式
+    /**
+     * 回车键样式
+     * Return key style
+     */
     public var returnKeyType: UIReturnKeyType = .default
-    /// 是否密码输入框
+    /**
+     * 是否密码输入框
+     * Whether password input field
+     */
     public var isSecureTextEntry: Bool = false
     
-    /// 输入框提示文字
+    /**
+     * 输入框提示文字
+     * Input field placeholder text
+     */
     public var placeHolder: String?
     public var placeHolderColor: UIColor = UIColor.gray
     
-    /// 输入框校验谓词
+    /**
+     * 输入框校验谓词
+     * Input field validation predicate
+     */
     public var inputPredicateFormat: String?
-    /// 输入字符数量限制
+    /**
+     * 输入字符数量限制
+     * Input character count limit
+     */
     public var limitWords: Int?
     
-    /// 输入框事件
+    /**
+     * 输入框事件
+     * Input field events
+     */
     var onTextShouldChangeBlock: ((_ textField: UITextField, _ range: NSRange, _ string: String) -> Bool)?
     var onTextDidChangeBlock: ((_ textField: UITextField) -> Void)?
     var onTextFieldDidBeginEditingBlock: ((_ textField: UITextField) -> Void)?
@@ -130,7 +202,7 @@ public final class TextFieldItem: ItemOf<CollectionTextFieldCell>, UITextFieldDe
     var onTextFieldShouldReturnBlock: ((_ textField: UITextField) -> Bool)?
     var onTextFieldShouldClearBlock: ((_ textField: UITextField) -> Bool)?
     
-    // 设置回调事件
+    // MARK: Set callback events
     public func onTextShouldChange(_ callBack:@escaping ((_ item: TextFieldItem, _ textField: UITextField, _ range: NSRange, _ string: String) -> Bool)) {
         onTextShouldChangeBlock = { [weak self](textField, range, string) in
             return callBack(self!, textField, range, string)
@@ -180,7 +252,10 @@ public final class TextFieldItem: ItemOf<CollectionTextFieldCell>, UITextFieldDe
         cell.boxView.layer.borderWidth = boxBorderWidth
     }
     
-    // 更新cell的布局
+    /**
+     * 更新cell的布局
+     * Update cell layout
+     */
     public override func customUpdateCell() {
         super.customUpdateCell()
         guard let cell = cell as? CollectionTextFieldCell else {
@@ -214,13 +289,22 @@ public final class TextFieldItem: ItemOf<CollectionTextFieldCell>, UITextFieldDe
             if let _ = textField.text, self?.limitWords != nil {
                 if let positionRange = textField.markedTextRange {
                     if let _ = textField.position(from: positionRange.start, offset: 0) {
-                        //正在使用拼音，不进行校验
+                        /*
+                         * 正在使用拼音，不进行校验
+                         * Currently using pinyin, no validation
+                         */
                     } else {
-                        //不在使用拼音，进行校验
+                        /*
+                         * 不在使用拼音，进行校验
+                         * Not using pinyin, perform validation
+                         */
                         self?.checkTextFieldLengthAndModify(textField)
                     }
                 } else {
-                    //不在使用拼音，进行校验
+                    /*
+                     * 不在使用拼音，进行校验
+                     * Not using pinyin, perform validation
+                     */
                     self?.checkTextFieldLengthAndModify(textField)
                 }
             }
@@ -321,13 +405,22 @@ public final class TextFieldItem: ItemOf<CollectionTextFieldCell>, UITextFieldDe
         return !isDisabled
     }
     
-    //检查输入框的文字是否超长，如果超出长度则做截短
+    /**
+     * 检查输入框的文字是否超长，如果超出长度则做截短
+     * Check if input field text is too long, truncate if exceeds length
+     */
     func checkTextFieldLengthAndModify(_ textField: UITextField) {
         if let text = textField.text {
             if self.checkTextFielLength(textField) {
-                //长度正常，不处理
+                /*
+                 * 长度正常，不处理
+                 * Length is normal, no processing
+                 */
             } else {
-                //超出长度，开始处理
+                /*
+                 * 超出长度，开始处理
+                 * Exceeds length, start processing
+                 */
                 let len = limitWords!
                 let subText = String(text[text.startIndex ..< text.index(text.startIndex,offsetBy: len)])
                 textField.text = subText

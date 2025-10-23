@@ -8,7 +8,10 @@
 import Foundation
 import SnapKit
 
-// 单个页面的Item
+/**
+ * 单个页面的Item
+ * Single page item
+ */
 // MARK:- QuickSegmentSinglePageItemCell
 class QuickSegmentSinglePageItemCell: ItemCell {
     
@@ -58,7 +61,6 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         initializer?(self)
     }
     
-    // 更新cell的布局
     override func updateCell() {
         super.updateCell()
         guard let cell = cell as? QuickSegmentSinglePageItemCell else {
@@ -139,7 +141,6 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         return "QuickSegmentSinglePageItem_\(self.indexPath?.row ?? 0)"
     }
     
-    /// 计算尺寸
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard
             item == self,

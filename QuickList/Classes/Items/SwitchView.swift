@@ -11,14 +11,26 @@ import SnapKit
 
 public class SwitchView: UIView {
     // MARK: - Public
-    /// 开关的最小尺寸
+    /**
+     * 开关的最小尺寸
+     * Minimum switch size
+     */
     public var minimumSize: CGSize = CGSize(width: 50, height: 30)
     
-    /// 当前开关状态
+    /**
+     * 当前开关状态
+     * Current switch state
+     */
     public private(set) var isOn: Bool = false
-    /// 开关状态变化的回调
+    /**
+     * 开关状态变化的回调
+     * Callback when switch state changes
+     */
     public var onSwitchChanged: ((_ isOn: Bool, _ fromTouch: Bool) -> Void)?
-    /// 设置开关状态
+    /**
+     * 设置开关状态
+     * Set switch state
+     */
     public func setOn(_ on: Bool, animated: Bool = false) {
         let needNotice = isOn != on
         isOn = on
@@ -28,7 +40,10 @@ public class SwitchView: UIView {
         }
     }
     
-    /// 滑块上的文案设置
+    /**
+     * 滑块上的文案设置
+     * Set text on indicator
+     */
     public var onIndicatorText: String? {
         didSet {
             setNeedsLayout()
@@ -39,7 +54,10 @@ public class SwitchView: UIView {
             setNeedsLayout()
         }
     }
-    /// 设置开关状态的文本
+    /**
+     * 设置开关状态的文本
+     * Set text for switch state
+     */
     public var onText: String? {
         didSet {
             onTextLabel.text = onText
@@ -53,14 +71,20 @@ public class SwitchView: UIView {
         }
     }
     
-    /// 内容边距（滑块、文案等和背景的间距）
+    /**
+     * 内容边距（滑块、文案等和背景的间距）
+     * Content insets (spacing between indicator, text, and background)
+     */
     public var contentInsets: UIEdgeInsets = UIEdgeInsets(top: 1, left: 1, bottom: 1, right: 1) {
         didSet {
             setNeedsLayout()
         }
     }
     
-    /// 颜色配置
+    /**
+     * 颜色配置
+     * Color configuration
+     */
     public var offIndicatorTextColor: UIColor = .black
     public var onIndicatorTextColor: UIColor = .white
     
@@ -145,7 +169,6 @@ public class SwitchView: UIView {
             make.center.equalToSuperview()
         }
         
-        /// 添加手势
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
         self.addGestureRecognizer(tapGesture)
     }
@@ -153,7 +176,10 @@ public class SwitchView: UIView {
     @objc func handleTap(_ sender: UITapGestureRecognizer) {
         switch sender.state {
         case .began:
-            /// 当手势开始或改变时，滑块往中间稍微放大
+            /*
+             * 当手势开始或改变时，滑块往中间稍微放大
+             * When the gesture starts or changes, the indicator moves slightly inward
+             */
             var targetFrame = indicatorView.frame
             if isOn {
                 targetFrame = CGRect(
@@ -174,11 +200,17 @@ public class SwitchView: UIView {
                 self.indicatorView.frame = targetFrame
             }
         case .ended:
-            /// 当手势结束时，如果点击区域还在开关范围内，则切换开关状态
+            /*
+             * 当手势结束时，如果点击区域还在开关范围内，则切换开关状态
+             * When the gesture ends, if the click area is still within the switch range, switch the switch state
+             */
             guard sender.view == self else { return }
             let touchPoint = sender.location(in: self)
             guard self.bounds.contains(touchPoint) else {
-                /// 否则恢复原样
+                /*
+                 * 否则恢复原样
+                 * Otherwise restore to original state
+                 */
                 UIView.animate(withDuration: 0.2) {
                     self.indicatorView.frame = CGRect(
                         x: self.isOn ? self.bounds.width - self.contentInsets.right - self.indicatorViewWidth : self.contentInsets.left,
