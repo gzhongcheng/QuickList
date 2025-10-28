@@ -25,17 +25,6 @@ public protocol FormDelegate : AnyObject {
     var isScrolling: Bool { get }
     
     /**
-     * 数据改变的后刷新界面
-     * Refresh interface after data change
-     */
-    func sectionsHaveBeenAdded(_ sections: [Section], at: IndexSet)
-    func sectionsHaveBeenRemoved(_ sections: [Section], at: IndexSet)
-    func sectionsHaveBeenReplaced(oldSections: [Section], newSections: [Section], at: IndexSet)
-    func itemsHaveBeenAdded(_ items: [Item], to section: Section , at: [IndexPath])
-    func itemsHaveBeenRemoved(_ items: [Item], to section: Section, at: [IndexPath])
-    func itemsHaveBeenReplaced(oldItems: [Item], newItems: [Item], to section: Section, at: [IndexPath])
-    
-    /**
      * 更新指定SectionIndex及之后的Section的Layout
      * Update Layout for specified SectionIndex and subsequent Sections
      * - Parameters:
@@ -351,7 +340,11 @@ extension Form: MutableCollection {
                     return
                 }
                 sections[position] = newValue
-                self.delegate?.sectionsHaveBeenRemoved([oldSection], at: IndexSet(integer: position))
+                newValue.form = self
+                self.delegate?.updateLayout(section: newValue, inAnimation: nil, othersInAnimation: ListReloadAnimation.fade, performBatchUpdates: { (listView, layout) in
+                    listView?.reloadSections(IndexSet(integer: position))
+                    layout?.reloadSectionsAfter(index: position, needOldSectionAttributes: false)
+                }, completion: nil)
             } else {
                 sections.append(newValue)
             }
@@ -402,39 +395,14 @@ extension Form : RangeReplaceableCollection {
         oldSection.form = nil
         return oldSection
     }
-    public func remove(at i: Int, updateUI: Bool) -> Section {
-        if i >= sections.count {
-            assertionFailure("Form: Index out of bounds")
-        }
-        let oldSection = sections[i]
-        sections.remove(at: i)
-        oldSection.form = nil
-        guard updateUI else {
-            return oldSection
-        }
-        self.delegate?.sectionsHaveBeenRemoved([oldSection], at: IndexSet(integer: i))
-        return oldSection
-    }
     
     public func removeFirst() -> Section {
         return remove(at: 0)
-    }
-    public func removeFirst(updateUI: Bool) -> Section {
-        return remove(at: 0, updateUI: updateUI)
     }
 
     public func removeAll(keepingCapacity keepCapacity: Bool = false) {
         sections.forEach({ $0.form = nil })
         sections.removeAll(keepingCapacity: keepCapacity)
-    }
-    public func removeAll(keepingCapacity keepCapacity: Bool = false, updateUI: Bool) {
-        let oldSections = sections
-        sections.forEach({ $0.form = nil })
-        sections.removeAll(keepingCapacity: keepCapacity)
-        guard updateUI else {
-            return
-        }
-        self.delegate?.sectionsHaveBeenRemoved(oldSections, at: IndexSet(integersIn: 0 ..< oldSections.count))
     }
     
     public func removeAll(where shouldBeRemoved: (Section) throws -> Bool) rethrows {
@@ -444,21 +412,5 @@ extension Form : RangeReplaceableCollection {
             }
         })
         try sections.removeAll(where: shouldBeRemoved)
-    }
-    public func removeAll(updateUI: Bool, where shouldBeRemoved: (Section) throws -> Bool) rethrows {
-        var needRemoveSections: [Section] = []
-        var needRemoveSectionIndexs: IndexSet = IndexSet()
-        sections.enumerated().forEach { (index, section) in
-            if (try? shouldBeRemoved(section)) ?? false {
-                needRemoveSections.append(section)
-                needRemoveSectionIndexs.insert(index)
-                section.form = nil
-            }
-        }
-        try sections.removeAll(where: shouldBeRemoved)
-        guard updateUI else {
-            return
-        }
-        self.delegate?.sectionsHaveBeenRemoved(needRemoveSections, at: needRemoveSectionIndexs)
     }
 }

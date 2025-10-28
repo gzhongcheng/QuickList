@@ -47,13 +47,9 @@ Section作为Item的集合容器，实现了Collection相关集合协议，支�
 > **insert(_:, at:)**: 在指定位置插入Item
 > **replaceSubrange(_:, with:)**: 替换指定范围的Item
 > **remove(at:)**: 删除指定位置的Item
-> **remove(at:, updateUI:)**: 删除指定位置的Item，可选择是否更新UI
 > **removeFirst()**: 删除第一个Item
-> **removeFirst(updateUI:)**: 删除第一个Item，可选择是否更新UI
 > **removeAll(keepingCapacity:)**: 删除所有Item
-> **removeAll(keepingCapacity:, updateUI:)**: 删除所有Item，可选择是否更新UI
 > **removeAll(where:)**: 根据条件删除Item
-> **removeAll(updateUI:, where:)**: 根据条件删除Item，可选择是否更新UI
 
 ## 使用举例
 ```

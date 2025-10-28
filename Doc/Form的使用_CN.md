@@ -34,13 +34,9 @@ Form作为Section的集合容器，实现了Collection相关集合协议，支�
 > **insert(_:, at:)**: 在指定位置插入Section
 > **replaceSubrange(_:, with:)**: 替换指定范围的Section
 > **remove(at:)**: 删除指定位置的Section
-> **remove(at:, updateUI:)**: 删除指定位置的Section，可选择是否更新UI
 > **removeFirst()**: 删除第一个Section
-> **removeFirst(updateUI:)**: 删除第一个Section，可选择是否更新UI
 > **removeAll(keepingCapacity:)**: 删除所有Section
-> **removeAll(keepingCapacity:, updateUI:)**: 删除所有Section，可选择是否更新UI
 > **removeAll(where:)**: 根据条件删除Section
-> **removeAll(updateUI:, where:)**: 根据条件删除Section，可选择是否更新UI
 
 ## 使用举例
 ```

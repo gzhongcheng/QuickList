@@ -490,63 +490,13 @@ extension Section: RangeReplaceableCollection {
         old.section = nil
         return old
     }
-    @discardableResult
-    public func remove(at i: Int, updateUI: Bool) -> Item {
-        if i >= items.count {
-            assertionFailure("Form: Index out of bounds")
-        }
-        let old = items[i]
-        items.remove(at: i)
-        old.section = nil
-        if updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate {
-            delegate.itemsHaveBeenRemoved([old], to: self, at: [IndexPath(row: i, section: sectionIndex)])
-        }
-        return old
-    }
     
     public func removeFirst() -> Item {
         return remove(at: 0)
-    }
-    public func removeFirst(updateUI: Bool) -> Item {
-        return remove(at: 0, updateUI: updateUI)
     }
 
     public func removeAll(keepingCapacity keepCapacity: Bool = false) {
         items.forEach({ $0.section = nil })
         items.removeAll(keepingCapacity: keepCapacity)
-    }
-    public func removeAll(keepingCapacity keepCapacity: Bool = false, updateUI: Bool) {
-        let oldItems = items
-        items.removeAll(keepingCapacity: keepCapacity)
-        oldItems.forEach({ $0.section = nil })
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenRemoved(oldItems, to: self, at: (0 ..< oldItems.count).map({ IndexPath(row: $0, section: sectionIndex) }))
-    }
-    
-    public func removeAll(where shouldBeRemoved: (Item) throws -> Bool) rethrows {
-        items.forEach { (item) in
-            if (try? shouldBeRemoved(item)) ?? false {
-                item.section = nil
-            }
-        }
-        try items.removeAll(where: shouldBeRemoved)
-    }
-    public func removeAll(updateUI: Bool, where shouldBeRemoved: (Item) throws -> Bool) rethrows {
-        var needRemoveItems: [Item] = []
-        var needRemoveItemIndexs: IndexSet = IndexSet()
-        items.enumerated().forEach { (index, item) in
-            if (try? shouldBeRemoved(item)) ?? false {
-                needRemoveItems.append(item)
-                needRemoveItemIndexs.insert(index)
-                item.section = nil
-            }
-        }
-        try items.removeAll(where: shouldBeRemoved)
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenRemoved(needRemoveItems, to: self, at: needRemoveItemIndexs.map({ IndexPath(row: $0, section: sectionIndex) }))
     }
 }

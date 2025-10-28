@@ -34,13 +34,9 @@ Form serves as a collection container for Sections, implementing Collection-rela
 > **insert(_:, at:)**: Insert Section at specified position
 > **replaceSubrange(_:, with:)**: Replace Sections in specified range
 > **remove(at:)**: Remove Section at specified position
-> **remove(at:, updateUI:)**: Remove Section at specified position with optional UI update
-> **removeFirst()**: Remove first Section
-> **removeFirst(updateUI:)**: Remove first Section with optional UI update
+> **removeFirst()**: Remove first Sectione
 > **removeAll(keepingCapacity:)**: Remove all Sections
-> **removeAll(keepingCapacity:, updateUI:)**: Remove all Sections with optional UI update
 > **removeAll(where:)**: Remove Sections based on condition
-> **removeAll(updateUI:, where:)**: Remove Sections based on condition with optional UI update
 
 ## Usage Example
 ```
