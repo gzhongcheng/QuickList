@@ -236,10 +236,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
                  */
                 if let ratio = aspectRatio, abs(cellHeight - Int(ratio.height)) > 2 || abs(Int(estimateItemSize.width) - Int(ratio.width)) > 2 {
                     aspectRatio = CGSize(width: Int(estimateItemSize.width), height: cellHeight)
-                    updateLayout(animation: true)
+                    updateLayout(animation: ListReloadAnimation.fade)
                 } else if aspectRatio == nil {
                     aspectRatio = CGSize(width: Int(estimateItemSize.width), height: cellHeight)
-                    updateLayout(animation: true)
+                    updateLayout(animation: ListReloadAnimation.fade)
                 }
                 cell.imageBoxView.setCorners(corners, rect: CGRect(x: 0, y: 0, width: imageWidth, height: imageHeight))
             } else {
@@ -252,10 +252,10 @@ public final class ImageItem: ItemOf<CollectionImageCell>, ItemType {
                  */
                 if let ratio = aspectRatio, abs(Int(estimateItemSize.height) - Int(ratio.height)) > 2 || abs(cellWidth - Int(ratio.width)) > 2 {
                     aspectRatio = CGSize(width: cellWidth, height: Int(estimateItemSize.height))
-                    updateLayout(animation: true)
+                    updateLayout(animation: ListReloadAnimation.fade)
                 } else if aspectRatio == nil {
                     aspectRatio = CGSize(width: cellWidth, height: Int(estimateItemSize.height))
-                    updateLayout(animation: true)
+                    updateLayout(animation: ListReloadAnimation.fade)
                 }
                 cell.imageBoxView.setCorners(corners, rect: CGRect(x: 0, y: 0, width: imageWidth, height: imageHeight))
             }

@@ -147,26 +147,25 @@ class ViewController: UIViewController {
         formlist.form.footer = formFooter
         
         // MARK: - Add sections after creation
-        let swipItemSection = Section("Test Swipe") { section in
-            section.column = 2
-            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-            section.lineSpace = 10
-            section.itemSpace = 10
-        }
-        for i in 0 ... 30 {
-            swipItemSection <<< TestSwipeItem("Swipe Delete \(i)") { item in
-                item.swipedActionButtons = [
-                    SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
-                        item?.removeFromSection()
-                    }),
-                    SwipeActionButton(title: "Favorite", backgroundColor: .black),
-                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "More", backgroundColor: .lightGray)
-                ]
-                item.autoTriggerFirstButton = true
-            }
-        }
-        formlist.form +++ swipItemSection
-        
+//        let swipItemSection = Section("Test Swipe") { section in
+//            section.column = 2
+//            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//            section.lineSpace = 10
+//            section.itemSpace = 10
+//        }
+//        for i in 0 ... 30 {
+//            swipItemSection <<< TestSwipeItem("Swipe Delete \(i)") { item in
+//                item.swipedActionButtons = [
+//                    SwipeActionButton(icon: UIImage(named: "icon_delete"), backgroundColor: .red, touchUpInside: { [weak item] in
+//                        item?.removeFromSection()
+//                    }),
+//                    SwipeActionButton(title: "Favorite", backgroundColor: .black),
+//                    SwipeActionButton(icon: UIImage(named: "icon_info"), title: "More", backgroundColor: .lightGray)
+//                ]
+//                item.autoTriggerFirstButton = true
+//            }
+//        }
+//        formlist.form +++ swipItemSection
         
         formlist.form +++ Section(header: "Automatic Wrap", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -196,7 +195,7 @@ class ViewController: UIViewController {
             }
 //            section.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
 //            section.layout = QuickListFlowLayout()
-            section.layout = RowEqualHeightLayout()
+             section.layout = RowEqualHeightLayout()
 //            section.isFormHeader = true
         }
             <<< newTagItem("Tag")

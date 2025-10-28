@@ -139,7 +139,6 @@ public final class SwitchItem: AutolayoutItemOf<CollectionSwitchCell>, ItemType 
         cell.titleLabel.textColor = titleColor
         cell.titleLabel.textAlignment = titleAlignment
         
-        cell.valueSwitch.setOn(self.value, animated: false)
         cell.valueSwitch.offBackgroundColor = switchOffBackgroundColor
         cell.valueSwitch.onBackgroundColor = switchOnBackgroundColor
         cell.valueSwitch.offIndicatorColor = switchOffIndicatorColor
@@ -227,22 +226,22 @@ public final class SwitchItem: AutolayoutItemOf<CollectionSwitchCell>, ItemType 
                 cell.valueSwitch.snp.remakeConstraints({ (make) in
                     make.top.equalTo(contentInsets.top)
                     make.right.equalTo(-contentInsets.right)
-                    make.bottom.lessThanOrEqualTo(-contentInsets.bottom)
+                    make.bottom.lessThanOrEqualTo(-contentInsets.bottom).priority(.medium)
                 })
             case .center:
                 cell.valueSwitch.snp.remakeConstraints({ (make) in
-                    make.top.greaterThanOrEqualTo(contentInsets.top)
+                    make.top.greaterThanOrEqualTo(contentInsets.top).priority(.medium)
                     make.right.equalTo(-contentInsets.right)
-                    make.bottom.lessThanOrEqualTo(-contentInsets.bottom)
+                    make.bottom.lessThanOrEqualTo(-contentInsets.bottom).priority(.medium)
                     make.centerY.equalToSuperview()
                 })
             case .bottom:
                 cell.valueSwitch.snp.remakeConstraints({ (make) in
-                    make.top.greaterThanOrEqualTo(contentInsets.top)
+                    make.top.greaterThanOrEqualTo(contentInsets.top).priority(.medium)
                     make.right.equalTo(-contentInsets.right)
                     make.bottom.equalTo(-contentInsets.bottom)
                 })
         }
-        cell.contentView.layoutIfNeeded()
+        cell.valueSwitch.setOn(self.value, animated: false)
     }
 }

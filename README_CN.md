@@ -66,6 +66,7 @@ QuickListView继承于UICollectionView，并增加了以下属性和方法：
 > **listSizeChangedBlock**：列表总尺寸变化回调，适用于需要根据展示内容的实际尺寸来调整布局的情况
 > **reload()**：设置需要reload
 > **selectItem(item:)**：设置选中指定的item（如果item的scrollToSelected为true，会自动滚动到item的位置）
+> **setNeedUpdateLayout(afterSection:, animation:)**：在指定section后使用自定义动画更新布局
 
 
 ## 布局设置
@@ -89,6 +90,32 @@ Section("自定义layout") { section in
 ```
 内容自定义布局的优先级 section.layout -> form.layout -> QuickListFlowLayout（默认）
 
+## 数据操作
+
+QuickList 为 Form 和 Section 级别提供了全面的数据操作方法。
+
+### Section 操作
+- **动画操作**：插入、删除和替换item，支持流畅的动画效果
+- **基础操作**：标准的数组类操作（append、insert、remove等）
+- **UI控制**：所有操作都支持可选的UI更新
+
+### Form 操作
+- **动画操作**：替换和删除section，支持动画效果
+- **基础操作**：section的标准集合操作
+- **批量更新**：高效的批量操作，支持动画
+
+### 使用示例
+```swift
+// Section 操作
+section.insertItem(with: newItem, at: 0, animation: .fade)
+section.deleteItems(with: [item], animation: .leftSlide)
+section.replaceItems(with: newItems, inAnimation: .fade, outAnimation: .scale)
+
+// Form 操作
+form.replaceSections(with: newSections, inAnimation: .fade, outAnimation: .scale)
+form.deleteSections(with: [section], inAnimation: .leftSlide, outAnimation: .rightSlide)
+```
+
 ## 使用说明
 
 [Form](./Doc/Form的使用_CN.md)
@@ -96,6 +123,8 @@ Section("自定义layout") { section in
 [Section](./Doc/Section的使用_CN.md)
 
 [Item](./Doc/Item的使用_CN.md)
+
+[列表重载动画](./Doc/ListReloadAnimation_CN.md)
 
 ---
 ## 功能计划

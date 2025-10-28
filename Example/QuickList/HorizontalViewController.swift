@@ -213,7 +213,7 @@ class HorizontalViewController: UIViewController {
             item.contentInsets = UIEdgeInsets(top: 10, left: 7, bottom: 10, right: 5)
             item.onCellSelection { item in
                 if item.value == "x" {
-                    item.section?.hideAllItems(withOut: [item], withAnimation: true)
+                    item.section?.hideAllItems(withOut: [item], inAnimation: ListReloadAnimation.fade, outAnimation: ListReloadAnimation.fade)
                     item.value = "o"
                 } else {
                     item.section?.showAllItems()

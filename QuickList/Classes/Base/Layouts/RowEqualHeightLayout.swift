@@ -82,24 +82,17 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         var itemIndex: Int = 0
         var visibleLineCount: Int = 0
         for (index, item) in section.items.enumerated() {
+            guard !item.isHidden else { continue }
             let attr = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: index, section: sectionIndex))
             var itemSize: CGSize
             if layout.scrollDirection == .vertical {
                 let itemEstSizeWidth = floor(singleItemWidth * CGFloat(item.weight) + (section.column > 1 ? section.itemSpace : 0) * CGFloat(item.weight - 1))
-                if item.isHidden {
-                    itemSize = CGSize(width: itemEstSizeWidth, height: 0)
-                } else {
-                    itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemEstSizeWidth, height: itemEstSizeWidth), in: formView, layoutType: .vertical) ?? .zero
-                }
+                itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemEstSizeWidth, height: itemEstSizeWidth), in: formView, layoutType: .vertical) ?? .zero
                 itemSize.height = ceil(itemSize.height)
                 itemSize.width = ceil(itemEstSizeWidth)
             } else {
                 let itemEstSizeHeight = floor(singleItemHeight * CGFloat(item.weight) + section.itemSpace * CGFloat(item.weight - 1))
-                if item.isHidden {
-                    itemSize = CGSize(width: 0, height: itemEstSizeHeight)
-                } else {
-                    itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemEstSizeHeight, height: itemEstSizeHeight), in: formView, layoutType: .horizontal) ?? .zero
-                }
+                itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemEstSizeHeight, height: itemEstSizeHeight), in: formView, layoutType: .horizontal) ?? .zero
                 itemSize.width = ceil(itemSize.width)
                 itemSize.height = ceil(itemEstSizeHeight)
             }

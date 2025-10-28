@@ -214,48 +214,201 @@ open class Section: NSObject {
      * 隐藏所有item
      * Hide all items
      */
-    public func hideAllItems(withOut: [Item] = [], withAnimation: Bool = true) {
-        UIView.animate(withDuration: withAnimation ? 0.3 : 0) {
-            self.items.forEach { (item) in
-                if !withOut.contains(item) {
-                    item.isHidden = true
-                    item.cell?.alpha = 0
-                }
+    public func hideAllItems(withOut: [Item] = [], inAnimation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, outAnimation: ListReloadAnimation? = ListReloadAnimation.topSlide, completion: (() -> Void)? = nil) {
+        self.items.reversed().forEach { (item) in
+            if !withOut.contains(item) {
+                item.isHidden = true
+                guard let cell = item.cell else { return }
+                outAnimation?.animateOut(view: cell)
             }
-            self.form?.delegate?.updateLayout(withAnimation: withAnimation, afterSection: self.index ?? 0)
         }
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: nil, completion: completion)
     }
     /**
      * 显示所有item
      * Show all items
      */
-    public func showAllItems(withAnimation: Bool = true) {
-        UIView.animate(withDuration: withAnimation ? 0.3 : 0) {
-            self.items.forEach { (item) in
-                item.isHidden = false
-                item.cell?.alpha = 1
-            }
-            self.form?.delegate?.updateLayout(withAnimation: withAnimation, afterSection: self.index ?? 0)
+    public func showAllItems(inAnimation: ListReloadAnimation? = ListReloadAnimation.topSlide, completion: (() -> Void)? = nil) {
+        self.items.forEach { (item) in
+            item.isHidden = false
         }
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: nil, performBatchUpdates: nil, completion: completion)
     }
+
     /**
-     * 刷新所有item
-     * Reload all items
+     * 动画添加item
+     * Animate add item
+     * - Parameters:
+     *   - item: 新的item / New item
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
      */
-    public func reload() {
-        guard let sectionIndex = form?.firstIndex(of: self) else {
-            return
-        }
-        self.form?.delegate?.updateLayout(withAnimation: false, afterSection: sectionIndex)
-        self.form?.delegate?.formView?.reloadSections(IndexSet(integer: sectionIndex))
+    public func addItem(with item: Item, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            self.append(item)
+            listView?.insertItems(at: [IndexPath(row: sectionIndex, section: sectionIndex)])
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 动画添加items
+     * Animate add items
+     * - Parameters:
+     *   - items: 新的item数组 / New item array
+     *   - inAnimation: cell进入动画 / Cell enter animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func addItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            var addedItemIndexPaths: [IndexPath] = []
+            items.enumerated().forEach { (index, item) in
+                self.append(item)
+                addedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+            }
+            listView?.insertItems(at: addedItemIndexPaths)
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 动画插入item
+     * Animate insert item
+     * - Parameters:
+     *   - item: 新的item / New item
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func insertItem(with item: Item, at index: Int, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            self.insert(item, at: index)
+            listView?.insertItems(at: [IndexPath(row: index, section: sectionIndex)])
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
     }
     
     /**
-     * 仅刷新界面布局
-     * Only refresh interface layout
+     * 动画删除items
+     * Animate delete items
+     * - Parameters:
+     *   - items: 需要删除的item数组 / Items to delete
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
      */
-    public func updateLayout(animation: Bool = false) {
-        form?.updateLayout(afterSection: self.index ?? 0, animation: animation)
+    public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.leftSlide, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: nil, othersInAnimation: animation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            var removedItemIndexPaths: [IndexPath] = []
+            items.enumerated().forEach { (index, item) in
+                if self.items.contains(item) {
+                    item.section = nil
+                    if let cell = item.cell {
+                        animation?.animateOut(view: cell)
+                    }
+                    removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+                }
+            }
+            listView?.deleteItems(at: removedItemIndexPaths)
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 替换所有item, 使用相同的进入和退出动画类型
+     * Replace all items, use the same enter and exit animation types
+     * - Parameters:
+     *   - newItems: 新的item数组 / New item array
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func replaceItems(with newItems: [Item], animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        replaceItems(with: newItems, inAnimation: animation, outAnimation: animation, completion: completion)
+    }
+
+    /**
+     * 替换所有item, 使用指定的进入和退出动画类型
+     * Replace all items, use the specified enter and exit animation types
+     * - Parameters:
+     *   - newItems: 新的item数组 / New item array
+     *   - inAnimation: cell进入动画 / Cell enter animation
+     *   - outAnimation: cell退出动画 / Cell exit animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func replaceItems(with newItems: [Item], inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, outAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsOutAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            var removedItemIndexPaths: [IndexPath] = []
+            self.items.enumerated().forEach { (index, item) in
+                if let cell = item.cell {
+                    outAnimation?.animateOut(view: cell)
+                }
+                item.section = nil
+                removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+            }
+            self.items = newItems
+            var addedItemIndexPaths: [IndexPath] = []
+            newItems.enumerated().forEach { (index, item) in
+                item.section = self
+                addedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+            }
+            listView?.deleteItems(at: removedItemIndexPaths)
+            listView?.insertItems(at: addedItemIndexPaths)
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 替换item数组到指定范围, 并通知到代理
+     * Replace item array to specified range, and notify delegate
+     * - Parameters:
+     *   - range: 范围 / Range
+     *   - newItems: 新的item数组 / New item array
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func replaceItems(with newItems: [Item], at range: Range<Int>, animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            let sectionIndex = self.index ?? 0
+            var removedItemIndexPaths: [IndexPath] = []
+            self.items.enumerated().forEach { (index, item) in
+                if index < range.lowerBound || index >= range.upperBound {
+                    if let cell = item.cell {
+                        animation?.animateOut(view: cell)
+                    }
+                    item.section = nil
+                    removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+                }
+            }
+            self.items = newItems
+            var addedItemIndexPaths: [IndexPath] = []
+            newItems.enumerated().forEach { (index, item) in
+                item.section = self
+                addedItemIndexPaths.append(IndexPath(row: index + range.lowerBound, section: sectionIndex))
+            }
+            listView?.deleteItems(at: removedItemIndexPaths)
+            listView?.insertItems(at: addedItemIndexPaths)
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 仅刷新界面布局,可以指定进入动画类型
+     * Only refresh interface layout, can specify enter animation type
+     * - Parameters:
+     *   - animation: cell进入动画 / Cell enter animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func updateLayout(animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: animation, performBatchUpdates: nil, completion: completion)
     }
 }
 
@@ -308,40 +461,15 @@ extension Section: RangeReplaceableCollection {
         items.insert(newElement, at: i)
         newElement.section = self
     }
-    public func insert(_ newElement: Item, at i: Int, updateUI: Bool) {
-        items.insert(newElement, at: i)
-        newElement.section = self
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenAdded([newElement], to: self, at: [IndexPath(row: i, section: sectionIndex)])
-    }
     
     public func append(_ formItem: Item) {
         items.append(formItem)
         formItem.section = self
     }
-    public func append(_ formItem: Item, updateUI: Bool) {
-        items.append(formItem)
-        formItem.section = self
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenAdded([formItem], to: self, at: [IndexPath(row: items.count - 1, section: sectionIndex)])
-    }
     
     public func append<S: Sequence>(contentsOf newElements: S) where S.Iterator.Element == Item {
         items.append(contentsOf: newElements)
         newElements.forEach({ $0.section = self })
-    }
-    public func append<S: Sequence>(contentsOf newElements: S, updateUI: Bool) where S.Iterator.Element == Item {
-        let oldCount = items.count
-        items.append(contentsOf: newElements)
-        newElements.forEach({ $0.section = self })
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenAdded(newElements.map({ $0 }), to: self, at: (oldCount - 1 ..< items.count - 1).map({ IndexPath(row: $0, section: sectionIndex) }))
     }
 
     public func replaceSubrange<C>(_ subRange: Range<Int>, with newElements: C) where C : Collection, C.Element == Item {
@@ -350,18 +478,6 @@ extension Section: RangeReplaceableCollection {
         items[lower ..< upper].forEach({ $0.section = nil })
         items.replaceSubrange(lower..<upper, with: newElements)
         newElements.forEach({ $0.section = self })
-    }
-    public func replaceSubrange<C>(_ subRange: Range<Int>, with newElements: C, updateUI: Bool) where C : Collection, C.Element == Item {
-        let lower = Swift.max(0, Swift.min(subRange.lowerBound, items.count - 1))
-        let upper = Swift.min(subRange.upperBound, items.count)
-        let oldItems = items[lower ..< upper].map({ $0 })
-        items.replaceSubrange(lower..<upper, with: newElements)
-        oldItems.forEach({ $0.section = nil })
-        newElements.forEach({ $0.section = self })
-        guard updateUI, let sectionIndex = form?.firstIndex(of: self), let delegate = form?.delegate else {
-            return
-        }
-        delegate.itemsHaveBeenReplaced(oldItems: oldItems, newItems: newElements.map({ $0 }), to: self, at: (lower ..< upper).map({ IndexPath(row: $0, section: sectionIndex) }))
     }
     
     @discardableResult

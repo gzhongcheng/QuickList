@@ -142,19 +142,19 @@ open class QuickListView: UICollectionView {
             needUpdateLayout = false
             firstUpdateSection = .max
         } else if needUpdateLayout, firstUpdateSection < form.count {
-            handler.updateLayout(withAnimation: updateLayoutUseAnimation, afterSection: firstUpdateSection)
+            handler.updateLayout(section: nil, othersInAnimation: updateLayoutInAnimation)
             firstUpdateSection = .max
-            updateLayoutUseAnimation = false
+            updateLayoutInAnimation = nil
         }
     }
     
     private var needUpdateLayout = true
-    private var updateLayoutUseAnimation = false
+    private var updateLayoutInAnimation: ListReloadAnimation?
     private var firstUpdateSection: Int = .max
-    public func setNeedUpdateLayout(afterSection: Int, useAnimation: Bool = false) {
+    public func setNeedUpdateLayout(afterSection: Int, animation: ListReloadAnimation? = nil) {
         needUpdateLayout = true
         firstUpdateSection = min(firstUpdateSection, afterSection)
-        updateLayoutUseAnimation = useAnimation || updateLayoutUseAnimation
+        updateLayoutInAnimation = animation ?? updateLayoutInAnimation
         setNeedsLayout()
     }
     

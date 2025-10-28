@@ -353,7 +353,7 @@ public final class TextViewItem : ItemOf<CollectionTextViewCell>, ItemType {
         let height = max(newHeight + boxPadding.top + boxPadding.bottom + boxInsets.top + boxInsets.bottom , minHeight)
         if Int(realHeight) != Int(height), autoHeight {
             realHeight = height
-            updateLayout(animation: true)
+            updateLayout(animation: ListReloadAnimation.fade)
         }
     }
     

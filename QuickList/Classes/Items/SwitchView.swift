@@ -16,6 +16,12 @@ public class SwitchView: UIView {
      * Minimum switch size
      */
     public var minimumSize: CGSize = CGSize(width: 50, height: 30)
+
+    /**
+     * 滑块之外的区域的最小宽度，默认为15
+     * Minimum width of the area outside the slider, default is 15
+     */
+    public var outsideAreaMinimumWidth: CGFloat = 15
     
     /**
      * 当前开关状态
@@ -106,9 +112,32 @@ public class SwitchView: UIView {
     }
     
     public override var intrinsicContentSize: CGSize {
+        var maxIndicatorTextWidth = max(onIndicatorText?.size(withAttributes: [.font: indicatorTextLabel.font ?? UIFont.systemFont(ofSize: 14)]).width ?? 0, offIndicatorText?.size(withAttributes: [.font: indicatorTextLabel.font ?? UIFont.systemFont(ofSize: 14)]).width ?? 0)
+        maxIndicatorTextWidth = ceil(maxIndicatorTextWidth)
+        var maxTextLabelWidth = max(onText?.size(withAttributes: [.font: onTextLabel.font ?? UIFont.systemFont(ofSize: 14)]).width ?? 0, offText?.size(withAttributes: [.font: offTextLabel.font ?? UIFont.systemFont(ofSize: 14)]).width ?? 0)
+        maxTextLabelWidth = ceil(maxTextLabelWidth)
+        let contentHeight = minimumSize.height - contentInsets.top - contentInsets.bottom
+        if maxTextLabelWidth == 0, maxIndicatorTextWidth == 0 {
+            return CGSize(
+                width: max(minimumSize.width, outsideAreaMinimumWidth + contentHeight + contentInsets.left + contentInsets.right), 
+                height: minimumSize.height
+            )
+        }
+        if maxIndicatorTextWidth == 0, maxTextLabelWidth > 0 {
+            return CGSize(
+                width: max(minimumSize.width, maxTextLabelWidth + contentInsets.left + contentInsets.right + contentHeight + contentHeight * 0.4),
+                height: minimumSize.height
+            )
+        }
+        if maxTextLabelWidth == 0, maxIndicatorTextWidth > 0 {
+            return CGSize(
+                width: max(minimumSize.width, maxIndicatorTextWidth + contentHeight * 0.4 + contentInsets.left + contentInsets.right + outsideAreaMinimumWidth),
+                height: minimumSize.height
+            )
+        }
         return CGSize(
-            width: max(minimumSize.width, max(onTextLabel.intrinsicContentSize.width, offTextLabel.intrinsicContentSize.width) + contentInsets.left + contentInsets.right + indicatorViewWidth * 1.15),
-            height: max(minimumSize.height, onTextLabel.intrinsicContentSize.height + contentInsets.top + contentInsets.bottom)
+            width: max(minimumSize.width, maxIndicatorTextWidth + contentHeight * 0.4 + maxTextLabelWidth + contentHeight * 0.4 + contentInsets.left + contentInsets.right),
+            height: minimumSize.height
         )
     }
     
@@ -129,8 +158,8 @@ public class SwitchView: UIView {
         indicatorTextLabel.text = isOn ? onIndicatorText : offIndicatorText
         indicatorTextLabel.sizeToFit()
         let indicatorTextWidth = indicatorTextLabel.bounds.size.width
-        let conentHeight = bounds.height - contentInsets.top - contentInsets.bottom
-        indicatorViewWidth = max(conentHeight, indicatorTextWidth + 10)
+        let contentHeight = bounds.height - contentInsets.top - contentInsets.bottom
+        indicatorViewWidth = max(contentHeight, indicatorTextWidth + contentHeight * 0.4)
         self.indicatorView.frame = CGRect(
             x: isOn ? bounds.width - contentInsets.right - indicatorViewWidth : contentInsets.left,
             y: contentInsets.top,
@@ -138,19 +167,19 @@ public class SwitchView: UIView {
             height: bounds.height - contentInsets.top - contentInsets.bottom
         )
         self.onTextLabel.frame = CGRect(
-            x: contentInsets.left + indicatorViewWidth * 0.15,
+            x: contentInsets.left + contentHeight * 0.2,
             y: contentInsets.top,
-            width: bounds.width - contentInsets.left - contentInsets.right - indicatorViewWidth * 1.15,
-            height: conentHeight
+            width: bounds.width - contentInsets.left - contentInsets.right - indicatorViewWidth - contentHeight * 0.2,
+            height: contentHeight
         )
         self.offTextLabel.frame = CGRect(
             x: contentInsets.left + indicatorViewWidth,
             y: contentInsets.top,
-            width: bounds.width - contentInsets.left - contentInsets.right - indicatorViewWidth * 1.15,
-            height: conentHeight
+            width: bounds.width - contentInsets.left - contentInsets.right - indicatorViewWidth - contentHeight * 0.2,
+            height: contentHeight
         )
         
-        self.indicatorView.layer.cornerRadius = conentHeight * 0.5
+        self.indicatorView.layer.cornerRadius = contentHeight * 0.5
         self.backgroundView.layer.cornerRadius = self.bounds.height * 0.5
     }
     
@@ -163,6 +192,7 @@ public class SwitchView: UIView {
         
         backgroundView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+            make.size.equalTo(minimumSize)
         }
         
         indicatorTextLabel.snp.makeConstraints { make in
@@ -245,6 +275,10 @@ public class SwitchView: UIView {
             self.onTextLabel.alpha = self.isOn ? 1.0 : 0
             self.offTextLabel.alpha = self.isOn ? 0 : 1.0
             self.indicatorTextLabel.text = self.isOn ? self.onIndicatorText : self.offIndicatorText
+            self.backgroundView.snp.updateConstraints { make in
+                make.size.equalTo(self.intrinsicContentSize)
+            }
+            self.superview?.layoutIfNeeded()
         }
         if animated {
             UIView.animate(withDuration: 0.3) {

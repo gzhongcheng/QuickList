@@ -68,6 +68,7 @@ QuickListView inherits from UICollectionView and adds the following properties a
 > **listSizeChangedBlock**: List total size change callback, suitable for cases where layout needs to be adjusted based on the actual size of displayed content
 > **reload()**: Set to reload
 > **selectItem(item:)**: Set to select the specified item (if the item's scrollToSelected is true, it will automatically scroll to the item's position)
+> **setNeedUpdateLayout(afterSection:, animation:)**: Update layout with custom animations after specified section
 
 
 ## Layout Settings
@@ -91,6 +92,32 @@ Section("Custom layout") { section in
 ```
 The priority for custom layout is: section.layout -> form.layout -> QuickListFlowLayout (default)
 
+## Data Operations
+
+QuickList provides comprehensive data manipulation methods for both Form and Section levels.
+
+### Section Operations
+- **Animation Operations**: Insert, delete, and replace items with smooth animations
+- **Basic Operations**: Standard array-like operations (append, insert, remove, etc.)
+- **UI Control**: Optional UI updates for all operations
+
+### Form Operations  
+- **Animation Operations**: Replace and delete sections with animations
+- **Basic Operations**: Standard collection operations for sections
+- **Batch Updates**: Efficient batch operations with animation support
+
+### Usage Examples
+```swift
+// Section operations
+section.insertItem(with: newItem, at: 0, animation: .fade)
+section.deleteItems(with: [item], animation: .leftSlide)
+section.replaceItems(with: newItems, inAnimation: .fade, outAnimation: .scale)
+
+// Form operations
+form.replaceSections(with: newSections, inAnimation: .fade, outAnimation: .scale)
+form.deleteSections(with: [section], inAnimation: .leftSlide, outAnimation: .rightSlide)
+```
+
 ## Usage Instructions
 
 [Form](./Doc/Form的使用.md)
@@ -98,6 +125,8 @@ The priority for custom layout is: section.layout -> form.layout -> QuickListFlo
 [Section](./Doc/Section的使用.md)
 
 [Item](./Doc/Item的使用.md)
+
+[List Reload Animation](./Doc/ListReloadAnimation.md)
 
 ---
 ## Feature Plans

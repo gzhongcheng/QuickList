@@ -148,7 +148,7 @@ public func +++ (left: Item, right: Item) -> Form {
  */
 @discardableResult
 public func +++! (left: Form, right: Section) -> Form {
-    left.append(right, updateUI: true)
+    left.addSection(with: right, animation: ListReloadAnimation.fade)
     return left
 }
 /**
@@ -161,11 +161,11 @@ public func +++! (left: Form, right: Section) -> Form {
 @discardableResult
 public func +++! (left: Form, right: Item) -> Form {
     if let section = left.sections.last {
-        section.append(right, updateUI: true)
+        section.addItem(with: right, animation: ListReloadAnimation.fade)
     } else {
         let section = Section()
         section.append(right)
-        left.append(section, updateUI: true)
+        left.addSection(with: section, animation: ListReloadAnimation.fade)
     }
     return left
 }
@@ -205,17 +205,8 @@ public func <<< (left: Item, right: Item) -> Section {
 
 // MARK: - <<<!
 /**
- * 添加Item到Section, 并通知到代理
- * Add Item to Section, and notify delegate
- * 
- * 使用 <<<!前，
- * 如果section已经被添加到form中，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
- * 如果section还没有被添加到form中，就没关系
- *
- * Add Item to Section, and notify delegate
- * before using <<<!, 
- * if the section has been added to the form, please confirm that the collectionView has been refreshed (the section information is already on the collectionView, otherwise it will crash)
- * if the section has not been added to the form, it's ok
+ * 添加Item到Section, 更新界面布局
+ * Add Item to Section, update interface layout
  * 
  * - parameter left:  section
  * - parameter right: item
@@ -224,22 +215,13 @@ public func <<< (left: Item, right: Item) -> Section {
  */
 @discardableResult
 public func <<<! (left: Section, right: Item) -> Section {
-    left.append(right, updateUI: true)
+    left.addItems(with: [right], animation: ListReloadAnimation.fade)
     return left
 }
 
 /**
- * 添加Item数组到Section, 并通知到代理
- * Add Item array to Section, and notify delegate
- * 
- * 使用 <<<!前，
- * 如果section已经被添加到form中，请确认collectionView已经刷新过（section的信息已经在collectionView上，否则会闪退）
- * 如果section还没有被添加到form中，就没关系
- *
- * Add Item array to Section, and notify delegate
- * before using <<<!, 
- * if the section has been added to the form, please confirm that the collectionView has been refreshed (the section information is already on the collectionView, otherwise it will crash)
- * if the section has not been added to the form, it's ok
+ * 添加Item数组到Section, 更新界面布局
+ * Add Item array to Section, update interface layout
  * 
  * - parameter left:  section
  * - parameter right: items
@@ -248,7 +230,7 @@ public func <<<! (left: Section, right: Item) -> Section {
  */
 @discardableResult
 public func <<<! (left: Section, right: [Item]) -> Section {
-    left.append(contentsOf: right, updateUI: true)
+    left.addItems(with: right, animation: ListReloadAnimation.fade)
     return left
 }
 
@@ -279,8 +261,7 @@ public func >>> (left: Form, right: [Section]) -> Form {
 */
 @discardableResult
 public func >>>! (left: Form, right: [Section]) -> Form {
-    let oldSections = left.sections
-    left.replaceSubrange(0 ..< oldSections.count, with: right, updateUI: true)
+    left.replaceSections(with: right, inAnimation: ListReloadAnimation.fade, outAnimation: ListReloadAnimation.fade)
     return left
 }
 
@@ -295,7 +276,7 @@ public func >>>! (left: Form, right: [Section]) -> Form {
  */
 @discardableResult
 public func >>>! (left: Form, right: (Range<Int>, [Section])) -> Form {
-    left.replaceSubrange(right.0, with: right.1, updateUI: true)
+    left.replaceSections(with: right.1, at: right.0, inAnimation: ListReloadAnimation.fade, outAnimation: ListReloadAnimation.fade)
     return left
 }
 
@@ -325,8 +306,7 @@ public func >>> (left: Section, newItems: [Item]) -> Section {
  */
 @discardableResult
 public func >>>! (left: Section, newItems: [Item]) -> Section {
-    left.removeAll(updateUI: true)
-    left.append(contentsOf: newItems, updateUI: true)
+    left.replaceItems(with: newItems, animation: ListReloadAnimation.fade)
     return left
 }
 
@@ -355,7 +335,7 @@ public func >>> (left: Section, right: (Range<Int>, [Item])) -> Section {
  */
 @discardableResult
 public func >>>! (left: Section, right: (Range<Int>, [Item])) -> Section {
-    left.replaceSubrange(right.0, with: right.1, updateUI: true)
+    left.replaceItems(with: right.1, at: right.0, animation: ListReloadAnimation.fade)
     return left
 }
 

@@ -36,6 +36,37 @@ extension UICollectionViewLayoutAttributes {
     }
 }
 
+extension Array where Element == UICollectionViewLayoutAttributes {
+    /**
+     * 使用二分法找到rect范围内的一个itemAttr
+     * Use binary search to find an itemAttr in the rect range
+     */
+    func binarySearch(frame: CGRect, in rect: CGRect, direction: UICollectionView.ScrollDirection) -> (Int, UICollectionViewLayoutAttributes)? {
+        var left = 0
+        var right = count - 1
+        while left <= right {
+            let mid = (left + right) / 2
+            if self[mid].frame.intersects(rect) {
+                return (mid, self[mid])
+            }
+            if direction == .vertical {
+                if self[mid].frame.minY > frame.minY {
+                    right = mid - 1
+                } else {
+                    left = mid + 1
+                }
+            } else {
+                if self[mid].frame.minX > frame.minX {
+                    right = mid - 1
+                } else {
+                    left = mid + 1
+                }
+            }
+        }
+        return nil
+    }
+}
+
 public protocol QuickListCollectionLayoutDelegate: AnyObject {
     /**
      * 更新完成回调
@@ -423,20 +454,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             rect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: formView.bounds.height)
         }
         /**
-         * 向两侧扩展一些距离
-         * Extend some distance to both sides
-         */
-        switch scrollDirection {
-        case .vertical:
-            rect.origin.y -= 50
-            rect.size.height += 100
-        case .horizontal:
-            rect.origin.x -= 50
-            rect.size.width += 100
-        @unknown default:
-            break
-        }
-        /**
          * 获取位置数组
          * Get position array
          */
@@ -517,7 +534,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
             }
         }
-        
+        print("layoutAttributesForElements returns \(resultAttrs.count)")
         return resultAttrs
     }
     
@@ -900,12 +917,53 @@ extension QuickListSectionAttribute {
                     resultAttrs.append(footerAttributes)
                 }
             }
-            for itemAttr in self.itemAttributes {
-                if rect.intersects(itemAttr.frame) {
-                    itemAttr.zIndex = 500
-                    resultAttrs.append(itemAttr)
+
+            /** 
+                * 使用二分法查找rect范围内的一个itemAttr
+                * Use binary search to find itemAttr in the rect range
+                */
+            if let (index, itemAttr) = self.itemAttributes.binarySearch(frame: rect, in: rect, direction: scrollDirection) {
+                itemAttr.zIndex = 500
+                resultAttrs.append(itemAttr)
+
+                let sectionColumnCount = self.column
+                /**
+                 * 从后往前反向遍历itemAttributes，直到遇到不在rect范围内的itemAttr，为排除瀑布流item高度不一导致可能出现中间某个itemAttr不在rect范围内，但前面的itemAttr在rect范围内的情况,需要遍历到整行的itemAttr都不在rect范围内为止
+                 * Traverse itemAttributes from back to front, add to resultAttrs until an itemAttr that is not in the rect range is encountered, 
+                 * to exclude the case where the itemAttr may not be in the rect range, but the previous itemAttr is in the rect range, due to the height of the waterfall item is not the same,
+                 * the traversal needs to be continued until the itemAttr of the entire row is not in the rect range
+                 */
+                var currentOutRectCount: Int = 0
+                for itemAttr in self.itemAttributes[..<index].reversed() {
+                    if rect.intersects(itemAttr.frame) {
+                        itemAttr.zIndex = 500
+                        resultAttrs.append(itemAttr)
+                        currentOutRectCount = 0
+                    } else if currentOutRectCount < sectionColumnCount {
+                        currentOutRectCount += 1
+                    } else {
+                        break
+                    }
+                }
+
+                /**
+                 * 从前往后遍历itemAttributes，直到遇到不在rect范围内的itemAttr，为排除瀑布流item高度不一导致可能出现中间某个itemAttr不在rect范围内，但后面的itemAttr在rect范围内的情况,需要遍历到整行的itemAttr都不在rect范围内为止
+                 * Traverse itemAttributes from front to back, add to resultAttrs until an itemAttr that is not in the rect range is encountered
+                 */
+                currentOutRectCount = 0
+                for itemAttr in self.itemAttributes[index...] {
+                    if rect.intersects(itemAttr.frame) {
+                        itemAttr.zIndex = 500
+                        resultAttrs.append(itemAttr)
+                        currentOutRectCount = 0
+                    } else if currentOutRectCount < sectionColumnCount {
+                        currentOutRectCount += 1
+                    } else {
+                        break
+                    }
                 }
             }
+
             if let decorationAttributes = self.decorationAttributes {
                 decorationAttributes.zIndex = 498
                 resultAttrs.append(decorationAttributes)

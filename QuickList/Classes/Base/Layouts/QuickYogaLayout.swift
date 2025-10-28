@@ -139,69 +139,60 @@ public class QuickYogaLayout: QuickListBaseLayout {
         attribute.itemAttributes.removeAll()
         var visibleLineCount: Int = 0
         for (index, item) in section.items.enumerated() {
+            guard !item.isHidden else { continue }
             let attr = UICollectionViewLayoutAttributes(forCellWith: IndexPath(item: index, section: sectionIndex))
             var itemSize: CGSize
             if layout.scrollDirection == .vertical {
-                if item.isHidden {
-                    itemSize = .zero
+                itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalWidth, height: itemTotalWidth), in: formView, layoutType: .free) ?? .zero
+                if itemOffsetX + itemSize.width > itemTotalWidth {
+                    /**
+                     * 超出尺寸，需要换行后再设置位置
+                     * Exceed size, need to wrap and then set position
+                     */
+                    alignVItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalWidth: itemTotalWidth, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
                     attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    itemOffsetX += itemSize.width + section.itemSpace
+                    lineItemAttrs.append(attr)
+                    visibleLineCount += 1
+                } else if itemOffsetX + itemSize.width == itemTotalWidth {
+                    /**
+                     * 尺寸刚好，设置完位置直接换行
+                     * Size is just right, wrap directly after setting position
+                     */
+                    attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    lineItemAttrs.append(attr)
+                    alignVItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalWidth: itemTotalWidth, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
+                    visibleLineCount += 1
                 } else {
-                    itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalWidth, height: itemTotalWidth), in: formView, layoutType: .free) ?? .zero
-                    if itemOffsetX + itemSize.width > itemTotalWidth {
-                        /**
-                         * 超出尺寸，需要换行后再设置位置
-                         * Exceed size, need to wrap and then set position
-                         */
-                        alignVItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalWidth: itemTotalWidth, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        itemOffsetX += itemSize.width + section.itemSpace
-                        lineItemAttrs.append(attr)
-                        visibleLineCount += 1
-                    } else if itemOffsetX + itemSize.width == itemTotalWidth {
-                        /**
-                         * 尺寸刚好，设置完位置直接换行
-                         * Size is just right, wrap directly after setting position
-                         */
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        lineItemAttrs.append(attr)
-                        alignVItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalWidth: itemTotalWidth, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
-                        visibleLineCount += 1
-                    } else {
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        itemOffsetX += itemSize.width + section.itemSpace
-                        lineItemAttrs.append(attr)
-                    }
+                    attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    itemOffsetX += itemSize.width + section.itemSpace
+                    lineItemAttrs.append(attr)
                 }
                 itemSize.height = ceil(itemSize.height)
             } else {
-                if item.isHidden {
-                    itemSize = .zero
+                itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalHeight, height: itemTotalHeight), in: formView, layoutType: .free) ?? .zero
+                if itemOffsetY + itemSize.height > itemTotalHeight {
+                    /**
+                     * 超出尺寸，需要换行后再设置位置
+                     * Exceed size, need to wrap and then set position
+                     */
+                    alignHItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalHeight: itemTotalHeight, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
                     attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    lineItemAttrs.append(attr)
+                    visibleLineCount += 1
+                } else if itemOffsetY + itemSize.height == itemTotalHeight {
+                    /**
+                     * 尺寸刚好，设置完位置直接换行
+                     * Size is just right, wrap directly after setting position
+                     */
+                    attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    lineItemAttrs.append(attr)
+                    alignHItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalHeight: itemTotalHeight, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
+                    visibleLineCount += 1
                 } else {
-                    itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalHeight, height: itemTotalHeight), in: formView, layoutType: .free) ?? .zero
-                    if itemOffsetY + itemSize.height > itemTotalHeight {
-                        /**
-                         * 超出尺寸，需要换行后再设置位置
-                         * Exceed size, need to wrap and then set position
-                         */
-                        alignHItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalHeight: itemTotalHeight, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        lineItemAttrs.append(attr)
-                        visibleLineCount += 1
-                    } else if itemOffsetY + itemSize.height == itemTotalHeight {
-                        /**
-                         * 尺寸刚好，设置完位置直接换行
-                         * Size is just right, wrap directly after setting position
-                         */
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        lineItemAttrs.append(attr)
-                        alignHItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalHeight: itemTotalHeight, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
-                        visibleLineCount += 1
-                    } else {
-                        attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
-                        itemOffsetY += itemSize.height + section.itemSpace
-                        lineItemAttrs.append(attr)
-                    }
+                    attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
+                    itemOffsetY += itemSize.height + section.itemSpace
+                    lineItemAttrs.append(attr)
                 }
                 itemSize.width = ceil(itemSize.width)
             }

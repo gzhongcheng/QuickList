@@ -32,7 +32,28 @@ Section serves as a collection container for Items, implementing Collection-rela
 > **hideAllItems(withOut:, withAnimation:)**: Hide all items except withOut (for collapse/expand)
 > **showAllItems(withAnimation:)**: Show all items (for collapse/expand)
 > **reload()**: Reload all Items
-> **updateLayout(animation:)**: Only refresh interface layout
+> **updateLayout(animation:, completion:)**: Only refresh interface layout, supports various animation effects, see [List Reload Animation](./ListReloadAnimation.md) for details
+
+#### Animation Operation Methods
+> **insertItem(with:, at:, animation:, completion:)**: Insert single Item at specified position with animation support
+> **deleteItems(with:, animation:, completion:)**: Delete specified Item array with animation support
+> **replaceItems(with:, animation:, completion:)**: Replace all Items with same animation
+> **replaceItems(with:, inAnimation:, outAnimation:, otherSectionsInAnimation:, otherSectionsOutAnimation:, completion:)**: Replace all Items with different enter and exit animations
+> **replaceItems(with:, at:, animation:, completion:)**: Replace Item array at specified range
+
+#### Basic Operation Methods
+> **append(_:)**: Add single Item to end
+> **append(contentsOf:)**: Add Item array to end
+> **insert(_:, at:)**: Insert Item at specified position
+> **replaceSubrange(_:, with:)**: Replace Items in specified range
+> **remove(at:)**: Remove Item at specified position
+> **remove(at:, updateUI:)**: Remove Item at specified position with optional UI update
+> **removeFirst()**: Remove first Item
+> **removeFirst(updateUI:)**: Remove first Item with optional UI update
+> **removeAll(keepingCapacity:)**: Remove all Items
+> **removeAll(keepingCapacity:, updateUI:)**: Remove all Items with optional UI update
+> **removeAll(where:)**: Remove Items based on condition
+> **removeAll(updateUI:, where:)**: Remove Items based on condition with optional UI update
 
 ## Usage Example
 ```
@@ -69,5 +90,25 @@ Section(header: "Auto wrap", footer: nil) { section in
     section.layout = RowEqualHeightLayout()
     /// Entire section floating
     section.isFormHeader = true
+    
+    /// Update layout with animation
+    section.updateLayout(animation: .fade)
+    
+    /// Animate insert Item
+    let newItem = TitleValueItem(title: "New Item", value: "New Value")
+    section.insertItem(with: newItem, at: 0, animation: .fade) {
+        print("Insert completed")
+    }
+    
+    /// Animate delete Items
+    section.deleteItems(with: [newItem], animation: .leftSlide) {
+        print("Delete completed")
+    }
+    
+    /// Animate replace all Items
+    let newItems = [TitleValueItem(title: "Item 1", value: "Value 1"), TitleValueItem(title: "Item 2", value: "Value 2")]
+    section.replaceItems(with: newItems, inAnimation: .fade, outAnimation: .scale) {
+        print("Replace completed")
+    }
 }
 ```

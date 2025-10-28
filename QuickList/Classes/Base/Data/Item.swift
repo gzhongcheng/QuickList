@@ -459,12 +459,12 @@ open class Item: NSObject {
     open func didEndDisplay() {
         isShow = false
     }
-    
+
     /**
-     * 刷新界面布局
-     * Refresh interface layout
+     * 刷新界面布局,可以指定进入动画类型
+     * Refresh interface layout, can specify enter animation type
      */
-    public func updateLayout(animation: Bool = false) {
+    public func updateLayout(animation: ListReloadAnimation? = nil) {
         section?.updateLayout(animation: animation)
     }
     
@@ -481,23 +481,9 @@ open class Item: NSObject {
      * 从列表中动画删除
      * Animated deletion from list
      */
-    public func removeFromSection(animation: Bool = true) {
+    public func removeFromSection(animation: ListReloadAnimation? = ListReloadAnimation.fade) {
         guard let section = self.section else { return }
-        self.isHidden = true
-        section.updateLayout(animation: animation)
-        if animation {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                UIView.performWithoutAnimation {
-                    section.removeAll(where: { $0 === self })
-                    section.reload()
-                }
-            }
-        } else {
-            UIView.performWithoutAnimation {
-                section.removeAll(where: { $0 === self })
-                section.reload()
-            }
-        }
+        section.deleteItems(with: [self], animation: animation)
     }
 }
 

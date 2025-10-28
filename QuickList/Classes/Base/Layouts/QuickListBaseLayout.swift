@@ -58,6 +58,8 @@ public class QuickListSectionAttribute: NSObject {
     
     public var startPoint: CGPoint = .zero
     public var endPoint: CGPoint = .zero
+    
+    public var column: Int = 1
 }
 
 open class QuickListBaseLayout {
@@ -91,6 +93,7 @@ open class QuickListBaseLayout {
         }
         
         var sectionAttr = QuickListSectionAttribute()
+        sectionAttr.column = section.column
         
         switch layout.dataChangeType {
         case .all:

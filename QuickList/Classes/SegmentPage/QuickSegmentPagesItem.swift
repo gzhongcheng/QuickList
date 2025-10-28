@@ -90,7 +90,7 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
             guard let cell = cell as? QuickSegmentPagesItemCell else {
                 return
             }
-            cell.pageList.setNeedUpdateLayout(afterSection: 0, useAnimation: false)
+            cell.pageList.setNeedUpdateLayout(afterSection: 0, animation: ListReloadAnimation.fade)
             print("QuickSegmentPagesItem - contentSize: \(contentSize)")
         }
     }

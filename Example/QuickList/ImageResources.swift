@@ -43,13 +43,41 @@ func newTagItem(_ title: String) -> TitleValueItem {
         item.titleHighlightColor = .white
         item.contentInsets = UIEdgeInsets(top: 10, left: 7, bottom: 10, right: 5)
         item.onCellSelection { item in
-            if item.value == "x" {
-                item.section?.hideAllItems(withOut: [item], withAnimation: true)
-                item.value = "o"
-            } else {
-                item.section?.showAllItems()
-                item.value = "x"
-            }
+//            if item.value == "x" {
+//                item.section?.hideAllItems(withOut: [item], inAnimation: ListReloadAnimation.transform, outAnimation: ListReloadAnimation.scale)
+//                item.value = "o"
+//            } else {
+//                item.section?.showAllItems(inAnimation: ListReloadAnimation.scale, outAnimation: ListReloadAnimation.scale)
+//                item.value = "x"
+//            }
+            guard let section = item.section else { return }
+            section.replaceItems(with: [tagFlodItem()], animation: ListReloadAnimation.leftSlide)
+        }
+    }
+}
+
+func tagFlodItem() -> TitleValueItem {
+    return TitleValueItem("Open") { item in
+        item.value = "o"
+        item.valueColor = .black
+        item.spaceBetweenTitleAndValue = 15
+        item.contentBgColor = UIColor(white: 0.9, alpha: 1.0)
+        item.titleHighlightColor = .white
+        item.contentInsets = UIEdgeInsets(top: 10, left: 7, bottom: 10, right: 5)
+        item.onCellSelection { item in
+            guard let section = item.section else { return }
+            section.replaceItems(with: [
+                newTagItem("Tag"),
+                newTagItem("Tag Tag"),
+                newTagItem("Tag Tag Tag Tag Tag"),
+                newTagItem("Tag"),
+                newTagItem("Tag Tag"),
+                newTagItem("Tag"),
+                newTagItem("Tag Tag"),
+                newTagItem("Tag Tag Tag Tag"),
+                newTagItem("Tag"),
+                newTagItem("Tag Tag Tag Tag Tag Tag Tag")
+            ], animation: ListReloadAnimation.leftSlide)
         }
     }
 }

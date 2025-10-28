@@ -38,8 +38,14 @@ public protocol FormDelegate : AnyObject {
     /**
      * 更新指定SectionIndex及之后的Section的Layout
      * Update Layout for specified SectionIndex and subsequent Sections
+     * - Parameters:
+     *   - section: 需要更新的Section / Section to update
+     *   - inAnimation: 本Section进入动画 / This section enter animation
+     *   - othersInAnimation: 其他Section进入动画 / Other sections enter animation
+     *   - performBatchUpdates: 批量更新数据的逻辑 / Batch update logic
+     *   - completion: 更新动画完成后的回调 / Completion after update
      */
-    func updateLayout(withAnimation: Bool, afterSection: Int)
+    func updateLayout(section: Section?, inAnimation: ListReloadAnimation?, othersInAnimation: ListReloadAnimation?, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)?, completion: (() -> Void)?)
     
     /**
      * 获取控件尺寸
@@ -177,8 +183,141 @@ public final class Form: NSObject {
      * 仅刷新界面布局
      * Only refresh interface layout
      */
-    public func updateLayout(afterSection: Int, animation: Bool = false) {
-        delegate?.formView?.setNeedUpdateLayout(afterSection: afterSection, useAnimation: animation)
+    public func updateLayout(afterSection: Int, animation: ListReloadAnimation? = nil) {
+        delegate?.formView?.setNeedUpdateLayout(afterSection: afterSection, animation: animation)
+    }
+
+    /**
+     * 添加Section数组, 更新界面布局
+     * Add Section array, update interface layout
+     * - Parameters:
+     *   - sections: Section数组 / Section array
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func addSections(with sections: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            var addedSectionIndexSet: IndexSet = IndexSet()
+            sections.forEach { section in
+                self.append(section)
+                addedSectionIndexSet.insert(self.sections.count - 1)
+            }
+            listView?.insertSections(addedSectionIndexSet)
+            layout?.reloadSectionsAfter(index: addedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 添加Section, 更新界面布局
+     * Add Section, update interface layout
+     * - Parameters:
+     *   - section: Section / Section
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func addSection(with section: Section, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            self.append(section)
+            listView?.insertSections(IndexSet(integer: self.sections.count - 1))
+            layout?.reloadSectionsAfter(index: self.sections.count - 1, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 替换Section数组, 更新界面布局
+     * Replace Section array, update interface layout
+     * - Parameters:
+     *   - sections: Section数组 / Section array
+     *   - inAnimation: 进入动画 / Item enter animation
+     *   - outAnimation: 退出动画 / Item exit animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func replaceSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            var removedSectionIndexSet: IndexSet = IndexSet()
+            self.sections.forEach { section in
+                section.items.forEach { item in
+                    if let cell = item.cell {
+                        outAnimation?.animateOut(view: cell)
+                    }
+                }
+                removedSectionIndexSet.insert(section.index ?? 0)
+            }
+            self.sections.removeAll()
+            var addedSectionIndexSet: IndexSet = IndexSet()
+            sections.forEach { section in
+                self.append(section)
+                addedSectionIndexSet.insert(self.sections.count - 1)
+            }
+            listView?.deleteSections(removedSectionIndexSet)
+            listView?.insertSections(addedSectionIndexSet)
+            layout?.reloadSectionsAfter(index: 0, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 替换Section数组到指定范围, 更新界面布局
+     * Replace Section array to specified range, update interface layout
+     * - Parameters:
+     *   - sections: Section数组 / Section array
+     *   - range: 范围 / Range
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func replaceSections(with sections: [Section], at range: Range<Int>, inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            var removedSectionIndexSet: IndexSet = IndexSet()
+            self.sections.enumerated().forEach { (index, section) in
+                if index < range.lowerBound || index >= range.upperBound {
+                    section.items.forEach { item in
+                        if let cell = item.cell {
+                            outAnimation?.animateOut(view: cell)
+                        }
+                    }
+                    removedSectionIndexSet.insert(index)
+                }
+            }
+            self.sections.removeAll(where: { removedSectionIndexSet.contains($0.index ?? 0) })
+            var addedSectionIndexSet: IndexSet = IndexSet()
+            sections.enumerated().forEach { (index, section) in
+                self.insert(section, at: index + range.lowerBound)
+                addedSectionIndexSet.insert(index + range.lowerBound)
+            }
+            listView?.deleteSections(removedSectionIndexSet)
+            listView?.insertSections(addedSectionIndexSet)
+            layout?.reloadSectionsAfter(index: removedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 删除Section数组, 更新界面布局
+     * Delete Section array, update interface layout
+     * - Parameters:
+     *   - sections: Section数组 / Section array
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func deleteSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            var removedSectionIndexSet: IndexSet = IndexSet()
+            sections.forEach { section in
+                if let index = self.sections.firstIndex(where: { $0.index == section.index }) {
+                    section.items.forEach { item in
+                        if let cell = item.cell {
+                            outAnimation?.animateOut(view: cell)
+                        }
+                    }
+                    removedSectionIndexSet.insert(index)
+                }
+            }
+            listView?.deleteSections(removedSectionIndexSet)
+            layout?.reloadSectionsAfter(index: removedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+        }, completion: completion)
     }
 }
 
@@ -235,27 +374,15 @@ extension Form : RangeReplaceableCollection {
         sections.append(formSection)
         formSection.form = self
     }
-    public func append(_ formSection: Section, updateUI: Bool) {
-        sections.append(formSection)
-        formSection.form = self
-        guard updateUI else {
-            return
-        }
-        delegate?.sectionsHaveBeenAdded([formSection], at: IndexSet(integersIn: sections.count - 2 ..< sections.count - 1))
-    }
 
     public func append<S: Sequence>(contentsOf newElements: S) where S.Iterator.Element == Section {
         sections.append(contentsOf: newElements)
         newElements.forEach({ $0.form = self })
     }
-    public func append<S: Sequence>(contentsOf newElements: S, updateUI: Bool) where S.Iterator.Element == Section {
-        let firstIndex = sections.count
-        sections.append(contentsOf: newElements)
-        newElements.forEach({ $0.form = self })
-        guard updateUI else {
-            return
-        }
-        delegate?.sectionsHaveBeenAdded(sections, at: IndexSet(integersIn: firstIndex ..< sections.count))
+
+    public func insert(_ newElement: Section, at i: Int) {
+        sections.insert(newElement, at: i)
+        newElement.form = self
     }
 
     public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C) where C.Iterator.Element == Section {
@@ -264,18 +391,6 @@ extension Form : RangeReplaceableCollection {
         sections[lower ..< upper].forEach({ $0.form = self })
         sections.replaceSubrange(lower ..< upper, with: newElements)
         newElements.forEach({ $0.form = self })
-    }
-    public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C, updateUI: Bool) where C.Iterator.Element == Section {
-        let lower = Swift.max(0, Swift.min(subRange.lowerBound, sections.count - 1))
-        let upper = Swift.min(subRange.upperBound, sections.count)
-        let oldSections = sections[lower ..< upper].map({ $0 })
-        sections.replaceSubrange(lower ..< upper, with: newElements)
-        oldSections.forEach({ $0.form = self })
-        newElements.forEach({ $0.form = self })
-        guard updateUI else {
-            return
-        }
-        self.delegate?.formView?.reloadData()
     }
     
     public func remove(at i: Int) -> Section {
