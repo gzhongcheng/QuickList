@@ -36,7 +36,7 @@ extension UIView {
      * 获取所在的VC
      * Get the VC in which the view is located
      */
-    func getViewController() -> UIViewController? {
+    public func getViewController() -> UIViewController? {
         for view in sequence(first: self.superview, next: {$0?.superview}){
             if let responder = view?.next{
                 if responder.isKind(of: UIViewController.self){
