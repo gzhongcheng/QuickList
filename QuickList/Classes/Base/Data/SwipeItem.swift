@@ -17,7 +17,7 @@ open class SwipeItemCell: ItemCell {
      * 是否可以左滑
      * Whether can swipe left
      */
-    public var canSwiped: Bool = true
+    public var canSwipe: Bool = true
     
     /**
      * 左滑时显示的按钮
@@ -45,6 +45,7 @@ open class SwipeItemCell: ItemCell {
                     }
                     make.trailing.equalTo(0).priority(.high)
                 }
+                button.setNeedsUpdateConstraints()
                 totalWidth += button.width
             }
         }
@@ -107,7 +108,7 @@ open class SwipeItemCell: ItemCell {
     var gestureBeginProgress: CGFloat = 0
     var lastGestureProgress: CGFloat = 0
     @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-        guard canSwiped, !swipedActionButtons.isEmpty else { return }
+        guard canSwipe, !swipedActionButtons.isEmpty else { return }
         
         let translation = gesture.translation(in: self.contentView)
         let velocity = gesture.velocity(in: self.contentView)
@@ -118,6 +119,7 @@ open class SwipeItemCell: ItemCell {
             if let currentSwipeCell = self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell, currentSwipeCell != self {
                 currentSwipeCell.closeSwipeActions()
             }
+            prohibitScroll(for: self.contentView)
             gestureBeginProgress = swipeProgress
             self.contentView.bringSubviewToFront(self.buttonsContainerView)
         case .changed:
@@ -127,10 +129,12 @@ open class SwipeItemCell: ItemCell {
         case .ended, .cancelled:
             if velocity.x > 500 {
                 closeSwipeActions()
+                restoreScroll()
                 return
             }
             if velocity.x < -500 {
                 openSwipeActions()
+                restoreScroll()
                 return
             }
             let shouldOpen = swipeProgress > 0.5
@@ -139,9 +143,36 @@ open class SwipeItemCell: ItemCell {
             } else {
                 closeSwipeActions()
             }
+            restoreScroll()
         default:
+            restoreScroll()
             break
         }
+    }
+    
+    /**
+     * 遍历所有可滚动的父视图并禁止滚动（并记录被禁止的滚动视图，手势结束后还原）
+     * Traverse all scrollable parent views and prohibit scrolling (and record the scroll view that is prohibited, restore after the gesture ends)
+     */
+    private var prohibitedScrollViews: NSHashTable<UIScrollView> = NSHashTable.weakObjects()
+    private func prohibitScroll(for view: UIView) {
+        if view is UIWindow {
+            return
+        }
+        if let scrollView = view as? UIScrollView {
+            if scrollView.isScrollEnabled {
+                prohibitedScrollViews.add(scrollView)
+                scrollView.isScrollEnabled = false
+            }
+        }
+        guard let superview = view.superview else { return }
+        prohibitScroll(for: superview)
+    }
+    private func restoreScroll() {
+        for scrollView in prohibitedScrollViews.allObjects {
+            scrollView.isScrollEnabled = true
+        }
+        prohibitedScrollViews.removeAllObjects()
     }
     
     private func totalButtonsWidth() -> CGFloat {
@@ -229,13 +260,13 @@ public protocol SwipeItemType {
 }
 
 // MARK: - SwipedAutolayoutItemOf
-// SwipedAutolayoutItemOf
+// SwipeAutolayoutItemOf
 open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, SwipeItemType {
     /**
      * 是否可以左滑
      * Whether can swipe left
      */
-    public var canSwiped: Bool = true
+    public var canSwipe: Bool = true
     /**
      * 左滑时显示的按钮
      * Buttons displayed when swiping left
@@ -249,20 +280,20 @@ open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, S
     
     public func configureSwipe() {
         guard let cell = self.cell as? SwipeItemCell else { return }
-        cell.canSwiped = canSwiped
+        cell.canSwipe = canSwipe
         cell.swipedActionButtons = swipedActionButtons
         cell.autoTriggerFirstButton = autoTriggerFirstButton
     }
 }
 
 // MARK: - SwipedItemOf
-// SwipedAutolayoutItemOf
+// SwipeItemOf
 open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
     /**
      * 是否可以左滑
      * Whether can swipe left
      */
-    public var canSwiped: Bool = true
+    public var canSwipe: Bool = true
     /**
      * 左滑时显示的按钮
      * Buttons displayed when swiping left
@@ -276,7 +307,7 @@ open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
     
     public func configureSwipe() {
         guard let cell = self.cell as? SwipeItemCell else { return }
-        cell.canSwiped = canSwiped
+        cell.canSwipe = canSwipe
         cell.swipedActionButtons = swipedActionButtons
         cell.autoTriggerFirstButton = autoTriggerFirstButton
     }
