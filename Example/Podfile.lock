@@ -15,13 +15,13 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
-  - QuickList/Base (1.0.4):
+  - QuickList/Base (1.0.8):
     - SnapKit
-  - QuickList/Items (1.0.4):
+  - QuickList/Items (1.0.8):
     - QuickList/Base
-  - QuickList/SegmentPage (1.0.4):
+  - QuickList/SegmentPage (1.0.8):
     - QuickList/Base
-  - QuickList/WebImage (1.0.4):
+  - QuickList/WebImage (1.0.8):
     - Kingfisher
     - KingfisherWebP
     - QuickList/Base
@@ -49,7 +49,7 @@ SPEC CHECKSUMS:
   Kingfisher: 53a10ea35051a436b5fb626ca2dd8f3144d755e9
   KingfisherWebP: 77fc86e1342523f0a49148fc9809b6f5fc12e73b
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  QuickList: e1576e61ae90133a53a8d089281a5dc4d4f04a17
+  QuickList: 0d999c59c20706e703de4bbd5e90283dcdf2fafc
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
 
 PODFILE CHECKSUM: 22b1b3d6c0e0de9215d6035a56279ab770eb3841
