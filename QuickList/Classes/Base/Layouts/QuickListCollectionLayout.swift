@@ -534,7 +534,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
             }
         }
-        print("layoutAttributesForElements returns \(resultAttrs.count)")
         return resultAttrs
     }
     
