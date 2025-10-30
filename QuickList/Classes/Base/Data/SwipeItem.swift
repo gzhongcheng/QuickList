@@ -216,10 +216,10 @@ open class SwipeItemCell: ItemCell {
                 self.buttonsContainerView.alpha = 1
             }
         } else {
-            UIView.animate(withDuration: 0.25) {
+            UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: {
                 self.swipeProgressUpdated(progress: 1)
                 self.layoutIfNeeded()
-            }
+            }, completion: nil)
         }
     }
     
@@ -228,11 +228,6 @@ open class SwipeItemCell: ItemCell {
             self.swipeProgressUpdated(progress: 0)
             self.layoutIfNeeded()
         }
-    }
-    
-    open override func prepareForReuse() {
-        super.prepareForReuse()
-        closeSwipeActions()
     }
 }
 
