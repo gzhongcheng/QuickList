@@ -144,6 +144,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
             var itemSize: CGSize
             if layout.scrollDirection == .vertical {
                 itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalWidth, height: itemTotalWidth), in: formView, layoutType: .free) ?? .zero
+                itemSize.width = min(itemSize.width, itemTotalWidth)
                 if itemOffsetX + itemSize.width > itemTotalWidth {
                     /**
                      * 超出尺寸，需要换行后再设置位置
@@ -171,6 +172,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
                 itemSize.height = ceil(itemSize.height)
             } else {
                 itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalHeight, height: itemTotalHeight), in: formView, layoutType: .free) ?? .zero
+                itemSize.height = min(itemSize.height, itemTotalHeight)
                 if itemOffsetY + itemSize.height > itemTotalHeight {
                     /**
                      * 超出尺寸，需要换行后再设置位置

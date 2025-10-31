@@ -76,6 +76,13 @@ public final class Form: NSObject {
         return delegate?.formView?.handler.layout
     }
     /**
+     * 列表视图对象(只读)
+     * List view object (read-only)
+     */
+    public var listView: QuickListView? {
+        return delegate?.formView
+    }
+    /**
      * 内容自定义布局（优先级 section.layout -> form.layout -> QuickListFlowLayout）
      * Custom layout for content (priority: section.layout -> form.layout -> QuickListFlowLayout)
      */
@@ -236,8 +243,8 @@ public final class Form: NSObject {
             var removedSectionIndexSet: IndexSet = IndexSet()
             self.sections.forEach { section in
                 section.items.forEach { item in
-                    if let cell = item.cell {
-                        outAnimation?.animateOut(view: cell)
+                    if let cell = item.cell, let section = item.section {
+                        outAnimation?.animateOut(view: cell, at: section)
                     }
                 }
                 removedSectionIndexSet.insert(section.index ?? 0)
@@ -270,8 +277,8 @@ public final class Form: NSObject {
             self.sections.enumerated().forEach { (index, section) in
                 if index < range.lowerBound || index >= range.upperBound {
                     section.items.forEach { item in
-                        if let cell = item.cell {
-                            outAnimation?.animateOut(view: cell)
+                        if let cell = item.cell, let section = item.section {
+                            outAnimation?.animateOut(view: cell, at: section)
                         }
                     }
                     removedSectionIndexSet.insert(index)
@@ -304,8 +311,8 @@ public final class Form: NSObject {
             sections.forEach { section in
                 if let index = self.sections.firstIndex(where: { $0.index == section.index }) {
                     section.items.forEach { item in
-                        if let cell = item.cell {
-                            outAnimation?.animateOut(view: cell)
+                        if let cell = item.cell, let section = item.section {
+                            outAnimation?.animateOut(view: cell, at: section)
                         }
                     }
                     removedSectionIndexSet.insert(index)

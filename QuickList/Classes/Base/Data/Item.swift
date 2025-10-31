@@ -251,6 +251,13 @@ open class Item: NSObject {
         return section?.form
     }
     /**
+     * Item所在的列表视图对象(只读)
+     * List view object where Item belongs (read-only)
+     */
+    public var listView: QuickListView? {
+        return form?.listView
+    }
+    /**
      * Item所在的Section
      * Section where Item belongs
      */
