@@ -60,7 +60,7 @@ Section("SwitchItem") { section in
         item.value = true
     }.onValueChanged({ (item) in
         /// 值改变的回调
-        guard let labelItem = item.section?.form?.firstItem(for: "DEFAULT_LABEL") as? LabelItem else {
+        guard let labelItem = item.form?.firstItem(for: "DEFAULT_LABEL") as? LabelItem else {
             return
         }
         if item.value {

@@ -69,6 +69,13 @@ public final class Form: NSObject {
     /// delegate
     public weak var delegate: FormDelegate?
     /**
+     * 列表的总布局对象(实际传递给列表使用的UICollectionViewLayout对象, 只读)
+     * Total layout object for the list (the actual UICollectionViewLayout object passed to the list, read-only)
+     */
+    public var listLayout: QuickListCollectionLayout? {
+        return delegate?.formView?.handler.layout
+    }
+    /**
      * 内容自定义布局（优先级 section.layout -> form.layout -> QuickListFlowLayout）
      * Custom layout for content (priority: section.layout -> form.layout -> QuickListFlowLayout)
      */

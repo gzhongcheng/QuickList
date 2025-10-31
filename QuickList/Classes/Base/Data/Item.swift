@@ -244,6 +244,13 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
 
 open class Item: NSObject {
     /**
+     * Item所在的Form(只读)
+     * Form where Item belongs (read-only)
+     */
+    public var form: Form? {
+        return section?.form
+    }
+    /**
      * Item所在的Section
      * Section where Item belongs
      */

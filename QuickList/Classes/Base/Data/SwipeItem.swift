@@ -13,6 +13,17 @@ import SnapKit
  * Cell that supports left swipe events
  */
 open class SwipeItemCell: ItemCell {
+    private weak var currentItem: Item?
+    public override var item: Item? {
+        didSet {
+            guard let eItem = item as? SwipeItemType, eItem != currentItem else { return }
+            currentItem = item
+            self.canSwipe = eItem.canSwipe
+            self.swipedActionButtons = eItem.swipedActionButtons
+            self.autoTriggerFirstButton = eItem.autoTriggerFirstButton
+        }
+    }
+    
     /**
      * 是否可以左滑
      * Whether can swipe left
@@ -250,8 +261,22 @@ extension SwipeItemCell: UIGestureRecognizerDelegate {
     }
 }
 
-public protocol SwipeItemType {
-    func configureSwipe()
+public protocol SwipeItemType: Item {
+    /**
+     * 是否可以左滑
+     * Whether can swipe left
+     */
+    var canSwipe: Bool { get set }
+    /**
+     * 左滑时显示的按钮
+     * Buttons displayed when swiping left
+     */
+    var swipedActionButtons: [SwipeActionButton] { get set }
+    /**
+     * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
+     * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
+     */
+    var autoTriggerFirstButton: Bool { get set }
 }
 
 // MARK: - SwipedAutolayoutItemOf
@@ -272,13 +297,6 @@ open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, S
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
     public var autoTriggerFirstButton: Bool = false
-    
-    public func configureSwipe() {
-        guard let cell = self.cell as? SwipeItemCell else { return }
-        cell.canSwipe = canSwipe
-        cell.swipedActionButtons = swipedActionButtons
-        cell.autoTriggerFirstButton = autoTriggerFirstButton
-    }
 }
 
 // MARK: - SwipedItemOf
@@ -299,13 +317,6 @@ open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
     public var autoTriggerFirstButton: Bool = false
-    
-    public func configureSwipe() {
-        guard let cell = self.cell as? SwipeItemCell else { return }
-        cell.canSwipe = canSwipe
-        cell.swipedActionButtons = swipedActionButtons
-        cell.autoTriggerFirstButton = autoTriggerFirstButton
-    }
 }
 
 // MARK: - SwipedActionButton

@@ -112,7 +112,6 @@ class SegmentViewController: UIViewController {
                 SegmentPageViewController1(),
                 SegmentPageViewController2()
             ],
-//            pageScrollEnable: false,
             pageContainerHeight: 300,
             scrollManager: scrollManager
         ) { section in
@@ -126,6 +125,7 @@ class SegmentViewController: UIViewController {
                 SegmentPageViewController2()
             ],
 //            pageContainerHeight: 300,
+//            pageScrollEnable: false,
             scrollManager: scrollManager
         )
     }
@@ -175,7 +175,20 @@ class SegmentPageViewController: UIViewController, QuickSegmentPageViewDelegate 
          */
         formHeader.displayType = .normal
         formlist.form.header = formHeader
-        
+//
+//        let editItemSection = Section("Test Edit Item") { section in
+//            section.column = 1
+//            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//            section.lineSpace = 10
+//            section.itemSpace = 10
+//        }
+//        for i in 0 ... 30 {
+//            editItemSection <<< TestEditMoveItem("Move Item \(i)") { item in
+//                item.isEditing = true
+//            }
+//        }
+//        formlist.form +++ editItemSection
+
         let swipItemSection = Section("Test Swipe Icon") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)

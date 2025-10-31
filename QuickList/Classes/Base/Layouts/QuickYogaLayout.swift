@@ -197,6 +197,9 @@ public class QuickYogaLayout: QuickListBaseLayout {
                 itemSize.width = ceil(itemSize.width)
             }
             attr.alpha = item.isHidden ? 0 : 1
+            if let editItem = item as? EditableItemType, editItem.isDragging {
+                attr.alpha = 0
+            }
             attribute.itemAttributes.append(attr)
             if item.isSelected {
                 attribute.selectedItemAttributes = attr

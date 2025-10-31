@@ -167,6 +167,21 @@ class ViewController: UIViewController {
 //        }
 //        formlist.form +++ swipItemSection
         
+        
+//        let editItemSection = Section("Test Edit Item") { section in
+//            section.column = 1
+//            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//            section.lineSpace = 10
+//            section.itemSpace = 10
+//        }
+//        for i in 0 ... 30 {
+//            editItemSection <<< TestEditMoveItem("Move Item \(i)") { item in
+//                item.isEditing = true
+//            }
+//        }
+//        formlist.form +++ editItemSection
+//        return;
+        
         formlist.form +++ Section(header: "Automatic Wrap", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
@@ -340,7 +355,6 @@ class ViewController: UIViewController {
                 item.value = "When the title and value are both very long, the title will squeeze the space of the value, therefore, the title needs to be set to the maximum width, in order to achieve a better display效果"
                 item.titlePosition = .width(120)
             }
-        
         +++ Section("SwitchItem") { section in
             section.lineSpace = 0
             section.column = 1
@@ -353,7 +367,7 @@ class ViewController: UIViewController {
                  * 值改变的回调
                  * Value changed callback
                  */
-                guard let TitleValueItem = item.section?.form?.firstItem(for: "DEFAULT_LABEL") as? TitleValueItem else {
+                guard let TitleValueItem = item.form?.firstItem(for: "DEFAULT_LABEL") as? TitleValueItem else {
                     return
                 }
                 if item.value {
@@ -493,10 +507,7 @@ class ViewController: UIViewController {
 //                <<< getHtmlImageItem()
 //                <<< getHtmlImageItem()
 //                <<< getHtmlImageItem(isLast: true)
-        +++ Section("ImageItem") { section in
-            section.lineSpace = 0
-            section.column = 1
-        }
+        
         let towColumSection = Section("Fixed Size Two Column Images") { section in
             section.column = 2
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)

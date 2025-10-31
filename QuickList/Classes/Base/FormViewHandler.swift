@@ -368,9 +368,6 @@ extension FormViewHandler: UICollectionViewDataSource {
         if !cell.isSetup {
             cell.setup()
         }
-        if let swipedItem = item as? SwipeItemType {
-            swipedItem.configureSwipe()
-        }
         item.updateCell()
         return cell
     }
@@ -631,6 +628,9 @@ extension FormViewHandler: UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let cell = cell as? ItemCell else {
+            return
+        }
+        if let editItem = cell.item as? EditableItemType, editItem.isDragging {
             return
         }
         cell.willDisplay()

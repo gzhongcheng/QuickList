@@ -439,6 +439,48 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             layoutExecute(QuickListFlowLayout())
         }
     }
+
+    public func getTargetItem(at point: CGPoint) -> Item? {
+        guard let formView = self.form?.delegate?.formView else { return nil }
+        if point.x < 0 || point.y < 0 {
+            return form?.sections.first?.items.first
+        }
+        if point.x > formView.contentSize.width || point.y > formView.contentSize.height {
+            return form?.sections.last?.items.last
+        }
+        
+        if let headerAttributes = self.headerAttributes {
+            if headerAttributes.frame.contains(point) {
+                return form?.sections.first?.items.first
+            }
+        }
+        if let footerAttributes = self.footerAttributes {
+            if footerAttributes.frame.contains(point) {
+                return form?.sections.last?.items.last
+            }
+        }
+        
+        for sectionAttr in sectionAttributes.values {
+            if self.scrollDirection == .vertical {
+                guard sectionAttr.startPoint.y <= point.y && sectionAttr.endPoint.y >= point.y else { continue }
+            }
+            if self.scrollDirection == .horizontal {
+                guard sectionAttr.startPoint.x <= point.x && sectionAttr.endPoint.x >= point.x else { continue }
+            }
+            for itemAttr in sectionAttr.itemAttributes {
+                if itemAttr.frame.contains(point) {
+                    return form?[itemAttr.indexPath]
+                }
+            }
+            if sectionAttr.headerAttributes?.frame.contains(point) ?? false {
+                return form?.sections.first?.items.first
+            }
+            if sectionAttr.footerAttributes?.frame.contains(point) ?? false {
+                return form?.sections.last?.items.last
+            }
+        }
+        return nil
+    }
     
     /**
      * 获取范围内的元素位置数组
