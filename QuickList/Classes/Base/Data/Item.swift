@@ -495,7 +495,7 @@ open class Item: NSObject {
      * 从列表中动画删除
      * Animated deletion from list
      */
-    public func removeFromSection(animation: ListReloadAnimation? = ListReloadAnimation.scaleY) {
+    public func removeFromSection(animation: ListReloadAnimation? = ListReloadAnimation.leftSlide.concatenate(with: ListReloadAnimation.scaleY).concatenate(with: ListReloadAnimation.fade)) {
         guard let section = self.section else { return }
         section.deleteItems(with: [self], animation: animation)
     }

@@ -152,7 +152,7 @@ open class EditableItemCell: ItemCell {
             make.width.equalToSuperview()
         }
         editContainer.snp.makeConstraints { make in
-            make.top.bottom.leading.equalToSuperview()
+            make.top.bottom.trailing.equalToSuperview()
             make.width.equalTo(self.editContainerWidth)
         }
 

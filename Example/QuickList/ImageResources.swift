@@ -51,7 +51,7 @@ func newTagItem(_ title: String) -> TitleValueItem {
 //                item.value = "x"
 //            }
             guard let section = item.section else { return }
-            section.replaceItems(with: [tagFlodItem()], animation: ListReloadAnimation.leftSlide)
+            section.replaceItems(with: [tagFlodItem()], inAnimation: .leftSlide, outAnimation: .rightSlide)
         }
     }
 }
@@ -64,21 +64,20 @@ func tagFlodItem() -> TitleValueItem {
         item.contentBgColor = UIColor(white: 0.9, alpha: 1.0)
         item.titleHighlightColor = .white
         item.contentInsets = UIEdgeInsets(top: 10, left: 7, bottom: 10, right: 5)
-        item.onCellSelection { item in
-            guard let section = item.section else { return }
-            section.replaceItems(with: [
-                newTagItem("Tag"),
-                newTagItem("Tag Tag"),
-                newTagItem("Tag Tag Tag Tag Tag"),
-                newTagItem("Tag"),
-                newTagItem("Tag Tag"),
-                newTagItem("Tag"),
-                newTagItem("Tag Tag"),
-                newTagItem("Tag Tag Tag Tag"),
-                newTagItem("Tag"),
-                newTagItem("Tag Tag Tag Tag Tag Tag Tag")
-            ], animation: ListReloadAnimation.leftSlide)
-        }
+    }.onCellSelection { item in
+        guard let section = item.section else { return }
+        section.replaceItems(with: [
+            newTagItem("Tag"),
+            newTagItem("Tag Tag"),
+            newTagItem("Tag Tag Tag Tag Tag"),
+            newTagItem("Tag"),
+            newTagItem("Tag Tag"),
+            newTagItem("Tag"),
+            newTagItem("Tag Tag"),
+            newTagItem("Tag Tag Tag Tag"),
+            newTagItem("Tag"),
+            newTagItem("Tag Tag Tag Tag Tag Tag Tag")
+        ], inAnimation: .rightSlide, outAnimation: .leftSlide)
     }
 }
 

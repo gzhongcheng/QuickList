@@ -71,6 +71,6 @@ final class TestEditMoveItem: EditableItemOf<TestEditMoveItemCell>, ItemType {
     }
     
     override func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
-        return CGSize(width: estimateItemSize.width, height: 150)
+        return CGSize(width: estimateItemSize.width, height: 50)
     }
 }

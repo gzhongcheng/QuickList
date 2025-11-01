@@ -313,7 +313,7 @@ open class Section: NSObject {
      *   - animation: 动画 / Animation
      *   - completion: 完成回调 / Completion callback
      */
-    public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.scaleY, completion: (() -> Void)? = nil) {
+    public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.leftSlide, completion: (() -> Void)? = nil) {
         self.form?.delegate?.updateLayout(section: self, inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -321,10 +321,10 @@ open class Section: NSObject {
             items.enumerated().forEach { (index, item) in
                 if self.items.contains(item) {
                     removedItemIndexPaths.append(item.indexPath!)
-                    item.section = nil
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
+                    item.section = nil
                 }
             }
             self.items.removeAll(where: { items.contains($0) })
@@ -509,5 +509,14 @@ extension Section: RangeReplaceableCollection {
     public func removeAll(keepingCapacity keepCapacity: Bool = false) {
         items.forEach({ $0.section = nil })
         items.removeAll(keepingCapacity: keepCapacity)
+    }
+    
+    public func removeAll(where shouldBeRemoved: (Item) throws -> Bool) rethrows {
+        items.forEach({ 
+            if (try? shouldBeRemoved($0)) ?? false {
+                $0.section = nil
+            }
+        })
+        try items.removeAll(where: shouldBeRemoved)
     }
 }
