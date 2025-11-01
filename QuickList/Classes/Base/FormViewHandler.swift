@@ -276,6 +276,12 @@ extension FormViewHandler: FormDelegate {
         currentUpdateSectionInAnimation = inAnimation
         currentUpdateOthersInAnimation = othersInAnimation
         if inAnimation != nil || othersInAnimation != nil {
+            let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0.3
+            UIView.beginAnimations(nil, context: nil)
+            UIView.setAnimationDuration(duration)
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(duration)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
             formView?.performBatchUpdates({ [weak self] in
                 if let customUpdates = performBatchUpdates {
                     customUpdates(self?.formView, self?.layout)
@@ -289,6 +295,8 @@ extension FormViewHandler: FormDelegate {
                 self?.currentUpdateOthersInAnimation = nil
                 completion?()
             })
+            CATransaction.commit()
+            UIView.commitAnimations()
         } else {
             if let customUpdates = performBatchUpdates {
                 customUpdates(self.formView, self.layout)
@@ -641,7 +649,7 @@ extension FormViewHandler: UICollectionViewDelegate {
             {
                 let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-                inAnimation.animateIn(view: cell, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                inAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else if
             let othersInAnimation = currentUpdateOthersInAnimation,
@@ -649,7 +657,7 @@ extension FormViewHandler: UICollectionViewDelegate {
         {
             let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
             let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-            othersInAnimation.animateIn(view: cell, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+            othersInAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
         }
     }
     
@@ -660,13 +668,13 @@ extension FormViewHandler: UICollectionViewDelegate {
             if let inAnimation = currentUpdateSectionInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                inAnimation.animateIn(view: view, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                inAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else {
             if let othersInAnimation = currentUpdateOthersInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                othersInAnimation.animateIn(view: view, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                othersInAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         }
     }

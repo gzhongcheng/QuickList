@@ -219,10 +219,10 @@ open class Section: NSObject {
             if !withOut.contains(item) {
                 item.isHidden = true
                 guard let cell = item.cell, let section = item.section else { return }
-                outAnimation?.animateOut(view: cell, at: section)
+                outAnimation?.animateOut(view: cell, to: item, at: section)
             }
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: nil, completion: completion)
     }
     /**
      * 显示所有item
@@ -232,7 +232,7 @@ open class Section: NSObject {
         self.items.forEach { (item) in
             item.isHidden = false
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: nil, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: nil, completion: completion)
     }
     
     /**
@@ -322,7 +322,7 @@ open class Section: NSObject {
                 if self.items.contains(item) {
                     item.section = nil
                     if let cell = item.cell, let section = item.section {
-                        animation?.animateOut(view: cell, at: section)
+                        animation?.animateOut(view: cell, to: item, at: section)
                     }
                     removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
                 }
@@ -360,7 +360,7 @@ open class Section: NSObject {
             var removedItemIndexPaths: [IndexPath] = []
             self.items.enumerated().forEach { (index, item) in
                 if let cell = item.cell, let section = item.section {
-                    outAnimation?.animateOut(view: cell, at: section)
+                    outAnimation?.animateOut(view: cell, to: item, at: section)
                 }
                 item.section = nil
                 removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
@@ -394,7 +394,7 @@ open class Section: NSObject {
             self.items.enumerated().forEach { (index, item) in
                 if index < range.lowerBound || index >= range.upperBound {
                     if let cell = item.cell, let section = item.section {
-                        animation?.animateOut(view: cell, at: section)
+                        animation?.animateOut(view: cell, to: item, at: section)
                     }
                     item.section = nil
                     removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))

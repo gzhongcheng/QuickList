@@ -244,7 +244,7 @@ public final class Form: NSObject {
             self.sections.forEach { section in
                 section.items.forEach { item in
                     if let cell = item.cell, let section = item.section {
-                        outAnimation?.animateOut(view: cell, at: section)
+                        outAnimation?.animateOut(view: cell, to: item, at: section)
                     }
                 }
                 removedSectionIndexSet.insert(section.index ?? 0)
@@ -278,7 +278,7 @@ public final class Form: NSObject {
                 if index < range.lowerBound || index >= range.upperBound {
                     section.items.forEach { item in
                         if let cell = item.cell, let section = item.section {
-                            outAnimation?.animateOut(view: cell, at: section)
+                            outAnimation?.animateOut(view: cell, to: item, at: section)
                         }
                     }
                     removedSectionIndexSet.insert(index)
@@ -312,7 +312,7 @@ public final class Form: NSObject {
                 if let index = self.sections.firstIndex(where: { $0.index == section.index }) {
                     section.items.forEach { item in
                         if let cell = item.cell, let section = item.section {
-                            outAnimation?.animateOut(view: cell, at: section)
+                            outAnimation?.animateOut(view: cell, to: item, at: section)
                         }
                     }
                     removedSectionIndexSet.insert(index)

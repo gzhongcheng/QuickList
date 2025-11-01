@@ -36,37 +36,6 @@ extension UICollectionViewLayoutAttributes {
     }
 }
 
-extension Array where Element == UICollectionViewLayoutAttributes {
-    /**
-     * 使用二分法找到rect范围内的一个itemAttr
-     * Use binary search to find an itemAttr in the rect range
-     */
-    func binarySearch(frame: CGRect, in rect: CGRect, direction: UICollectionView.ScrollDirection) -> (Int, UICollectionViewLayoutAttributes)? {
-        var left = 0
-        var right = count - 1
-        while left <= right {
-            let mid = (left + right) / 2
-            if self[mid].frame.intersects(rect) {
-                return (mid, self[mid])
-            }
-            if direction == .vertical {
-                if self[mid].frame.minY > frame.minY {
-                    right = mid - 1
-                } else {
-                    left = mid + 1
-                }
-            } else {
-                if self[mid].frame.minX > frame.minX {
-                    right = mid - 1
-                } else {
-                    left = mid + 1
-                }
-            }
-        }
-        return nil
-    }
-}
-
 public protocol QuickListCollectionLayoutDelegate: AnyObject {
     /**
      * 更新完成回调
@@ -95,7 +64,11 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             resetData()
         }
     }
-    
+    /**
+     * 默认布局
+     * Default layout
+     */
+    lazy var defaultLayout: QuickListBaseLayout = QuickListFlowLayout()
     /**
      * 更新类型
      * Update type
@@ -298,7 +271,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                         section.endPoint.y += offsetY
                         section.headerAttributes?.frame.origin.y += offsetY
                         section.footerAttributes?.frame.origin.y += offsetY
-                        section.itemAttributes.forEach { $0.frame.origin.y += offsetY }
+                        section.itemAttributes.values.forEach { $0.frame.origin.y += offsetY }
                         section.decorationAttributes?.frame.origin.y += offsetY
                         section.suspensionDecorationAttributes?.frame.origin.y += offsetY
                     }
@@ -323,7 +296,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                         section.endPoint.x += offsetX
                         section.headerAttributes?.frame.origin.x += offsetX
                         section.footerAttributes?.frame.origin.x += offsetX
-                        section.itemAttributes.forEach { $0.frame.origin.x += offsetX }
+                        section.itemAttributes.values.forEach { $0.frame.origin.x += offsetX }
                         section.decorationAttributes?.frame.origin.x += offsetX
                         section.suspensionDecorationAttributes?.frame.origin.x += offsetX
                     }
@@ -404,13 +377,13 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     sectionAttr.footerAttributes?.caculatedFrame = sectionAttr.footerAttributes?.frame
                     sectionAttr.decorationAttributes?.caculatedFrame = sectionAttr.decorationAttributes?.frame
                     sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
-                    sectionAttr.itemAttributes.forEach { $0.caculatedFrame = $0.frame }
+                    sectionAttr.itemAttributes.values.forEach { $0.caculatedFrame = $0.frame }
                 } else {
                     self.suspensionHeaderSectionSize = nil
                     sectionAttr.headerAttributes?.zIndex = 502
                     sectionAttr.footerAttributes?.zIndex = 501
                     sectionAttr.decorationAttributes?.zIndex = 498
-                    sectionAttr.itemAttributes.forEach { $0.zIndex = 500 }
+                    sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
                 }
                 sectionAttr.isFormHeader = section.isFormHeader
             } else {
@@ -418,7 +391,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 sectionAttr.headerAttributes?.zIndex = 502
                 sectionAttr.footerAttributes?.zIndex = 501
                 sectionAttr.decorationAttributes?.zIndex = 498
-                sectionAttr.itemAttributes.forEach { $0.zIndex = 500 }
+                sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
             }
             self.sectionAttributes[sectionIndex] = sectionAttr
             guard sectionAttr.endPoint != .zero else {
@@ -436,7 +409,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         } else if let formLayout = form?.layout {
             layoutExecute(formLayout)
         } else {
-            layoutExecute(QuickListFlowLayout())
+            layoutExecute(self.defaultLayout)
         }
     }
 
@@ -467,7 +440,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             if self.scrollDirection == .horizontal {
                 guard sectionAttr.startPoint.x <= point.x && sectionAttr.endPoint.x >= point.x else { continue }
             }
-            for itemAttr in sectionAttr.itemAttributes {
+            for itemAttr in sectionAttr.itemAttributes.values {
                 if itemAttr.frame.contains(point) {
                     return form?[itemAttr.indexPath]
                 }
@@ -567,7 +540,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
                 if 
                     let indexPath = indexPath,
-                    let selectedItemAttributes = sectionAttr.itemAttributes.first(where: { $0.indexPath == indexPath })
+                    let selectedItemAttributes = sectionAttr.itemAttributes[indexPath]
                 {
                     selectedItemDecoration.frame = selectedItemAttributes.frame
                     selectedItemDecoration.layer.zPosition = form?.selectedItemDecorationPosition == .below ? 1023 : 1025
@@ -582,12 +555,11 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = sectionAttributes[sectionIndex],
-            indexPath.row < section.itemAttributes.count
+            let section = sectionAttributes[sectionIndex]
         else {
             return nil
         }
-        return section.itemAttributes[indexPath.row]
+        return section.itemAttributes[indexPath]
     }
     
     public override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
@@ -621,12 +593,11 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public func initialLayoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = oldSectionAttributes[sectionIndex],
-            indexPath.row < section.itemAttributes.count
+            let section = oldSectionAttributes[sectionIndex]
         else {
             return nil
         }
-        return section.itemAttributes[indexPath.row]
+        return section.itemAttributes[indexPath]
     }
     
     public func initialLayoutAttributesForElement(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
@@ -918,7 +889,7 @@ extension QuickListSectionAttribute {
                 suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(footerAttributes)
             }
-            for itemAttr in self.itemAttributes {
+            for itemAttr in self.itemAttributes.values {
                 var itemAttr = itemAttr
                 suspensionAttributes(&itemAttr, zIndex: 1024, for: view, headerSize: headerSize, with: scrollDirection)
                 resultAttrs.append(itemAttr)
@@ -959,49 +930,10 @@ extension QuickListSectionAttribute {
                 }
             }
 
-            /** 
-                * 使用二分法查找rect范围内的一个itemAttr
-                * Use binary search to find itemAttr in the rect range
-                */
-            if let (index, itemAttr) = self.itemAttributes.binarySearch(frame: rect, in: rect, direction: scrollDirection) {
-                itemAttr.zIndex = 500
-                resultAttrs.append(itemAttr)
-
-                let sectionColumnCount = self.column
-                /**
-                 * 从后往前反向遍历itemAttributes，直到遇到不在rect范围内的itemAttr，为排除瀑布流item高度不一导致可能出现中间某个itemAttr不在rect范围内，但前面的itemAttr在rect范围内的情况,需要遍历到整行的itemAttr都不在rect范围内为止
-                 * Traverse itemAttributes from back to front, add to resultAttrs until an itemAttr that is not in the rect range is encountered, 
-                 * to exclude the case where the itemAttr may not be in the rect range, but the previous itemAttr is in the rect range, due to the height of the waterfall item is not the same,
-                 * the traversal needs to be continued until the itemAttr of the entire row is not in the rect range
-                 */
-                var currentOutRectCount: Int = 0
-                for itemAttr in self.itemAttributes[..<index].reversed() {
-                    if rect.intersects(itemAttr.frame) {
-                        itemAttr.zIndex = 500
-                        resultAttrs.append(itemAttr)
-                        currentOutRectCount = 0
-                    } else if currentOutRectCount < sectionColumnCount {
-                        currentOutRectCount += 1
-                    } else {
-                        break
-                    }
-                }
-
-                /**
-                 * 从前往后遍历itemAttributes，直到遇到不在rect范围内的itemAttr，为排除瀑布流item高度不一导致可能出现中间某个itemAttr不在rect范围内，但后面的itemAttr在rect范围内的情况,需要遍历到整行的itemAttr都不在rect范围内为止
-                 * Traverse itemAttributes from front to back, add to resultAttrs until an itemAttr that is not in the rect range is encountered
-                 */
-                currentOutRectCount = 0
-                for itemAttr in self.itemAttributes[index...] {
-                    if rect.intersects(itemAttr.frame) {
-                        itemAttr.zIndex = 500
-                        resultAttrs.append(itemAttr)
-                        currentOutRectCount = 0
-                    } else if currentOutRectCount < sectionColumnCount {
-                        currentOutRectCount += 1
-                    } else {
-                        break
-                    }
+            for itemAttr in self.itemAttributes.values {
+                if rect.intersects(itemAttr.frame) {
+                    itemAttr.zIndex = 500
+                    resultAttrs.append(itemAttr)
                 }
             }
 

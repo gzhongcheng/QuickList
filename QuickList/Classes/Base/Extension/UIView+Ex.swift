@@ -46,4 +46,24 @@ extension UIView {
         }
         return nil
     }
+
+    /**
+     * 截图
+     * Take a screenshot
+     * - Parameters:
+     *   - frame: 截图区域 / Screenshot area
+     * - Returns: 截图 / Screenshot
+     */
+    public func takeSnapshot(_ frame: CGRect) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(frame.size, false, 0)
+        
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        context.translateBy(x: frame.origin.x * -1, y: frame.origin.y * -1)
+        
+        layer.render(in: context)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image
+    }
 }

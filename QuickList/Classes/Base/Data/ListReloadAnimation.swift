@@ -58,20 +58,20 @@ open class ListReloadAnimation: NSObject {
      * 动画时长
      * Animation duration
      */
-    public var duration: TimeInterval = 3
+    public var duration: TimeInterval = 0.3
 
     /**
      * 动画进入
      * Animate in
      */
-    open func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    open func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
     }
 
     /**
      * 动画退出，因为列表刷新后，cell就会被替换掉，因此这里需要复制一个一模一样的cell的截图出来，然后进行动画退出，可以调用addOutSnapshotAndDoAnimation方法来实现
      * Animate out, because the cell will be replaced after the list is refreshed, so here we need to copy a screenshot of a cell and then animate out, you can call addOutSnapshotAndDoAnimation method to achieve this
      */
-    open func animateOut(view: UIView, at section: Section) {
+    open func animateOut(view: UIView, to item: Item?, at section: Section) {
         // For example:
         // addOutSnapshotAndDoAnimation(view: view, animation: { snapshot in
         //     snapshot.alpha = 0
@@ -85,7 +85,7 @@ open class ListReloadAnimation: NSObject {
      *   - cell: 需要进行动画的cell / The cell to animate
      *   - animation: 执行的动画回调 / Animation callback
      */
-    public func addOutSnapshotAndDoAnimation(view: UIView, at section: Section, delay: TimeInterval = 0, options: UIView.AnimationOptions = [.curveEaseOut], animation: @escaping (UIView) -> Void) {
+    public func addOutSnapshotAndDoAnimation(view: UIView, at section: Section, delay: TimeInterval = 0, options: UIView.AnimationOptions = [.curveEaseInOut], animation: @escaping (UIView) -> Void) {
         guard
             let snapshot = view.snapshotView(afterScreenUpdates: true),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
@@ -103,37 +103,24 @@ open class ListReloadAnimation: NSObject {
     }
 }
 
-// MARK: - UIView + extension
-private extension UIView {
-    func takeSnapshot(_ frame: CGRect) -> UIImage? {
-        UIGraphicsBeginImageContextWithOptions(frame.size, false, 0)
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
-        context.translateBy(x: frame.origin.x * -1, y: frame.origin.y * -1)
-        layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
-    }
-}
-
 // MARK: - FadeListReloadAnimation
 /**
  * 淡入淡出动画
  * Fade in and fade out animation
  */
 public class FadeListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
-            UIView.animate(withDuration: self.duration, animations: {
+            UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.alpha = 0
         })
@@ -146,20 +133,20 @@ public class FadeListReloadAnimation: ListReloadAnimation {
  * Scale animation
  */
 public class ScaleListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.transform = CGAffineTransform(scaleX: 0, y: 0)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
-            UIView.animate(withDuration: self.duration, animations: {
+            UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
             snapshot.alpha = 0
@@ -173,20 +160,20 @@ public class ScaleListReloadAnimation: ListReloadAnimation {
  * Slide from left, slide from left animation
  */
 public class LeftSlideListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
-            UIView.animate(withDuration: self.duration, animations: {
+            UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0)
             snapshot.alpha = 0
@@ -200,20 +187,20 @@ public class LeftSlideListReloadAnimation: ListReloadAnimation {
  * Slide from right, slide from right animation
  */
 public class RightSlideListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.transform = CGAffineTransform(translationX: view.bounds.width, y: 0)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
-            UIView.animate(withDuration: self.duration, animations: {
+            UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: view.bounds.width, y: 0)
             snapshot.alpha = 0
@@ -227,7 +214,7 @@ public class RightSlideListReloadAnimation: ListReloadAnimation {
  * Slide from top, slide from top animation
  */
 public class TopSlideListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.transform = CGAffineTransform(translationX: 0, y: -view.bounds.height)
         view.alpha = 0
         targetAttributes?.alpha = 0
@@ -240,7 +227,7 @@ public class TopSlideListReloadAnimation: ListReloadAnimation {
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: 0, y: -view.bounds.height)
             snapshot.alpha = 0
@@ -254,20 +241,20 @@ public class TopSlideListReloadAnimation: ListReloadAnimation {
  * Slide from bottom, slide from bottom animation
  */
 public class BottomSlideListReloadAnimation: ListReloadAnimation { 
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
-            UIView.animate(withDuration: self.duration, animations: {
+            UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
             snapshot.alpha = 0
@@ -281,7 +268,7 @@ public class BottomSlideListReloadAnimation: ListReloadAnimation {
  * Move from the old cell position to the new cell position
  */
 public class TransformListReloadAnimation: ListReloadAnimation {
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         if
             let lastAttributes = lastAttributes, 
             let targetAttributes = targetAttributes 
@@ -300,7 +287,7 @@ public class TransformListReloadAnimation: ListReloadAnimation {
             })
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
             // 使用渐隐动画来实现
             snapshot.alpha = 0
@@ -313,36 +300,97 @@ public class TransformListReloadAnimation: ListReloadAnimation {
  * 3D折叠动画
  * 3D fold animation
  */
-public class ThreeDFoldListReloadAnimation: ListReloadAnimation {
+public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDelegate {
     
-    public override func animateIn(view: UIView, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        var targetItemIndex: Int = 0
-        for (index, item) in section.items.enumerated() {
-            if view == item.cell {
-                targetItemIndex = index
-                break
-            }
+    /**
+     * 折叠时跳过的item(仅针对单Section的折叠动画有效)
+     * Items to skip during folding (only effective for single section fold animation)
+     */
+    public func setSkipItems(items: [Item], at section: Section) {
+        var sectionLayout: QuickListBaseLayout? = section.layout
+        if sectionLayout == nil {
+            sectionLayout = section.form?.layout
         }
+        if sectionLayout == nil {
+            sectionLayout = section.form?.listLayout?.defaultLayout
+        }
+        guard let sectionLayout = sectionLayout else { 
+            self.itemTargetFrames = [:]
+            return
+        }
+        self.itemTargetFrames = sectionLayout.calculateItemsFrameWhenOthersFolded(items: items, at: section)
+    }
+
+    private var itemTargetFrames: [Item: CGRect] = [:]
+    
+    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        if item == nil {
+            if
+                let lastAttributes = lastAttributes, 
+                let targetAttributes = targetAttributes 
+            {
+                let transform = CGAffineTransform(translationX: lastAttributes.frame.origin.x - targetAttributes.frame.origin.x, y: lastAttributes.frame.origin.y - targetAttributes.frame.origin.y)
+                view.transform = transform
+            }
+            view.alpha = 0
+            targetAttributes?.alpha = 0
+            view.superview?.layoutIfNeeded()
+            DispatchQueue.main.async {
+                UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
+                    view.transform = .identity
+                    view.alpha = 1
+                    targetAttributes?.alpha = 1
+                })
+            }
+            return
+        }
+        
+        let targetItemIndex: Int = item?.indexPath?.row ?? -1
+        view.alpha = 1
+        targetAttributes?.alpha = 1
         guard
-            let snapshot = view.snapshotView(afterScreenUpdates: true),
+            let snapshotImage = view.takeSnapshot(view.bounds),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
+        let snapshot = UIImageView(image: snapshotImage)
         targetView.addSubview(snapshot)
         snapshot.layer.zPosition = view.layer.zPosition
         snapshot.frame = view.convert(view.bounds, to: targetView)
-        snapshot.alpha = 0
         view.alpha = 0
         targetAttributes?.alpha = 0
         targetView.layoutIfNeeded()
+        
+        var finalPoint = targetAttributes?.frame.origin ?? CGPoint.zero
+        finalPoint.x += view.frame.width * 0.5
+        finalPoint.y += view.frame.height * 0.5
+        var startPoint = view.frame.origin
+        var lastSkipItemBeforeTargetItem: Item? = nil
+        for i in itemTargetFrames.keys {
+            if i.indexPath?.row ?? -1 < targetItemIndex, lastSkipItemBeforeTargetItem?.indexPath?.row ?? -1 < i.indexPath?.row ?? -1 {
+                lastSkipItemBeforeTargetItem = i
+            }
+        }
+        if 
+            let lastSkipItemBeforeTargetItem = lastSkipItemBeforeTargetItem,
+            let lastSkipItemBeforeTargetItemFrame = itemTargetFrames[lastSkipItemBeforeTargetItem]
+        {
+            startPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX, y: lastSkipItemBeforeTargetItemFrame.maxY)
+        } else if
+            let sectionIndex = section.index,
+            let sectionAttr = section.form?.listLayout?.sectionAttributes[sectionIndex]
+        {
+            startPoint = CGPoint(x: sectionAttr.startPoint.x + (sectionAttr.headerAttributes?.frame.width ?? 0) + section.contentInset.left, y: sectionAttr.startPoint.y + (sectionAttr.headerAttributes?.frame.height ?? 0) + section.contentInset.top)
+        }
+
         switch section.form?.delegate?.scrollDirection {
         case .vertical:
-            startVerticalUnfoldAnimation(to: snapshot, attributes: targetAttributes, atIndex: targetItemIndex) {
+            startVerticalUnfoldAnimation(to: snapshot, atIndex: targetItemIndex, targetStartPoint: startPoint, targetEndPoint: finalPoint) {
                 snapshot.removeFromSuperview()
                 view.alpha = 1
                 targetAttributes?.alpha = 1
             }
         case .horizontal:
-            startHorizontalUnfoldAnimation(to: snapshot, attributes: targetAttributes, atIndex: targetItemIndex) {
+            startHorizontalUnfoldAnimation(to: snapshot, atIndex: targetItemIndex, targetStartPoint: startPoint, targetEndPoint: finalPoint) {
                 snapshot.removeFromSuperview()
                 view.alpha = 1
                 targetAttributes?.alpha = 1
@@ -351,31 +399,46 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation {
             break
         }
     }
-    public override func animateOut(view: UIView, at section: Section) {
-        var targetItemIndex: Int = 0
-        for (index, item) in section.items.enumerated() {
-            if view == item.cell {
-                targetItemIndex = index
-                break
-            }
-        }
+    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         guard
-            let snapshot = view.snapshotView(afterScreenUpdates: true),
+            let snapshotImage = view.takeSnapshot(view.bounds),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
+        let snapshot = UIImageView(image: snapshotImage)
         targetView.addSubview(snapshot)
         snapshot.layer.zPosition = view.layer.zPosition
         snapshot.frame = view.convert(view.bounds, to: targetView)
         view.alpha = 0
         targetView.layoutIfNeeded()
+        
+
+        let targetItemIndex: Int = item?.indexPath?.row ?? -1
+        var lastSkipItemBeforeTargetItem: Item? = nil
+        for i in itemTargetFrames.keys {
+            if i.indexPath?.row ?? -1 < targetItemIndex, lastSkipItemBeforeTargetItem?.indexPath?.row ?? -1 < i.indexPath?.row ?? -1 {
+                lastSkipItemBeforeTargetItem = i
+            }
+        }
+        var endPoint = snapshot.frame.origin
+        if 
+            let lastSkipItemBeforeTargetItem = lastSkipItemBeforeTargetItem,
+            let lastSkipItemBeforeTargetItemFrame = itemTargetFrames[lastSkipItemBeforeTargetItem]
+        {
+            endPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX, y: lastSkipItemBeforeTargetItemFrame.maxY)
+        } else if
+            let sectionIndex = section.index,
+            let sectionAttr = section.form?.listLayout?.sectionAttributes[sectionIndex]
+        {
+            endPoint = CGPoint(x: sectionAttr.startPoint.x + (sectionAttr.headerAttributes?.frame.width ?? 0) + section.contentInset.left, y: sectionAttr.startPoint.y + (sectionAttr.headerAttributes?.frame.height ?? 0) + section.contentInset.top)
+        }
         DispatchQueue.main.async {
             switch section.form?.delegate?.scrollDirection {
             case .vertical:
-                self.startVerticalFoldAnimation(to: snapshot, atIndex: targetItemIndex) {
+                self.startVerticalFoldAnimation(to: snapshot, atIndex: targetItemIndex, targetEndPoint: endPoint) {
                     snapshot.removeFromSuperview()
                 }
             case .horizontal:
-                self.startHorizontalFoldAnimation(to: snapshot, atIndex: targetItemIndex) {
+                self.startHorizontalFoldAnimation(to: snapshot, atIndex: targetItemIndex, targetEndPoint: endPoint) {
                     snapshot.removeFromSuperview()
                 }
             default:
@@ -384,124 +447,280 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation {
         }
     }
 
-    func startVerticalFoldAnimation(to view: UIView, atIndex: Int, completion: @escaping () -> Void) {
+    func startVerticalFoldAnimation(to view: UIView, atIndex: Int, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
         /**
-         * 单数往上翻出，使用3D旋转加透明度1到0的动画，动画的centerPoint为view的顶部中心
-         * 双数往下翻出，使用3D旋转加透明度1到0的动画加上平移动画移动到view的顶部做组合动画，动画的centerPoint为view的底部中心
-         * Odd index up, use 3D rotation animation plus alpha 1 to 0 animation
-         * Even index down, use 3D rotation animation plus alpha 1 to 0 animation plus translation animation move to the top of the view to do a combined animation
+         * 创建一个动画，用于实现3D旋转动画
+         * Create a keyframe animation to implement 3D rotation animation
          */
+        let transformAnimation = CABasicAnimation()
+        transformAnimation.keyPath = "transform"
+        var perspectiveTransform = CATransform3DIdentity
+        perspectiveTransform.m34 = -2.5 / 2000
+        var angle: CGFloat = CGFloat.pi * 0.5
         if atIndex % 2 == 1 {
-            let centerPoint = CGPoint(x: view.bounds.width / 2, y: 0)
-            view.layer.anchorPoint = centerPoint
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2)
-                view.alpha = 0
-            }, completion: { _ in
-                view.removeFromSuperview()
-            })
-        } else {
-            let centerPoint = CGPoint(x: view.bounds.width / 2, y: view.bounds.height)
-            view.layer.anchorPoint = centerPoint
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2).translatedBy(x: 0, y: view.bounds.height)
-                view.alpha = 0
-            }, completion: { _ in
-                view.removeFromSuperview()
-            })
+            angle = -angle
+            /**
+             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             */
+            let maskLayer = CALayer()
+            maskLayer.frame = view.bounds
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            maskLayer.opacity = 0
+            view.layer.addSublayer(maskLayer)
+            let alphaAnimation = CABasicAnimation()
+            alphaAnimation.keyPath = "opacity"
+            alphaAnimation.toValue = NSNumber(value: 1)
+            alphaAnimation.duration = duration
+            alphaAnimation.isRemovedOnCompletion = false
+            alphaAnimation.fillMode = .forwards
+            alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
         }
+        let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 1, 0, 0)
+        transformAnimation.toValue = NSValue(caTransform3D: rotateTransform)
+        /**
+            *  创建一个向上平移的动画
+            * Create a up translation animation
+            */
+        let positionAnimation = CABasicAnimation()
+        positionAnimation.keyPath = "position.y"
+        positionAnimation.toValue = NSNumber(value: targetEndPoint.y)
+        /**
+         * 创建一个透明度动画
+         * Create a alpha animation
+         */
+        let alphaAnimation = CABasicAnimation()
+        alphaAnimation.keyPath = "opacity"
+        alphaAnimation.toValue = NSNumber(value: 0)
+        /**
+         * 创建一个组合动画
+         * Create a combined animation
+         */
+        let groupAnimation = CAAnimationGroup()
+        groupAnimation.duration = duration
+        groupAnimation.isRemovedOnCompletion = false
+        groupAnimation.fillMode = .forwards
+        groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
+        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        groupAnimation.delegate = self
+
+        animationCompletions[groupAnimation] = completion
+        view.layer.add(groupAnimation, forKey: "FoldGroupAnimation")
     }
 
-    func startVerticalUnfoldAnimation(to view: UIView, attributes: UICollectionViewLayoutAttributes?, atIndex: Int, completion: @escaping () -> Void) {
-        /**
-         * 单数往下翻出，使用3D旋转加透明度从0到1的动画，动画的centerPoint为view的顶部中心
-         * 双数往上翻出，使用3D旋转加透明度从0到1的动画加上平移动动画移动到view的底部做组合动画，动画的centerPoint为view的底部中心
-         * Odd index down, use 3D rotation animation plus alpha from 0 to 1 animation, animation's centerPoint is the top center of the view
-         * Even index up, use 3D rotation animation plus alpha from 0 to 1 animation plus translation animation move to the bottom of the view to do a combined animation, animation's centerPoint is the bottom center of the view
-         * Odd index down, use 3D rotation animation, animation's centerPoint is the top center of the view
-         * Even index up, use 3D rotation animation plus translation animation move to the bottom of the view to do a combined animation, animation's centerPoint is the bottom center of the view
-         */
+    func startVerticalUnfoldAnimation(to view: UIView, atIndex: Int, targetStartPoint: CGPoint, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
+        var perspectiveTransform = CATransform3DIdentity
+        perspectiveTransform.m34 = -2.5 / 2000
+        var angle: CGFloat = CGFloat.pi * 0.5
         if atIndex % 2 == 1 {
-            let centerPoint = CGPoint(x: view.bounds.width / 2, y: 0)
-            view.layer.anchorPoint = centerPoint
-            view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2)
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = .identity
-                view.alpha = 1
-                attributes?.alpha = 1
-            }, completion: { _ in
-                completion()
-            })
-        } else {
-            let centerPoint = CGPoint(x: view.bounds.width / 2, y: view.bounds.height)
-            view.layer.anchorPoint = centerPoint
-            view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2).translatedBy(x: 0, y: view.bounds.height)
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = .identity
-                view.alpha = 1
-            }, completion: { _ in
-                completion()
-            })
+            angle = -angle
+            /**
+             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             */
+            let maskLayer = CALayer()
+            maskLayer.frame = view.bounds
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            view.layer.addSublayer(maskLayer)
+            let alphaAnimation = CABasicAnimation()
+            alphaAnimation.keyPath = "opacity"
+            alphaAnimation.toValue = NSNumber(value: 0)
+            alphaAnimation.duration = duration
+            alphaAnimation.isRemovedOnCompletion = false
+            alphaAnimation.fillMode = .forwards
+            alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
         }
+        let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 1, 0, 0)
+        view.layer.transform = rotateTransform
+        view.layer.position = CGPoint(x: view.layer.position.x, y: targetStartPoint.y)
+        view.alpha = 0
+        view.layoutIfNeeded()
+        
+         /**
+        * 创建一个动画，用于实现3D旋转动画
+        * Create a keyframe animation to implement 3D rotation animation
+        */
+        let transformAnimation = CABasicAnimation()
+        transformAnimation.keyPath = "transform"
+        transformAnimation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
+        /**
+        *  创建一个向下平移的动画
+        * Create a down translation animation
+        */
+        let positionAnimation = CABasicAnimation()
+        positionAnimation.keyPath = "position.y"
+        positionAnimation.toValue = NSNumber(value: targetEndPoint.y)
+        /**
+        * 创建一个透明度动画
+        * Create a alpha animation
+        */
+        let alphaAnimation = CABasicAnimation()
+        alphaAnimation.keyPath = "opacity"
+        alphaAnimation.toValue = NSNumber(value: 1)
+        /**
+        * 创建一个组合动画
+        * Create a combined animation
+        */
+        let groupAnimation = CAAnimationGroup()
+        groupAnimation.duration = duration
+        groupAnimation.isRemovedOnCompletion = false
+        groupAnimation.fillMode = .forwards
+        groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
+        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        groupAnimation.delegate = self
+
+        animationCompletions[groupAnimation] = completion
+        view.layer.add(groupAnimation, forKey: "UnfoldGroupAnimation")
     }
 
-    func startHorizontalFoldAnimation(to view: UIView, atIndex: Int, completion: @escaping () -> Void) {
+    func startHorizontalFoldAnimation(to view: UIView, atIndex: Int, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
         /**
-         * 单数往左滑出，使用3D旋转加透明度1到0的动画，动画的centerPoint为view的左中心
-         * 双数往右滑出，使用3D旋转加透明度1到0的动画加上平移动画移动到view的左做组合动画，动画的centerPoint为view的右中心
-         * Odd index left, use 3D rotation animation plus alpha 1 to 0 animation
-         * Even index right, use 3D rotation animation plus alpha 1 to 0 animation plus translation animation move to the left of the view to do a combined animation
+         * 创建一个动画，用于实现3D旋转动画
+         * Create a keyframe animation to implement 3D rotation animation
          */
-        if atIndex % 2 == 1 {
-            let centerPoint = CGPoint(x: 0, y: view.bounds.height / 2)
-            view.layer.anchorPoint = centerPoint
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2)
-                view.alpha = 0
-            }, completion: { _ in
-                completion()
-            })
-        } else {
-            let centerPoint = CGPoint(x: view.bounds.width, y: view.bounds.height / 2)
-            view.layer.anchorPoint = centerPoint
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2).translatedBy(x: 0, y: -view.bounds.width)
-                view.alpha = 0
-            }, completion: { _ in
-                completion()
-            })
+        let transformAnimation = CABasicAnimation()
+        transformAnimation.keyPath = "transform"
+        var perspectiveTransform = CATransform3DIdentity
+        perspectiveTransform.m34 = -2.5 / 2000
+        var angle: CGFloat = CGFloat.pi * 0.5
+        if atIndex % 2 == 0 {
+            angle = -angle
+            /**
+             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             */
+            let maskLayer = CALayer()
+            maskLayer.frame = view.bounds
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            view.layer.addSublayer(maskLayer)
+            let alphaAnimation = CABasicAnimation()
+            alphaAnimation.keyPath = "opacity"
+            alphaAnimation.toValue = NSNumber(value: 0)
+            alphaAnimation.duration = duration
+            alphaAnimation.isRemovedOnCompletion = false
+            alphaAnimation.fillMode = .forwards
+            alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
         }
+        let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 0, 1, 0)
+        transformAnimation.toValue = NSValue(caTransform3D: rotateTransform)
+        /**
+            *  创建一个向右平移的动画
+            * Create a right translation animation
+            */
+        let positionAnimation = CABasicAnimation()
+        positionAnimation.keyPath = "position.x"
+        positionAnimation.toValue = NSNumber(value: targetEndPoint.x)
+        /**
+         * 创建一个透明度动画
+         * Create a alpha animation
+         */
+        let alphaAnimation = CABasicAnimation()
+        alphaAnimation.keyPath = "opacity"
+        alphaAnimation.toValue = NSNumber(value: 0)
+        /**
+            * 创建一个组合动画
+            * Create a combined animation
+            */
+        let groupAnimation = CAAnimationGroup()
+        groupAnimation.duration = duration
+        groupAnimation.isRemovedOnCompletion = false
+        groupAnimation.fillMode = .forwards
+        groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
+        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        groupAnimation.delegate = self
+
+        animationCompletions[groupAnimation] = completion
+        view.layer.add(groupAnimation, forKey: "FoldGroupAnimation")
     }
 
-    func startHorizontalUnfoldAnimation(to view: UIView, attributes: UICollectionViewLayoutAttributes?, atIndex: Int, completion: @escaping () -> Void) {
+    func startHorizontalUnfoldAnimation(to view: UIView, atIndex: Int, targetStartPoint: CGPoint, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
         /**
          * 单数往右滑出，使用3D旋转加透明度从0到1的动画，动画的centerPoint为view的右中心
          * 双数往左滑出，使用3D旋转加透明度从0到1的动画加上平移动动画移动到view的右做组合动画，动画的centerPoint为view的左中心
          * Odd index right, use 3D rotation animation plus alpha from 0 to 1 animation
          * Even index left, use 3D rotation animation plus alpha from 0 to 1 animation plus translation animation move to the right of the view to do a combined animation
          */
-        if atIndex % 2 == 1 {
-            let centerPoint = CGPoint(x: 0, y: view.bounds.height / 2)
-            view.layer.anchorPoint = centerPoint
-            view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2)
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = .identity
-                view.alpha = 1
-                attributes?.alpha = 1
-            }, completion: { _ in
-                completion()
-            })
-        } else {
-            let centerPoint = CGPoint(x: view.bounds.width, y: view.bounds.height / 2)
-            view.layer.anchorPoint = centerPoint
-            view.transform = CGAffineTransform(rotationAngle: CGFloat.pi / 2).translatedBy(x: 0, y: view.bounds.width)
-            UIView.animate(withDuration: duration, animations: {
-                view.transform = .identity
-                view.alpha = 1
-                attributes?.alpha = 1
-            }, completion: { _ in
-                completion()
-            })
+
+        /**
+         * 创建一个动画，用于实现3D旋转动画
+         * Create a keyframe animation to implement 3D rotation animation
+         */
+        var perspectiveTransform = CATransform3DIdentity
+        perspectiveTransform.m34 = -2.5 / 2000
+        var angle: CGFloat = CGFloat.pi * 0.5
+        if atIndex % 2 == 0 {
+            angle = -angle
+            /**
+             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             */
+            let maskLayer = CALayer()
+            maskLayer.frame = view.bounds
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            view.layer.addSublayer(maskLayer)
+            let alphaAnimation = CABasicAnimation()
+            alphaAnimation.keyPath = "opacity"
+            alphaAnimation.toValue = NSNumber(value: 0)
+            alphaAnimation.duration = duration
+            alphaAnimation.isRemovedOnCompletion = false
+            alphaAnimation.fillMode = .forwards
+            alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
+        }
+        let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 0, 1, 0)
+        view.layer.transform = rotateTransform
+        view.layer.position = CGPoint(x: targetStartPoint.x, y: view.layer.position.y)
+        view.alpha = 0
+        view.layoutIfNeeded()
+
+        let transformAnimation = CABasicAnimation()
+        transformAnimation.keyPath = "transform"
+        transformAnimation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
+
+        /**
+            *  创建一个向左平移的动画
+            * Create a left translation animation
+            */
+        let positionAnimation = CABasicAnimation()
+        positionAnimation.keyPath = "position.x"
+        positionAnimation.toValue = NSNumber(value: targetEndPoint.x)
+        /**
+         * 创建一个透明度动画
+         * Create a alpha animation
+         */
+        let alphaAnimation = CABasicAnimation()
+        alphaAnimation.keyPath = "opacity"
+        alphaAnimation.toValue = NSNumber(value: 1)
+        /**
+         * 创建一个组合动画
+         * Create a combined animation
+         */
+        let groupAnimation = CAAnimationGroup()
+        groupAnimation.duration = duration
+        groupAnimation.isRemovedOnCompletion = false
+        groupAnimation.fillMode = .forwards
+        groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
+        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        groupAnimation.delegate = self
+        view.layer.add(groupAnimation, forKey: "UnfoldGroupAnimation")
+
+        animationCompletions[groupAnimation] = completion
+    }
+
+    // MARK: CAAnimationDelegate
+    private var animationCompletions: [CAAnimationGroup: () -> Void] = [:]
+    public func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+        if flag, let animationGroup = anim as? CAAnimationGroup {
+            for (key, completion) in animationCompletions {
+                if key.animations == animationGroup.animations {
+                    completion()
+                    animationCompletions.removeValue(forKey: key)
+                    break
+                }
+            }
         }
     }
 }

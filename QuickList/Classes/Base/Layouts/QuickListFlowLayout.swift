@@ -80,6 +80,10 @@ public class QuickListFlowLayout: QuickListBaseLayout {
         let itemTotalHeight = maxHeight - sectionContentInset.top - sectionContentInset.bottom
         let singleItemWidth: CGFloat = (itemTotalWidth - (column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
         let singleItemHeight: CGFloat = (itemTotalHeight - (column > 1 ? (section.itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
+        attribute.itemsMaxWidth = itemTotalWidth
+        attribute.itemsMaxHeight = itemTotalHeight
+        attribute.singleItemWidth = singleItemWidth
+        attribute.singleItemHeight = singleItemHeight
         /**
          * 每列的最后一个元素的结束偏移量（相对于itemStartPoint）
          * End offset of the last element in each column (relative to itemStartPoint)
@@ -219,7 +223,7 @@ public class QuickListFlowLayout: QuickListBaseLayout {
             if let editItem = item as? EditableItemType, editItem.isDragging {
                 attr.alpha = 0
             }
-            attribute.itemAttributes.append(attr)
+            attribute.itemAttributes[item.indexPath ?? IndexPath(item: index, section: sectionIndex)] = attr
             if item.isSelected {
                 attribute.selectedItemAttributes = attr
             }
@@ -260,5 +264,101 @@ public class QuickListFlowLayout: QuickListBaseLayout {
         addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
         
         return attribute
+    }
+
+    public override func calculateItemsFrameWhenOthersFolded(items: [Item], at section: Section) -> [Item: CGRect] {
+        guard 
+            let cacheAttr = cacheAttrs[section],
+            let layout = section.form?.listLayout
+        else { return [:] }
+        var itemTargetFrames: [Item: CGRect] = [:]
+        let singleItemWidth = cacheAttr.singleItemWidth
+        let singleItemHeight = cacheAttr.singleItemHeight
+        let itemSpace = section.itemSpace
+        let lineSpace = section.lineSpace
+        let itemStartPointX = cacheAttr.startPoint.x + (cacheAttr.headerAttributes?.frame.width ?? 0)
+        let itemStartPointY = cacheAttr.startPoint.y + (cacheAttr.headerAttributes?.frame.height ?? 0)
+
+        var itemOffsetX: CGFloat = 0
+        var itemOffsetY: CGFloat = 0
+        var tempOffsets: [CGFloat] = (0..<section.column).map({ _ in 0 })
+        var itemIndex: Int = 0
+
+        for item in items.sorted(by: { $0.indexPath?.row ?? -1 < $1.indexPath?.row ?? -1 }) {
+            guard 
+                let indexPath = item.indexPath, 
+                let itemAttr = cacheAttr.itemAttributes[indexPath],
+                itemAttr.isHidden == false
+            else { 
+                continue 
+            }
+            var itemFrame = itemAttr.frame
+            if tempOffsets.count <= item.weight {
+                if layout.scrollDirection == .vertical {
+                    itemOffsetY = tempOffsets.sorted().last!
+                    itemOffsetX = 0
+                } else {
+                    itemOffsetX = tempOffsets.sorted().last!
+                    itemOffsetY = 0
+                }
+            } else {
+                for (i, offset) in tempOffsets.enumerated() {
+                    if layout.scrollDirection == .vertical {
+                        if offset > itemOffsetY {
+                            itemOffsetY = offset
+                            itemIndex = i
+                        }
+                    }
+                    else {
+                        if offset > itemOffsetX {
+                            itemOffsetX = offset
+                            itemIndex = i
+                        }
+                    }
+                }
+                var haveSpace: Bool = false
+                for i in 0 ... tempOffsets.count - item.weight {
+                    var currentMaxOffset: CGFloat = 0
+                    for j in 0 ..< item.weight {
+                        currentMaxOffset = max(tempOffsets[i + j], currentMaxOffset)
+                    }
+                    if layout.scrollDirection == .vertical {
+                        if currentMaxOffset < itemOffsetY {
+                            itemOffsetY = currentMaxOffset
+                            itemIndex = i
+                            haveSpace = true
+                        }
+                    }
+                    else {
+                        if currentMaxOffset < itemOffsetX {
+                            itemOffsetX = currentMaxOffset
+                            itemIndex = i
+                            haveSpace = true
+                        }
+                    }
+                }
+                if !haveSpace {
+                    itemIndex = 0
+                }
+                for i in itemIndex ..< itemIndex + item.weight {
+                    if layout.scrollDirection == .vertical {
+                        tempOffsets[i] = itemOffsetY + lineSpace + itemFrame.height
+                    } else {
+                        tempOffsets[i] = itemOffsetX + lineSpace + itemFrame.width
+                    }
+                }
+                if layout.scrollDirection == .vertical {
+                    itemOffsetX = CGFloat(itemIndex) * (singleItemWidth + itemSpace)
+                } else {
+                    itemOffsetY = CGFloat(itemIndex) * (singleItemHeight + itemSpace)
+                }
+            }
+            
+            itemFrame.origin.x = itemOffsetX + itemStartPointX
+                itemFrame.origin.y = itemOffsetY + itemStartPointY
+
+            itemTargetFrames[item] = itemFrame
+        }
+        return itemTargetFrames
     }
 }

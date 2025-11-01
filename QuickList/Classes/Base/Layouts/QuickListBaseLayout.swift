@@ -32,7 +32,7 @@ public class QuickListSectionAttribute: NSObject {
      * 存放item位置的数组
      * Array storing item positions
      */
-    public var itemAttributes: [UICollectionViewLayoutAttributes] = []
+    public var itemAttributes: [IndexPath: UICollectionViewLayoutAttributes] = [:]
     /**
      * 存放当前选中item位置（仅在单选状态下有效）
      * Store current selected item position (only valid in single selection state)
@@ -58,19 +58,25 @@ public class QuickListSectionAttribute: NSObject {
     
     public var startPoint: CGPoint = .zero
     public var endPoint: CGPoint = .zero
+
+    public var itemsMaxWidth: CGFloat = 0
+    public var itemsMaxHeight: CGFloat = 0
+    public var singleItemWidth: CGFloat = 0
+    public var singleItemHeight: CGFloat = 0
     
     public var column: Int = 1
 }
 
 open class QuickListBaseLayout {
     var needUpdate: Bool = true
-    var cacheAttr: QuickListSectionAttribute = QuickListSectionAttribute()
+    var cacheAttrs: [Section: QuickListSectionAttribute] = [:]
     
     /**
      * layout获取布局对象
      * Layout gets layout object
      */
     func getAttsWithLayout(_ layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint, isFirstSection: Bool) -> QuickListSectionAttribute {
+        let cacheAttr = cacheAttrs[section] ?? QuickListSectionAttribute()
         let oldStart = cacheAttr.startPoint
         cacheAttr.startPoint = currentStart
         
@@ -105,8 +111,8 @@ open class QuickListBaseLayout {
         }
         
         self.needUpdate = false
-        self.cacheAttr = sectionAttr
-        return self.cacheAttr
+        self.cacheAttrs[section] = sectionAttr
+        return sectionAttr
     }
     
     /**
@@ -125,7 +131,10 @@ open class QuickListBaseLayout {
      * Only need to update x and y positions of all frames
      */
     private func update(with offsetXY: CGPoint, start: CGPoint, section: Section) -> QuickListSectionAttribute {
-        guard let sectionIndex = section.index else { return cacheAttr }
+        let cacheAttr = cacheAttrs[section] ?? QuickListSectionAttribute()
+        guard let sectionIndex = section.index else {
+            return cacheAttr
+        }
         /**
          * 更新header、footer、items
          * Update header, footer, items
@@ -138,7 +147,7 @@ open class QuickListBaseLayout {
             footerAttr.frame = moveXY(offsetXY: offsetXY, to: footerAttr.frame)
             footerAttr.indexPath = IndexPath(index: sectionIndex)
         }
-        for itemAttr in cacheAttr.itemAttributes {
+        for itemAttr in cacheAttr.itemAttributes.values {
             itemAttr.frame = moveXY(offsetXY: offsetXY, to: itemAttr.frame)
             itemAttr.indexPath = IndexPath(item: itemAttr.indexPath.item, section: sectionIndex)
         }
@@ -298,5 +307,14 @@ open class QuickListBaseLayout {
             decorationAttributes.frame = frame
             attribute.suspensionDecorationAttributes = decorationAttributes
         }
+    }
+    
+    /**
+     * 计算当其他item都收起时，剩余item的frame
+     * Calculate the frame of remaining items when all other items are folded
+     */
+    open func calculateItemsFrameWhenOthersFolded(items: [Item], at section: Section) -> [Item: CGRect] {
+        assertionFailure("Method must be override!")
+        return [:]
     }
 }

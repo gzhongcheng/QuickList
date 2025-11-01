@@ -202,7 +202,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
             if let editItem = item as? EditableItemType, editItem.isDragging {
                 attr.alpha = 0
             }
-            attribute.itemAttributes.append(attr)
+            attribute.itemAttributes[item.indexPath ?? IndexPath(item: index, section: sectionIndex)] = attr
             if item.isSelected {
                 attribute.selectedItemAttributes = attr
             }
