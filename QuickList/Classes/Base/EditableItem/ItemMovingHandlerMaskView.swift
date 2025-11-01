@@ -128,6 +128,7 @@ public class ItemMovingHandlerMaskView: UIView {
             return
         }
         moveSnapshot.frame = CGRect(x: pointInWindow.x - self.moveStartPointInItem.x, y: pointInWindow.y - self.moveStartPointInItem.y, width: moveSnapshot.frame.width, height: moveSnapshot.frame.height)
+        
         DispatchQueue.main.async {
             guard
                 let listView = self.item?.section?.form?.delegate?.formView
@@ -287,7 +288,7 @@ public class ItemMovingHandlerMaskView: UIView {
             let item = self.item,
             let listView = item.form?.delegate?.formView,
             let moveSnapshot = self.moveSnapshot,
-            let targetItem = item.form?.listLayout?.getTargetItem(at: moveSnapshot.convert(CGPoint(x: moveSnapshot.bounds.width * 0.5, y: moveSnapshot.bounds.height * 0.5), to: listView)),
+            let targetItem = item.form?.listLayout?.getTargetItem(at: moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: listView)),
             let targetIndexPath = targetItem.indexPath,
             targetItem != item
         else { return }

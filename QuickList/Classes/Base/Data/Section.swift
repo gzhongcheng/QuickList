@@ -222,7 +222,7 @@ open class Section: NSObject {
                 outAnimation?.animateOut(view: cell, to: item, at: section)
             }
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     /**
      * 显示所有item
@@ -232,7 +232,7 @@ open class Section: NSObject {
         self.items.forEach { (item) in
             item.isHidden = false
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     
     /**
@@ -313,22 +313,23 @@ open class Section: NSObject {
      *   - animation: 动画 / Animation
      *   - completion: 完成回调 / Completion callback
      */
-    public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.leftSlide, completion: (() -> Void)? = nil) {
-        self.form?.delegate?.updateLayout(section: self, inAnimation: nil, othersInAnimation: animation, performBatchUpdates: { [weak self] (listView, layout) in
+    public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.scaleY, completion: (() -> Void)? = nil) {
+        self.form?.delegate?.updateLayout(section: self, inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             var removedItemIndexPaths: [IndexPath] = []
             items.enumerated().forEach { (index, item) in
                 if self.items.contains(item) {
+                    removedItemIndexPaths.append(item.indexPath!)
                     item.section = nil
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
-                    removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
                 }
             }
+            self.items.removeAll(where: { items.contains($0) })
             listView?.deleteItems(at: removedItemIndexPaths)
-            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
+            layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: true)
         }, completion: completion)
     }
 
@@ -396,15 +397,13 @@ open class Section: NSObject {
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
-                    item.section = nil
                     removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
                 }
             }
-            self.items = newItems
+            self.replaceSubrange(range, with: newItems)
             var addedItemIndexPaths: [IndexPath] = []
             newItems.enumerated().forEach { (index, item) in
-                item.section = self
-                addedItemIndexPaths.append(IndexPath(row: index + range.lowerBound, section: sectionIndex))
+                addedItemIndexPaths.append(item.indexPath!)
             }
             listView?.deleteItems(at: removedItemIndexPaths)
             listView?.insertItems(at: addedItemIndexPaths)

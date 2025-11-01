@@ -21,7 +21,9 @@ open class ListReloadAnimation: NSObject {
      * 缩放动画
      * Scale animation
      */
-    public static let scale: ListReloadAnimation = ScaleListReloadAnimation()
+    public static let scaleX: ListReloadAnimation = ScaleListReloadAnimation(scaleX: true, scaleY: false)
+    public static let scaleY: ListReloadAnimation = ScaleListReloadAnimation(scaleX: false, scaleY: true)
+    public static let scaleXY: ListReloadAnimation = ScaleListReloadAnimation(scaleX: true, scaleY: true)
     /**
      * 3D折叠动画
      * 3D fold animation
@@ -133,8 +135,16 @@ public class FadeListReloadAnimation: ListReloadAnimation {
  * Scale animation
  */
 public class ScaleListReloadAnimation: ListReloadAnimation {
+    public var scaleX: Bool = true
+    public var scaleY: Bool = true
+    public init(scaleX: Bool = true, scaleY: Bool = true) {
+        self.scaleX = scaleX
+        self.scaleY = scaleY
+        super.init()
+    }
+
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        view.transform = CGAffineTransform(scaleX: 0, y: 0)
+        view.transform = CGAffineTransform(scaleX: scaleX ? 0 : 1, y: scaleY ? 0 : 1)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
@@ -148,7 +158,7 @@ public class ScaleListReloadAnimation: ListReloadAnimation {
     }
     public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
-            snapshot.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+            snapshot.transform = CGAffineTransform(scaleX: self.scaleX ? 0.01 : 1, y: self.scaleY ? 0.01 : 1)
             snapshot.alpha = 0
         })
     }

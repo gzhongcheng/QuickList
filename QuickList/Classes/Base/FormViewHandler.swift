@@ -275,41 +275,27 @@ extension FormViewHandler: FormDelegate {
         currentUpdateSection = section
         currentUpdateSectionInAnimation = inAnimation
         currentUpdateOthersInAnimation = othersInAnimation
-        if inAnimation != nil || othersInAnimation != nil {
-            let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0.3
-            UIView.beginAnimations(nil, context: nil)
-            UIView.setAnimationDuration(duration)
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(duration)
-            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
-            formView?.performBatchUpdates({ [weak self] in
-                if let customUpdates = performBatchUpdates {
-                    customUpdates(self?.formView, self?.layout)
-                } else {
-                    self?.layout.reloadSectionsAfter(index: section?.index ?? 0, needOldSectionAttributes: true)
-                }
-            }, completion: { [weak self] _ in
-                self?.layout.oldSectionAttributes.removeAll()
-                self?.currentUpdateSection = nil
-                self?.currentUpdateSectionInAnimation = nil
-                self?.currentUpdateOthersInAnimation = nil
-                completion?()
-            })
-            CATransaction.commit()
-            UIView.commitAnimations()
-        } else {
+        let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0
+        UIView.beginAnimations(nil, context: nil)
+        UIView.setAnimationDuration(duration)
+        CATransaction.begin()
+        CATransaction.setAnimationDuration(duration)
+        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
+        formView?.performBatchUpdates({ [weak self] in
             if let customUpdates = performBatchUpdates {
-                customUpdates(self.formView, self.layout)
+                customUpdates(self?.formView, self?.layout)
             } else {
-                self.layout.reloadSectionsAfter(index: section?.index ?? 0)
+                self?.layout.reloadSectionsAfter(index: section?.index ?? 0, needOldSectionAttributes: true)
             }
-            DispatchQueue.main.async {
-                self.currentUpdateSection = nil
-                self.currentUpdateSectionInAnimation = nil
-                self.currentUpdateOthersInAnimation = nil
-                completion?()
-            }
-        }
+        }, completion: { [weak self] _ in
+            self?.layout.oldSectionAttributes.removeAll()
+            self?.currentUpdateSection = nil
+            self?.currentUpdateSectionInAnimation = nil
+            self?.currentUpdateOthersInAnimation = nil
+            completion?()
+        })
+        CATransaction.commit()
+        UIView.commitAnimations()
     }
     
     fileprivate func representableItem(from item: Item, at indexPath: IndexPath) -> (any ItemViewRepresentable)? {
