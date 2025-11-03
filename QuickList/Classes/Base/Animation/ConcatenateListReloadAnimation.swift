@@ -30,8 +30,7 @@ public protocol ConcatenateAnimationType: ListReloadAnimation {
 extension ConcatenateAnimationType {
     public func concatenate(with animation: ConcatenateAnimationType) -> ConcatenateListReloadAnimation {
         if let self = self as? ConcatenateListReloadAnimation {
-            self.concatenate(with: animation)
-            return self
+            return self.concatenate(with: animation)
         }
         return ConcatenateListReloadAnimation(animations: [self, animation])
     }
