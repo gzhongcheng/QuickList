@@ -504,12 +504,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             suspensionFooter = footer.shouldSuspension
         }
         
-        for sectionAttr in sectionAttributes.values {
-            /**
-             * 添加item位置
-             * Add item position
-             */
-            resultAttrs.append(contentsOf: sectionAttr.layoutAttributesForElements(
+        var needUpdateSectionsAfter: Int?
+        for (index, sectionAttr) in sectionAttributes {
+            let (itemsAttr, needUpdate) = sectionAttr.layoutAttributesForElements(
                 in: rect,
                 for: formView,
                 headerSize: headerSize,
@@ -518,7 +515,16 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 footerSize: footerSize,
                 suspensionFooter: suspensionFooter,
                 scrollDirection: self.scrollDirection
-            ) ?? [])
+            )
+            
+            /**
+             * 添加item位置
+             * Add item position
+             */
+            resultAttrs.append(contentsOf: itemsAttr ?? [])
+            if needUpdate {
+                needUpdateSectionsAfter = max(needUpdateSectionsAfter ?? 0, index)
+            }
             
             /**
              * 如果有装饰view，也需要悬浮
@@ -529,18 +535,18 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 let selectedItemDecoration = form?.selectedItemDecoration,
                 selectedItemDecoration.alpha == 1
             {
-                var indexPath: IndexPath?
+                var targetItem: Item?
                 for section in form?.sections ?? [] {
                     for item in section.items {
                         if item.isSelected {
-                            indexPath = item.indexPath
+                            targetItem = item
                             break
                         }
                     }
                 }
                 if 
-                    let indexPath = indexPath,
-                    let selectedItemAttributes = sectionAttr.itemAttributes[indexPath]
+                    let targetItem = targetItem,
+                    let selectedItemAttributes = sectionAttr.itemAttributes[targetItem]
                 {
                     selectedItemDecoration.frame = selectedItemAttributes.frame
                     selectedItemDecoration.layer.zPosition = form?.selectedItemDecorationPosition == .below ? 1023 : 1025
@@ -549,17 +555,32 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
             }
         }
+        if let needUpdateIndex = needUpdateSectionsAfter {
+            self.reloadSectionsAfter(index: needUpdateIndex)
+        }
         return resultAttrs
     }
     
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = sectionAttributes[sectionIndex]
+            let section = sectionAttributes[sectionIndex],
+            let item = form?[indexPath],
+            let attr = section.itemAttributes[item]
         else {
             return nil
         }
-        return section.itemAttributes[indexPath]
+        if
+            let autoLayoutItem = item as? AutolayoutItemProtocol,
+            autoLayoutItem.needReSize,
+            let cell = item.cell
+        {
+            let newAttr = cell.preferredAutoLayoutAttributesFitting(attr, with: autoLayoutItem.cacheEstimateItemSize, layoutType: autoLayoutItem.cacheLayoutType)
+            attr.frame = newAttr.frame
+            self.reloadSectionsAfter(index: sectionIndex)
+            return attr
+        }
+        return attr
     }
     
     public override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
@@ -593,11 +614,16 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public func initialLayoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = oldSectionAttributes[sectionIndex]
+            let section = oldSectionAttributes[sectionIndex],
+            let item = form?[indexPath],
+            let attr = section.itemAttributes[item]
         else {
             return nil
         }
-        return section.itemAttributes[indexPath]
+        if item.needReSize {
+            return nil
+        }
+        return attr
     }
     
     public func initialLayoutAttributesForElement(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
@@ -868,7 +894,8 @@ extension QuickListSectionAttribute {
         footerSize: CGSize,
         suspensionFooter: Bool,
         scrollDirection: UICollectionView.ScrollDirection
-    ) -> [UICollectionViewLayoutAttributes]? {
+    ) -> ([UICollectionViewLayoutAttributes]?, Bool) {
+        var needUpdateLayoutsAfterSelf: Bool = false
         var resultAttrs: [UICollectionViewLayoutAttributes] = []
         var sectionArea: CGRect
         if scrollDirection == .vertical {
@@ -930,6 +957,22 @@ extension QuickListSectionAttribute {
                 }
             }
 
+            for (item, attr) in self.itemAttributes {
+                if rect.intersects(attr.frame) {
+                    if
+                        let autoLayoutItem = item as? AutolayoutItemProtocol,
+                        autoLayoutItem.needReSize,
+                        let cell = item.cell
+                    {
+                        let newAttr = cell.preferredAutoLayoutAttributesFitting(attr, with: autoLayoutItem.cacheEstimateItemSize, layoutType: autoLayoutItem.cacheLayoutType)
+                        attr.frame = newAttr.frame
+                        needUpdateLayoutsAfterSelf = true
+                    }
+                    attr.zIndex = 500
+                    resultAttrs.append(attr)
+                }
+            }
+            
             for itemAttr in self.itemAttributes.values {
                 if rect.intersects(itemAttr.frame) {
                     itemAttr.zIndex = 500
@@ -942,7 +985,7 @@ extension QuickListSectionAttribute {
                 resultAttrs.append(decorationAttributes)
             }
         }
-        return resultAttrs
+        return (resultAttrs, needUpdateLayoutsAfterSelf)
     }
     
     /**

@@ -14,6 +14,7 @@ import Foundation
  */
 public class LeftSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0)
         view.alpha = 0
         targetAttributes?.alpha = 0
@@ -60,6 +61,7 @@ public class LeftSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnima
  */
 public class RightSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: view.bounds.width, y: 0)
         view.alpha = 0
         targetAttributes?.alpha = 0
@@ -106,6 +108,7 @@ public class RightSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnim
  */
 public class TopSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: 0, y: -view.bounds.height)
         view.alpha = 0
         targetAttributes?.alpha = 0
@@ -152,6 +155,7 @@ public class TopSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimat
  */
 public class BottomSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
         view.alpha = 0
         targetAttributes?.alpha = 0

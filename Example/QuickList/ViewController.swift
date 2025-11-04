@@ -207,7 +207,7 @@ class ViewController: UIViewController {
                     make.edges.equalToSuperview()
                 }
             }
-//            section.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
+            section.layout = QuickYogaLayout(alignment: .flexStart, lineAlignment: .flexStart)
 //            section.layout = QuickListFlowLayout()
 //             section.layout = RowEqualHeightLayout()
 //            section.isFormHeader = true

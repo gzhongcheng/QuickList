@@ -36,6 +36,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
     private var itemTargetFrames: [Item: CGRect] = [:]
     
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         if item == nil {
             if
                 let lastAttributes = lastAttributes,

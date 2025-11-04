@@ -85,12 +85,12 @@ public class FormViewHandler: NSObject {
      * 当前正在进行的Section进入动画
      * Current section enter animation
      */
-    private var currentUpdateSectionInAnimation: ListReloadAnimation?
+    private var currentUpdateSectionInAnimation: ListReloadAnimation = .none
     /**
      * 当前正在进行的其他Section进入动画
      * Current other sections enter animation
      */
-    private var currentUpdateOthersInAnimation: ListReloadAnimation?
+    private var currentUpdateOthersInAnimation: ListReloadAnimation = .none
 
     public override init() {
         super.init()
@@ -273,8 +273,8 @@ extension FormViewHandler: FormDelegate {
     
     public func updateLayout(section: Section?, inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, othersInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)? = nil, completion: (() -> Void)? = nil) {
         currentUpdateSection = section
-        currentUpdateSectionInAnimation = inAnimation
-        currentUpdateOthersInAnimation = othersInAnimation
+        currentUpdateSectionInAnimation = inAnimation ?? .none
+        currentUpdateOthersInAnimation = othersInAnimation ?? .none
         let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0
         UIView.beginAnimations(nil, context: nil)
         UIView.setAnimationDuration(duration)
@@ -290,8 +290,8 @@ extension FormViewHandler: FormDelegate {
         }, completion: { [weak self] _ in
             self?.layout.oldSectionAttributes.removeAll()
             self?.currentUpdateSection = nil
-            self?.currentUpdateSectionInAnimation = nil
-            self?.currentUpdateOthersInAnimation = nil
+            self?.currentUpdateSectionInAnimation = .none
+            self?.currentUpdateOthersInAnimation = .none
             completion?()
         })
         CATransaction.commit()
@@ -629,39 +629,27 @@ extension FormViewHandler: UICollectionViewDelegate {
         }
         cell.willDisplay()
         cell.item?.willDisplay()
-        if let section = cell.item?.section, section == currentUpdateSection {
-            if
-                let inAnimation = currentUpdateSectionInAnimation
-            {
-                let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
-                let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-                inAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
-            }
-        } else if
-            let othersInAnimation = currentUpdateOthersInAnimation,
-            let section = cell.item?.section
-        {
-            let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
-            let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-            othersInAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+        guard let section = cell.item?.section else {
+            return
+        }
+        let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
+        let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
+        if section == currentUpdateSection {
+            currentUpdateSectionInAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+        } else {
+            currentUpdateOthersInAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
         }
     }
     
     public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         guard let index = indexPath.safeSection(), form.count > index else { return }
         let section = form[index]
+        let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
+        let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
         if section == currentUpdateSection {
-            if let inAnimation = currentUpdateSectionInAnimation {
-                let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
-                let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                inAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
-            }
+            currentUpdateSectionInAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
         } else {
-            if let othersInAnimation = currentUpdateOthersInAnimation {
-                let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
-                let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                othersInAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
-            }
+            currentUpdateOthersInAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
         }
     }
 

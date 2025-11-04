@@ -50,6 +50,7 @@ public class ConcatenateListReloadAnimation: ListReloadAnimation {
     }
 
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         for animation in animations {
             animation.beforeIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         }

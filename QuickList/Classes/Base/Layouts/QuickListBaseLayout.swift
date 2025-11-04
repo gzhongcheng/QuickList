@@ -32,7 +32,7 @@ public class QuickListSectionAttribute: NSObject {
      * 存放item位置的数组
      * Array storing item positions
      */
-    public var itemAttributes: [IndexPath: UICollectionViewLayoutAttributes] = [:]
+    public var itemAttributes: [Item: UICollectionViewLayoutAttributes] = [:]
     /**
      * 存放当前选中item位置（仅在单选状态下有效）
      * Store current selected item position (only valid in single selection state)

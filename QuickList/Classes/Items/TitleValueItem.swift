@@ -140,11 +140,6 @@ public final class TitleValueItem: AutolayoutItemOf<CollectionLabelCell>, ItemTy
         guard let cell = cell as? CollectionLabelCell else {
             return
         }
-        
-        updateCellData(cell)
-    }
-    
-    public override func updateCellData(_ cell: CollectionLabelCell) {
         if attributeTitle != nil {
             cell.titleLabel.attributedText = attributeTitle
         } else {
@@ -247,10 +242,9 @@ public final class TitleValueItem: AutolayoutItemOf<CollectionLabelCell>, ItemTy
                 case .center:
                     cell.valueLabel.snp.remakeConstraints({ (make) in
                         make.left.equalTo(cell.titleLabel.snp.right).offset(spaceBetweenTitleAndValue)
-                        make.top.greaterThanOrEqualTo(contentInsets.top)
                         make.right.equalTo(-contentInsets.right)
-                        make.bottom.lessThanOrEqualTo(-contentInsets.bottom)
                         make.centerY.equalToSuperview()
+                        make.top.greaterThanOrEqualTo(max(contentInsets.top, contentInsets.bottom))
                     })
                 case .bottom:
                     cell.valueLabel.snp.remakeConstraints({ (make) in

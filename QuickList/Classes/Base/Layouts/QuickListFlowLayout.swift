@@ -223,7 +223,7 @@ public class QuickListFlowLayout: QuickListBaseLayout {
             if let editItem = item as? EditableItemType, editItem.isDragging {
                 attr.alpha = 0
             }
-            attribute.itemAttributes[item.indexPath ?? IndexPath(item: index, section: sectionIndex)] = attr
+            attribute.itemAttributes[item] = attr
             if item.isSelected {
                 attribute.selectedItemAttributes = attr
             }
@@ -285,9 +285,8 @@ public class QuickListFlowLayout: QuickListBaseLayout {
         var itemIndex: Int = 0
 
         for item in items.sorted(by: { $0.indexPath?.row ?? -1 < $1.indexPath?.row ?? -1 }) {
-            guard 
-                let indexPath = item.indexPath, 
-                let itemAttr = cacheAttr.itemAttributes[indexPath],
+            guard
+                let itemAttr = cacheAttr.itemAttributes[item],
                 itemAttr.isHidden == false
             else { 
                 continue 

@@ -66,18 +66,12 @@ public final class CustomViewItem: AutolayoutItemOf<CustomViewItemCell>, ItemTyp
      */
     public override func updateCell() {
         super.updateCell()
-        guard let cell = cell as? CustomViewItemCell else {
+        guard
+            let cell = cell as? CustomViewItemCell,
+            let customView = customView
+        else {
             return
         }
-        updateCellData(cell)
-    }
-    
-    /**
-     * 自动布局计算尺寸时需要用到这个方法设置完数据后再算尺寸，所以上面的updateCell方法直接转调这个方法
-     * This method is needed for auto layout size calculation, setting data first then calculating size, so the above updateCell method directly calls this method
-     */
-    public override func updateCellData(_ cell: CustomViewItemCell) {
-        guard let customView = customView else { return }
         cell.addCustomViewIfNeeded(customView)
         customViewLayoutBuilder?(customView)
     }

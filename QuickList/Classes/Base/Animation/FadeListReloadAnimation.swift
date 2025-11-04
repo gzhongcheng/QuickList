@@ -14,6 +14,7 @@ import Foundation
  */
 public class FadeListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.alpha = 0
         targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()

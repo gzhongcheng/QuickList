@@ -214,7 +214,7 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
             if let editItem = item as? EditableItemType, editItem.isDragging {
                 attr.alpha = 0
             }
-            attribute.itemAttributes[item.indexPath ?? IndexPath(item: index, section: sectionIndex)] = attr
+            attribute.itemAttributes[item] = attr
             if item.isSelected {
                 attribute.selectedItemAttributes = attr
             }

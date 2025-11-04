@@ -157,11 +157,6 @@ public final class ButtonItem: AutolayoutItemOf<CollectionButtonCell>, TypedColl
         guard let cell = cell as? CollectionButtonCell else {
             return
         }
-        
-        updateCellData(cell)
-    }
-    
-    public override func updateCellData(_ cell: CollectionButtonCell) {
         switch arrowType {
             case .none:
                 cell.arrowImageView.image = nil

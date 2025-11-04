@@ -22,6 +22,7 @@ public class ScaleListReloadAnimation: ListReloadAnimation, ConcatenateAnimation
     }
 
     public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(scaleX: scaleX ? 0 : 1, y: scaleY ? 0 : 1)
         view.alpha = 0
         targetAttributes?.alpha = 0
