@@ -123,6 +123,10 @@ public final class SwitchItem: AutolayoutItemOf<CollectionSwitchCell>, ItemType 
         guard let cell = cell as? CollectionSwitchCell else {
             return
         }
+        updateCellData(cell)
+    }
+    
+    public override func updateCellData(_ cell: CollectionSwitchCell) {
         if attributeTitle != nil {
             cell.titleLabel.attributedText = attributeTitle
         } else {

@@ -504,9 +504,8 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             suspensionFooter = footer.shouldSuspension
         }
         
-        var needUpdateSectionsAfter: Int?
         for (index, sectionAttr) in sectionAttributes {
-            let (itemsAttr, needUpdate) = sectionAttr.layoutAttributesForElements(
+            let itemsAttr = sectionAttr.layoutAttributesForElements(
                 in: rect,
                 for: formView,
                 headerSize: headerSize,
@@ -516,15 +515,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 suspensionFooter: suspensionFooter,
                 scrollDirection: self.scrollDirection
             )
-            
-            /**
-             * 添加item位置
-             * Add item position
-             */
             resultAttrs.append(contentsOf: itemsAttr ?? [])
-            if needUpdate {
-                needUpdateSectionsAfter = max(needUpdateSectionsAfter ?? 0, index)
-            }
             
             /**
              * 如果有装饰view，也需要悬浮
@@ -555,9 +546,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 }
             }
         }
-        if let needUpdateIndex = needUpdateSectionsAfter {
-            self.reloadSectionsAfter(index: needUpdateIndex)
-        }
         return resultAttrs
     }
     
@@ -569,16 +557,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             let attr = section.itemAttributes[item]
         else {
             return nil
-        }
-        if
-            let autoLayoutItem = item as? AutolayoutItemProtocol,
-            autoLayoutItem.needReSize,
-            let cell = item.cell
-        {
-            let newAttr = cell.preferredAutoLayoutAttributesFitting(attr, with: autoLayoutItem.cacheEstimateItemSize, layoutType: autoLayoutItem.cacheLayoutType)
-            attr.frame = newAttr.frame
-            self.reloadSectionsAfter(index: sectionIndex)
-            return attr
         }
         return attr
     }
@@ -618,9 +596,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             let item = form?[indexPath],
             let attr = section.itemAttributes[item]
         else {
-            return nil
-        }
-        if item.needReSize {
             return nil
         }
         return attr
@@ -894,8 +869,7 @@ extension QuickListSectionAttribute {
         footerSize: CGSize,
         suspensionFooter: Bool,
         scrollDirection: UICollectionView.ScrollDirection
-    ) -> ([UICollectionViewLayoutAttributes]?, Bool) {
-        var needUpdateLayoutsAfterSelf: Bool = false
+    ) -> [UICollectionViewLayoutAttributes]? {
         var resultAttrs: [UICollectionViewLayoutAttributes] = []
         var sectionArea: CGRect
         if scrollDirection == .vertical {
@@ -957,22 +931,6 @@ extension QuickListSectionAttribute {
                 }
             }
 
-            for (item, attr) in self.itemAttributes {
-                if rect.intersects(attr.frame) {
-                    if
-                        let autoLayoutItem = item as? AutolayoutItemProtocol,
-                        autoLayoutItem.needReSize,
-                        let cell = item.cell
-                    {
-                        let newAttr = cell.preferredAutoLayoutAttributesFitting(attr, with: autoLayoutItem.cacheEstimateItemSize, layoutType: autoLayoutItem.cacheLayoutType)
-                        attr.frame = newAttr.frame
-                        needUpdateLayoutsAfterSelf = true
-                    }
-                    attr.zIndex = 500
-                    resultAttrs.append(attr)
-                }
-            }
-            
             for itemAttr in self.itemAttributes.values {
                 if rect.intersects(itemAttr.frame) {
                     itemAttr.zIndex = 500
@@ -985,7 +943,7 @@ extension QuickListSectionAttribute {
                 resultAttrs.append(decorationAttributes)
             }
         }
-        return (resultAttrs, needUpdateLayoutsAfterSelf)
+        return resultAttrs
     }
     
     /**

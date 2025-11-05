@@ -75,28 +75,4 @@ open class ItemCell: UICollectionViewCell {
         super.apply(layoutAttributes)
         self.layer.zPosition = CGFloat(layoutAttributes.zIndex)
     }
-    
-    open func preferredAutoLayoutAttributesFitting(_ layoutAttributes: UICollectionViewLayoutAttributes, with estimateItemSize: CGSize, layoutType: ItemCellLayoutType) -> UICollectionViewLayoutAttributes {
-        if item?.needReSize ?? false {
-            setNeedsLayout()
-            layoutIfNeeded()
-            var newFrame = layoutAttributes.frame
-            switch layoutType {
-            case .vertical:
-                let size = contentView.systemLayoutSizeFitting(CGSize(width: estimateItemSize.width,
-                                                                      height: UIView.layoutFittingCompressedSize.height))
-                newFrame.size = CGSize(width: estimateItemSize.width, height: size.height)
-            case .horizontal:
-                let size = contentView.systemLayoutSizeFitting(CGSize(width: UIView.layoutFittingCompressedSize.width,
-                                                                      height: estimateItemSize.height))
-                newFrame.size = CGSize(width: size.width, height: estimateItemSize.height)
-            case .free:
-                let size = contentView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-                newFrame.size = size
-            }
-            layoutAttributes.frame = newFrame
-            item?.cellSize = newFrame.size
-        }
-        return layoutAttributes
-    }
 }
