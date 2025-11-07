@@ -278,12 +278,12 @@ open class Item: NSObject {
      * Item的title(可用于展示)
      * Item's title (can be used for display)
      */
-    public var title: String?
+    open var title: String?
     /**
      * 标记item的唯一标识，同一个Section中的item的tag建议不要设置相同
      * Unique identifier for item, it's recommended not to set the same tag for items in the same Section
      */
-    public var tag: String?
+    open var tag: String?
     
     /**
      * cell的权重（如：在flowLayout中表示cell的尺寸占几列，默认为1）

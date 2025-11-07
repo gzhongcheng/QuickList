@@ -128,6 +128,9 @@ public class QuickYogaLayout: QuickListBaseLayout {
          */
         let itemTotalWidth = maxWidth - sectionContentInset.left - sectionContentInset.right
         let itemTotalHeight = maxHeight - sectionContentInset.top - sectionContentInset.bottom
+
+        attribute.itemsMaxWidth = itemTotalWidth
+        attribute.itemsMaxHeight = itemTotalHeight
         
         var itemOffsetX: CGFloat = itemStartPoint.x
         var itemOffsetY: CGFloat = itemStartPoint.y
@@ -378,5 +381,85 @@ public class QuickYogaLayout: QuickListBaseLayout {
         lineItemAttrs = []
         itemOffsetX = maxOffsetX + lineSpace
         itemOffsetY = itemStartPoint.y
+    }
+
+    public override func calculateItemsFrameWhenOthersFolded(items: [Item], at section: Section) -> [Item : CGRect] {
+        guard
+            let cacheAttr = cacheAttrs[section],
+            let layout = section.form?.listLayout
+        else { return [:] }
+        var itemTargetFrames: [Item: CGRect] = [:]
+        let itemSpace = section.itemSpace
+        let lineSpace = section.lineSpace
+        let itemStartPointX = cacheAttr.startPoint.x + (cacheAttr.headerAttributes?.frame.width ?? 0)
+        let itemStartPointY = cacheAttr.startPoint.y + (cacheAttr.headerAttributes?.frame.height ?? 0)
+        let itemTotalWidth = cacheAttr.itemsMaxWidth
+        let itemTotalHeight = cacheAttr.itemsMaxHeight
+
+        var itemOffsetX: CGFloat = 0
+        var itemOffsetY: CGFloat = 0
+        var currentRowMaxHeight: CGFloat = 0
+        var currentRowItemFrames: [Item: CGRect] = [:]
+
+        for item in items.sorted(by: { $0.indexPath?.row ?? -1 < $1.indexPath?.row ?? -1 }) {
+            guard
+                let itemAttr = cacheAttr.itemAttributes[item],
+                itemAttr.isHidden == false
+            else { 
+                continue 
+            }
+            var itemFrame = itemAttr.frame
+            if layout.scrollDirection == .vertical {
+                if itemOffsetX + itemFrame.width > itemTotalWidth {
+                    itemOffsetX = 0
+                    itemOffsetY += currentRowMaxHeight + lineSpace
+                    for (key, value) in currentRowItemFrames {
+                        var newFrame: CGRect = value
+                        newFrame.size.height = currentRowMaxHeight
+                        itemTargetFrames[key] = newFrame
+                    }
+                    currentRowItemFrames.removeAll()
+                    currentRowMaxHeight = itemFrame.height
+                } else {
+                    currentRowMaxHeight = max(currentRowMaxHeight, itemFrame.height)
+                }
+                itemFrame.origin.x = itemOffsetX + itemStartPointX
+                itemFrame.origin.y = itemOffsetY + itemStartPointY
+                currentRowItemFrames[item] = itemFrame
+                itemOffsetX += itemFrame.width + itemSpace
+            } else {
+                if itemOffsetY + itemFrame.height > itemTotalHeight {
+                    itemOffsetY = 0
+                    itemOffsetX += currentRowMaxHeight + lineSpace
+                    for (key, value) in currentRowItemFrames {
+                        var newFrame: CGRect = value
+                        newFrame.size.width = currentRowMaxHeight
+                        itemTargetFrames[key] = newFrame
+                    }
+                    currentRowItemFrames.removeAll()
+                    currentRowMaxHeight = itemFrame.width
+                } else {
+                    currentRowMaxHeight = max(currentRowMaxHeight, itemFrame.width)
+                }
+                itemFrame.origin.x = itemOffsetX + itemStartPointX
+                itemFrame.origin.y = itemOffsetY + itemStartPointY
+                currentRowItemFrames[item] = itemFrame
+                itemOffsetY += itemFrame.height + itemSpace
+            }
+        }
+        if layout.scrollDirection == .vertical {
+            for (key, value) in currentRowItemFrames {
+                var newFrame: CGRect = value
+                newFrame.size.height = currentRowMaxHeight
+                itemTargetFrames[key] = newFrame
+            }
+        } else {
+            for (key, value) in currentRowItemFrames {
+                var newFrame: CGRect = value
+                newFrame.size.width = currentRowMaxHeight
+                itemTargetFrames[key] = newFrame
+            }
+        }
+        return itemTargetFrames
     }
 }

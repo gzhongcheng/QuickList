@@ -242,11 +242,14 @@ public final class Form: NSObject {
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
             self.sections.forEach { section in
-                section.items.forEach { item in
-                    if let cell = item.cell, let section = item.section {
-                        outAnimation?.animateOut(view: cell, to: item, at: section)
+                if let outAnimation = outAnimation {
+                    section.items.forEach { item in
+                        if let cell = item.cell, let section = item.section {
+                            outAnimation.animateOut(view: cell, to: item, at: section)
+                        }
                     }
                 }
+                section.form = nil
                 removedSectionIndexSet.insert(section.index ?? 0)
             }
             self.sections.removeAll()
@@ -276,11 +279,14 @@ public final class Form: NSObject {
             var removedSectionIndexSet: IndexSet = IndexSet()
             self.sections.enumerated().forEach { (index, section) in
                 if index < range.lowerBound || index >= range.upperBound {
-                    section.items.forEach { item in
-                        if let cell = item.cell, let section = item.section {
-                            outAnimation?.animateOut(view: cell, to: item, at: section)
+                    if let outAnimation = outAnimation {
+                        section.items.forEach { item in
+                            if let cell = item.cell, let section = item.section {
+                                outAnimation.animateOut(view: cell, to: item, at: section)
+                            }
                         }
                     }
+                    section.form = nil
                     removedSectionIndexSet.insert(index)
                 }
             }
@@ -310,11 +316,14 @@ public final class Form: NSObject {
             var removedSectionIndexSet: IndexSet = IndexSet()
             sections.forEach { section in
                 if let index = self.sections.firstIndex(where: { $0.index == section.index }) {
-                    section.items.forEach { item in
-                        if let cell = item.cell, let section = item.section {
-                            outAnimation?.animateOut(view: cell, to: item, at: section)
+                    if let outAnimation = outAnimation {
+                        section.items.forEach { item in
+                            if let cell = item.cell, let section = item.section {
+                                outAnimation.animateOut(view: cell, to: item, at: section)
+                            }
                         }
                     }
+                    section.form = nil
                     removedSectionIndexSet.insert(index)
                 }
             }

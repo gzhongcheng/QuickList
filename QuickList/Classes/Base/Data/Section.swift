@@ -215,6 +215,9 @@ open class Section: NSObject {
      * Hide all items
      */
     public func hideAllItems(withOut: [Item] = [], inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, outAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        if let threeDAnim = outAnimation as? ThreeDFoldListReloadAnimation {
+            threeDAnim.setSkipItems(items: withOut, at: self)
+        }
         self.items.reversed().forEach { (item) in
             if !withOut.contains(item) {
                 item.isHidden = true

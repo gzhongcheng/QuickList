@@ -354,7 +354,7 @@ public class QuickListFlowLayout: QuickListBaseLayout {
             }
             
             itemFrame.origin.x = itemOffsetX + itemStartPointX
-                itemFrame.origin.y = itemOffsetY + itemStartPointY
+            itemFrame.origin.y = itemOffsetY + itemStartPointY
 
             itemTargetFrames[item] = itemFrame
         }

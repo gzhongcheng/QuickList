@@ -90,7 +90,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             let lastSkipItemBeforeTargetItem = lastSkipItemBeforeTargetItem,
             let lastSkipItemBeforeTargetItemFrame = itemTargetFrames[lastSkipItemBeforeTargetItem]
         {
-            startPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX, y: lastSkipItemBeforeTargetItemFrame.maxY)
+            startPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX + section.itemSpace, y: lastSkipItemBeforeTargetItemFrame.maxY + section.itemSpace)
         } else if
             let sectionIndex = section.index,
             let sectionAttr = section.form?.listLayout?.sectionAttributes[sectionIndex]
@@ -142,7 +142,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             let lastSkipItemBeforeTargetItem = lastSkipItemBeforeTargetItem,
             let lastSkipItemBeforeTargetItemFrame = itemTargetFrames[lastSkipItemBeforeTargetItem]
         {
-            endPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX, y: lastSkipItemBeforeTargetItemFrame.maxY)
+            endPoint = CGPoint(x: lastSkipItemBeforeTargetItemFrame.maxX + section.itemSpace, y: lastSkipItemBeforeTargetItemFrame.maxY + section.itemSpace)
         } else if
             let sectionIndex = section.index,
             let sectionAttr = section.form?.listLayout?.sectionAttributes[sectionIndex]
@@ -164,6 +164,28 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             }
         }
     }
+    
+    func setAnchorPoint(anchorPoint: CGPoint, forView view: UIView) {
+        var newPoint = CGPoint(x: view.bounds.size.width * anchorPoint.x,
+                               y: view.bounds.size.height * anchorPoint.y)
+
+
+        var oldPoint = CGPoint(x: view.bounds.size.width * view.layer.anchorPoint.x,
+                               y: view.bounds.size.height * view.layer.anchorPoint.y)
+
+        newPoint = newPoint.applying(view.transform)
+        oldPoint = oldPoint.applying(view.transform)
+
+        var position = view.layer.position
+        position.x -= oldPoint.x
+        position.x += newPoint.x
+
+        position.y -= oldPoint.y
+        position.y += newPoint.y
+
+        view.layer.position = position
+        view.layer.anchorPoint = anchorPoint
+    }
 
     func startVerticalFoldAnimation(to view: UIView, atIndex: Int, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
         /**
@@ -173,17 +195,17 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let transformAnimation = CABasicAnimation()
         transformAnimation.keyPath = "transform"
         var perspectiveTransform = CATransform3DIdentity
-        perspectiveTransform.m34 = -2.5 / 2000
+        perspectiveTransform.m34 = 2.5 / 2000
         var angle: CGFloat = CGFloat.pi * 0.5
-        if atIndex % 2 == 1 {
-            angle = -angle
+        if atIndex % 2 == 0 {
+            setAnchorPoint(anchorPoint: CGPoint(x: 0.5, y: 0), forView: view)
             /**
-             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
-             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             * 添加一个透明度为0.6的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.6 to make the fold animation look more立体
              */
             let maskLayer = CALayer()
             maskLayer.frame = view.bounds
-            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.6).cgColor
             maskLayer.opacity = 0
             view.layer.addSublayer(maskLayer)
             let alphaAnimation = CABasicAnimation()
@@ -194,9 +216,13 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             alphaAnimation.fillMode = .forwards
             alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
+        } else {
+            setAnchorPoint(anchorPoint: CGPoint(x: 0.5, y: 1), forView: view)
+            angle = -angle
         }
         let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 1, 0, 0)
         transformAnimation.toValue = NSValue(caTransform3D: rotateTransform)
+        transformAnimation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         /**
             *  创建一个向上平移的动画
             * Create a up translation animation
@@ -204,6 +230,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let positionAnimation = CABasicAnimation()
         positionAnimation.keyPath = "position.y"
         positionAnimation.toValue = NSNumber(value: targetEndPoint.y)
+        positionAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         /**
          * 创建一个透明度动画
          * Create a alpha animation
@@ -211,6 +238,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let alphaAnimation = CABasicAnimation()
         alphaAnimation.keyPath = "opacity"
         alphaAnimation.toValue = NSNumber(value: 0)
+        alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
          * 创建一个组合动画
          * Create a combined animation
@@ -220,7 +248,6 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         groupAnimation.isRemovedOnCompletion = false
         groupAnimation.fillMode = .forwards
         groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
-        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         groupAnimation.delegate = self
 
         animationCompletions[groupAnimation] = completion
@@ -229,17 +256,18 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
 
     func startVerticalUnfoldAnimation(to view: UIView, atIndex: Int, targetStartPoint: CGPoint, targetEndPoint: CGPoint, completion: @escaping () -> Void) {
         var perspectiveTransform = CATransform3DIdentity
-        perspectiveTransform.m34 = -2.5 / 2000
-        var angle: CGFloat = CGFloat.pi * 0.5
-        if atIndex % 2 == 1 {
-            angle = -angle
+        perspectiveTransform.m34 = 2.5 / 2000
+        var startAngle: CGFloat = CGFloat.pi * 0.5
+        if atIndex % 2 == 0 {
+            view.layer.position = CGPoint(x: view.layer.position.x, y: targetStartPoint.y + view.bounds.height * 0.5)
+            setAnchorPoint(anchorPoint: CGPoint(x: 0.5, y: 0), forView: view)
             /**
-             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
-             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             * 添加一个透明度为0.6的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.6 to make the fold animation look more立体
              */
             let maskLayer = CALayer()
             maskLayer.frame = view.bounds
-            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.6).cgColor
             view.layer.addSublayer(maskLayer)
             let alphaAnimation = CABasicAnimation()
             alphaAnimation.keyPath = "opacity"
@@ -249,12 +277,14 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             alphaAnimation.fillMode = .forwards
             alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
+        } else {
+            view.layer.position = CGPoint(x: view.layer.position.x, y: targetStartPoint.y - view.bounds.height * 0.5)
+            startAngle = -startAngle
+            setAnchorPoint(anchorPoint: CGPoint(x: 0.5, y: 1), forView: view)
         }
-        let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 1, 0, 0)
+        let rotateTransform = CATransform3DRotate(perspectiveTransform, startAngle, 1, 0, 0)
         view.layer.transform = rotateTransform
-        view.layer.position = CGPoint(x: view.layer.position.x, y: targetStartPoint.y)
-        view.alpha = 0
-        view.layoutIfNeeded()
+        view.layer.opacity = 0
         
          /**
         * 创建一个动画，用于实现3D旋转动画
@@ -263,13 +293,20 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let transformAnimation = CABasicAnimation()
         transformAnimation.keyPath = "transform"
         transformAnimation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
+        transformAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
         *  创建一个向下平移的动画
         * Create a down translation animation
         */
         let positionAnimation = CABasicAnimation()
         positionAnimation.keyPath = "position.y"
-        positionAnimation.toValue = NSNumber(value: targetEndPoint.y)
+        if atIndex % 2 == 0 {
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.y - view.bounds.height * 0.5)
+        } else {
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.y + view.bounds.height * 0.5)
+        }
+        positionAnimation.timingFunction = CAMediaTimingFunction(name: .linear)
+        
         /**
         * 创建一个透明度动画
         * Create a alpha animation
@@ -277,6 +314,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let alphaAnimation = CABasicAnimation()
         alphaAnimation.keyPath = "opacity"
         alphaAnimation.toValue = NSNumber(value: 1)
+        alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
         * 创建一个组合动画
         * Create a combined animation
@@ -286,7 +324,6 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         groupAnimation.isRemovedOnCompletion = false
         groupAnimation.fillMode = .forwards
         groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
-        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         groupAnimation.delegate = self
 
         animationCompletions[groupAnimation] = completion
@@ -304,26 +341,31 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         perspectiveTransform.m34 = -2.5 / 2000
         var angle: CGFloat = CGFloat.pi * 0.5
         if atIndex % 2 == 0 {
-            angle = -angle
+            setAnchorPoint(anchorPoint: CGPoint(x: 0, y: 0.5), forView: view)
             /**
-             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
-             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             * 添加一个透明度为0.6的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.6 to make the fold animation look more立体
              */
             let maskLayer = CALayer()
             maskLayer.frame = view.bounds
-            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.6).cgColor
+            maskLayer.opacity = 0
             view.layer.addSublayer(maskLayer)
             let alphaAnimation = CABasicAnimation()
             alphaAnimation.keyPath = "opacity"
-            alphaAnimation.toValue = NSNumber(value: 0)
+            alphaAnimation.toValue = NSNumber(value: 1)
             alphaAnimation.duration = duration
             alphaAnimation.isRemovedOnCompletion = false
             alphaAnimation.fillMode = .forwards
             alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
+        } else {
+            angle = -angle
+            setAnchorPoint(anchorPoint: CGPoint(x: 1, y: 0.5), forView: view)
         }
         let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 0, 1, 0)
         transformAnimation.toValue = NSValue(caTransform3D: rotateTransform)
+        transformAnimation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         /**
             *  创建一个向右平移的动画
             * Create a right translation animation
@@ -331,6 +373,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let positionAnimation = CABasicAnimation()
         positionAnimation.keyPath = "position.x"
         positionAnimation.toValue = NSNumber(value: targetEndPoint.x)
+        positionAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         /**
          * 创建一个透明度动画
          * Create a alpha animation
@@ -338,6 +381,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let alphaAnimation = CABasicAnimation()
         alphaAnimation.keyPath = "opacity"
         alphaAnimation.toValue = NSNumber(value: 0)
+        alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
             * 创建一个组合动画
             * Create a combined animation
@@ -347,7 +391,6 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         groupAnimation.isRemovedOnCompletion = false
         groupAnimation.fillMode = .forwards
         groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
-        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         groupAnimation.delegate = self
 
         animationCompletions[groupAnimation] = completion
@@ -370,14 +413,15 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         perspectiveTransform.m34 = -2.5 / 2000
         var angle: CGFloat = CGFloat.pi * 0.5
         if atIndex % 2 == 0 {
-            angle = -angle
+            view.layer.position = CGPoint(x: targetStartPoint.x + view.bounds.width * 0.5, y: view.layer.position.y)
+            setAnchorPoint(anchorPoint: CGPoint(x: 0, y: 0.5), forView: view)
             /**
-             * 添加一个透明度为0.3的黑色遮罩，让折叠动画看起来更立体
-             * Add a black mask with an alpha of 0.3 to make the fold animation look more立体
+             * 添加一个透明度为0.6的黑色遮罩，让折叠动画看起来更立体
+             * Add a black mask with an alpha of 0.6 to make the fold animation look more立体
              */
             let maskLayer = CALayer()
             maskLayer.frame = view.bounds
-            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.1).cgColor
+            maskLayer.backgroundColor = UIColor.black.withAlphaComponent(0.6).cgColor
             view.layer.addSublayer(maskLayer)
             let alphaAnimation = CABasicAnimation()
             alphaAnimation.keyPath = "opacity"
@@ -387,24 +431,31 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             alphaAnimation.fillMode = .forwards
             alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             maskLayer.add(alphaAnimation, forKey: "AlphaAnimation")
+        } else {
+            view.layer.position = CGPoint(x: targetStartPoint.x - view.bounds.width * 0.5, y: view.layer.position.y)
+            setAnchorPoint(anchorPoint: CGPoint(x: 1, y: 0.5), forView: view)
+            angle = -angle
         }
         let rotateTransform = CATransform3DRotate(perspectiveTransform, angle, 0, 1, 0)
         view.layer.transform = rotateTransform
-        view.layer.position = CGPoint(x: targetStartPoint.x, y: view.layer.position.y)
         view.alpha = 0
-        view.layoutIfNeeded()
 
         let transformAnimation = CABasicAnimation()
         transformAnimation.keyPath = "transform"
         transformAnimation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
-
+        transformAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
             *  创建一个向左平移的动画
             * Create a left translation animation
             */
         let positionAnimation = CABasicAnimation()
         positionAnimation.keyPath = "position.x"
-        positionAnimation.toValue = NSNumber(value: targetEndPoint.x)
+        if atIndex % 2 == 0 {
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.x - view.bounds.width * 0.5)
+        } else {
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.x + view.bounds.width * 0.5)
+        }
+        positionAnimation.timingFunction = CAMediaTimingFunction(name: .linear)
         /**
          * 创建一个透明度动画
          * Create a alpha animation
@@ -412,6 +463,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let alphaAnimation = CABasicAnimation()
         alphaAnimation.keyPath = "opacity"
         alphaAnimation.toValue = NSNumber(value: 1)
+        alphaAnimation.timingFunction = CAMediaTimingFunction(name: .easeIn)
         /**
          * 创建一个组合动画
          * Create a combined animation
@@ -421,7 +473,6 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         groupAnimation.isRemovedOnCompletion = false
         groupAnimation.fillMode = .forwards
         groupAnimation.animations = [transformAnimation, positionAnimation, alphaAnimation]
-        groupAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         groupAnimation.delegate = self
         view.layer.add(groupAnimation, forKey: "UnfoldGroupAnimation")
 

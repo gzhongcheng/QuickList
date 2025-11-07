@@ -504,7 +504,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             suspensionFooter = footer.shouldSuspension
         }
         
-        for (index, sectionAttr) in sectionAttributes {
+        for sectionAttr in sectionAttributes.values {
             let itemsAttr = sectionAttr.layoutAttributesForElements(
                 in: rect,
                 for: formView,
@@ -552,9 +552,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = sectionAttributes[sectionIndex],
+            let sectionAttribute = sectionAttributes[sectionIndex],
             let item = form?[indexPath],
-            let attr = section.itemAttributes[item]
+            let attr = sectionAttribute.itemAttributes[item]
         else {
             return nil
         }
@@ -570,21 +570,21 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         }
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = sectionAttributes[sectionIndex]
+            let sectionAttribute = sectionAttributes[sectionIndex]
         else {
             return nil
         }
         if elementKind == QuickListReusableType.sectionHeader.elementKind {
-            return section.headerAttributes
+            return sectionAttribute.headerAttributes
         }
         if elementKind == QuickListReusableType.sectionFooter.elementKind {
-            return section.footerAttributes
+            return sectionAttribute.footerAttributes
         }
         if elementKind == QuickListReusableType.decoration.elementKind {
-            return section.decorationAttributes
+            return sectionAttribute.decorationAttributes
         }
         if elementKind == QuickListReusableType.suspensionDecoration.elementKind {
-            return section.suspensionDecorationAttributes
+            return sectionAttribute.suspensionDecorationAttributes
         }
         return nil
     }
@@ -592,9 +592,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public func initialLayoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = oldSectionAttributes[sectionIndex],
+            let sectionAttribute = oldSectionAttributes[sectionIndex],
             let item = form?[indexPath],
-            let attr = section.itemAttributes[item]
+            let attr = sectionAttribute.itemAttributes[item]
         else {
             return nil
         }
@@ -604,21 +604,21 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public func initialLayoutAttributesForElement(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard
             let sectionIndex = indexPath.safeSection(),
-            let section = oldSectionAttributes[sectionIndex]
+            let sectionAttribute = oldSectionAttributes[sectionIndex]
         else {
             return nil
         }
         if elementKind == QuickListReusableType.sectionHeader.elementKind {
-            return section.headerAttributes
+            return sectionAttribute.headerAttributes
         }
         if elementKind == QuickListReusableType.sectionFooter.elementKind {
-            return section.footerAttributes
+            return sectionAttribute.footerAttributes
         }
         if elementKind == QuickListReusableType.decoration.elementKind {
-            return section.decorationAttributes
+            return sectionAttribute.decorationAttributes
         }
         if elementKind == QuickListReusableType.suspensionDecoration.elementKind {
-            return section.suspensionDecorationAttributes
+            return sectionAttribute.suspensionDecorationAttributes
         }
         return nil
     }

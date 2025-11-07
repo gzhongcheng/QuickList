@@ -102,6 +102,7 @@ open class QuickListView: UICollectionView {
      * List total size change callback
      */
     public var listSizeChangedBlock: ((CGSize) -> Void)?
+    private var currentContentSize: CGSize = .zero
     
     
     // MARK:- Initialization methods
@@ -188,8 +189,11 @@ extension QuickListView: FormViewLongTapProtorol {
 
 extension QuickListView: QuickListCollectionLayoutDelegate {
     public func collectionLayoutDidFinishLayout(_ layout: QuickListCollectionLayout) {
-        if let block = self.listSizeChangedBlock {
-            block(layout.collectionViewContentSize)
+        if currentContentSize != layout.collectionViewContentSize {
+            currentContentSize = layout.collectionViewContentSize
+            if let block = self.listSizeChangedBlock {
+                block(layout.collectionViewContentSize)
+            }
         }
     }
 }

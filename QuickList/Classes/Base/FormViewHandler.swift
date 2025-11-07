@@ -281,18 +281,21 @@ extension FormViewHandler: FormDelegate {
         CATransaction.begin()
         CATransaction.setAnimationDuration(duration)
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
+        CATransaction.setCompletionBlock { [weak self] in
+            self?.layout.oldSectionAttributes.removeAll()
+            self?.currentUpdateSection = nil
+            self?.currentUpdateSectionInAnimation = nil
+            self?.currentUpdateOthersInAnimation = nil
+            DispatchQueue.main.async {
+                completion?()
+            }
+        }
         formView?.performBatchUpdates({ [weak self] in
             if let customUpdates = performBatchUpdates {
                 customUpdates(self?.formView, self?.layout)
             } else {
                 self?.layout.reloadSectionsAfter(index: section?.index ?? 0, needOldSectionAttributes: true)
             }
-        }, completion: { [weak self] _ in
-            self?.layout.oldSectionAttributes.removeAll()
-            self?.currentUpdateSection = nil
-            self?.currentUpdateSectionInAnimation = nil
-            self?.currentUpdateOthersInAnimation = nil
-            completion?()
         })
         CATransaction.commit()
         UIView.commitAnimations()
@@ -629,6 +632,10 @@ extension FormViewHandler: UICollectionViewDelegate {
         }
         cell.willDisplay()
         cell.item?.willDisplay()
+        doAnimationForCell(cell,  at: indexPath)
+    }
+    
+    private func doAnimationForCell(_ cell: ItemCell, at indexPath: IndexPath) {
         if let section = cell.item?.section, section == currentUpdateSection {
             if
                 let inAnimation = currentUpdateSectionInAnimation
