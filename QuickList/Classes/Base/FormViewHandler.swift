@@ -272,6 +272,7 @@ public class FormViewHandler: NSObject {
 extension FormViewHandler: FormDelegate {
     
     public func updateLayout(section: Section?, inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, othersInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)? = nil, completion: (() -> Void)? = nil) {
+        guard formView?.superview != nil, formView?.window != nil else { return }
         currentUpdateSection = section
         currentUpdateSectionInAnimation = inAnimation
         currentUpdateOthersInAnimation = othersInAnimation
