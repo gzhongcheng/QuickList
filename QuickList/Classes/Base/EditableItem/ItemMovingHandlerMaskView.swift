@@ -11,6 +11,36 @@ import Foundation
 // MovingHandlerMaskView
 public class ItemMovingHandlerMaskView: UIView {
     /**
+     * 自动滚动的步长, 不设置的话默认为当前cell高度的两倍(即每次滚动两个cell的高度)
+     * The step of auto scroll, if not set, default is the height of the cell * 2 (i.e. scroll two cell heights)
+     */
+    public var autoScrollStep: CGFloat?
+    /**
+     * 自动滚动的间隔时间
+     * The interval time between auto scroll
+     */
+    public var autoScrollTimeSpace: TimeInterval = 1
+
+    /**
+     * 添加阴影到移动的截图
+     * Add shadow to the move snapshot
+     */
+    public var addShadowToMoveSnapshotBlock: ((UIView) -> Void)? = { view in
+        var blurEffect: UIBlurEffect = UIBlurEffect(style: .regular)
+        if #available(iOS 13.0, *) {
+            blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        }
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        view.insertSubview(blurEffectView, at: 0)
+        blurEffectView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        view.layer.shadowColor = UIColor.systemGray.cgColor
+        view.layer.shadowOffset = CGSize(width: 0, height: 2)
+        view.layer.shadowOpacity = 0.5
+        view.layer.shadowRadius = 2
+    }
+    /**
      * 要移动的Item
      * The item to move
      */
@@ -21,15 +51,24 @@ public class ItemMovingHandlerMaskView: UIView {
      */
     public var moveSnapshot: UIView? = nil {
         didSet {
-            for view in self.subviews {
+            for view in moveSnapshotContainerView.subviews {
                 view.removeFromSuperview()
             }
             if let snapshot = moveSnapshot {
-                self.addSubview(snapshot)
+                moveSnapshotContainerView.addSubview(snapshot)
+                snapshot.snp.makeConstraints { make in
+                    make.edges.equalToSuperview()
+                }
             }
-            self.layoutIfNeeded()
         }
     }
+    private lazy var moveSnapshotContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        self.addSubview(view)
+        return view
+    }()
+    
     /**
      * 移动开始的点在Item中的位置
      * The start point in Item
@@ -73,7 +112,9 @@ public class ItemMovingHandlerMaskView: UIView {
     public func reset() {
         removeTargetIndicator()
         stopAutoScroll()
-        moveSnapshot?.removeFromSuperview()
+        for view in moveSnapshotContainerView.subviews {
+            view.removeFromSuperview()
+        }
         moveSnapshot = nil
         item = nil
         moveStartPointInItem = .zero
@@ -116,7 +157,9 @@ public class ItemMovingHandlerMaskView: UIView {
         moveStartPointInItem = pointInCell
         moveStartPointInWindow = pointInWindow
         moveSnapshot = cell.snapshotView(afterScreenUpdates: false)
-        moveSnapshot?.frame = CGRect(x: pointInWindow.x - pointInCell.x, y: pointInWindow.y - pointInCell.y, width: cell.frame.width, height: cell.frame.height)
+        moveSnapshot?.contentMode = .topLeft
+        moveSnapshotContainerView.frame = CGRect(x: pointInWindow.x - pointInCell.x, y: pointInWindow.y - pointInCell.y, width: cell.frame.width, height: cell.frame.height)
+        addShadowToMoveSnapshotBlock?(moveSnapshotContainerView)
         UIApplication.shared.keyWindow?.addSubview(ItemMovingHandlerMaskView.shared)
         ItemMovingHandlerMaskView.shared.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -125,10 +168,7 @@ public class ItemMovingHandlerMaskView: UIView {
     }
     
     public func updateMoveAnimationSnapshot(pointInWindow: CGPoint) {
-        guard let moveSnapshot = self.moveSnapshot else {
-            return
-        }
-        moveSnapshot.frame = CGRect(x: pointInWindow.x - self.moveStartPointInItem.x, y: pointInWindow.y - self.moveStartPointInItem.y, width: moveSnapshot.frame.width, height: moveSnapshot.frame.height)
+        moveSnapshotContainerView.frame = CGRect(x: pointInWindow.x - self.moveStartPointInItem.x, y: pointInWindow.y - self.moveStartPointInItem.y, width: moveSnapshotContainerView.frame.width, height: moveSnapshotContainerView.frame.height)
         
         DispatchQueue.main.async {
             guard
@@ -184,7 +224,7 @@ public class ItemMovingHandlerMaskView: UIView {
                     let targetCellFrame = layout?.layoutAttributesForItem(at: targetMoveIndexPath)?.frame,
                     let targetCellFrameInWindow = listView?.convert(targetCellFrame.origin, to: UIApplication.shared.keyWindow)
                 {
-                    self.moveSnapshot?.frame = CGRect(x: targetCellFrameInWindow.x, y: targetCellFrameInWindow.y, width: targetCellFrame.width, height: targetCellFrame.height)
+                    self.moveSnapshotContainerView.frame = CGRect(x: targetCellFrameInWindow.x, y: targetCellFrameInWindow.y, width: targetCellFrame.width, height: targetCellFrame.height)
                 }
             } completion: {
                 self.item?.form?.listLayout?.layoutAttributesForItem(at: targetMoveIndexPath)?.alpha = 1
@@ -197,7 +237,7 @@ public class ItemMovingHandlerMaskView: UIView {
             let itemFrame = itemAttr?.frame ?? .zero
             let itemPointInWindow = item.form?.delegate?.formView?.convert(itemFrame.origin, to: UIApplication.shared.keyWindow) ?? .zero
             UIView.animate(withDuration: 0.3, animations: {
-                self.moveSnapshot?.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
+                self.moveSnapshotContainerView.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
             }, completion: { _ in
                 itemAttr?.alpha = 1
                 self.item?.cell?.alpha = 1
@@ -209,17 +249,6 @@ public class ItemMovingHandlerMaskView: UIView {
     }
     
     // MARK: - auto scroll behavior
-    /**
-     * 自动滚动的步长, 不设置的话默认为当前cell高度的两倍(即每次滚动两个cell的高度)
-     * The step of auto scroll, if not set, default is the height of the cell * 2 (i.e. scroll two cell heights)
-     */
-    public var autoScrollStep: CGFloat?
-    /**
-     * 自动滚动的间隔时间
-     * The interval time between auto scroll
-     */
-    public var autoScrollTimeSpace: TimeInterval = 1
-    
     private func autoScrollTo(point: CGPoint) {
         guard
             autoScrollTimer == nil
@@ -263,21 +292,21 @@ public class ItemMovingHandlerMaskView: UIView {
         else {
             return
         }
-        let autoScrollStep = self.autoScrollStep ?? (moveSnapshot?.frame.height ?? 100) * 2
+        let autoScrollStep = self.autoScrollStep ?? moveSnapshotContainerView.frame.height * 2
         switch listView.scrollDirection {
         case .vertical:
             var newScrollContent = listView.contentOffset.y
             if targetPoint.y < newScrollContent {
                 newScrollContent -= autoScrollStep
                 newScrollContent = max(-listView.adjustedContentInset.top, newScrollContent)
-                listView.setContentOffset(CGPoint(x: 0, y: newScrollContent), animated: true)
+                listView.setContentOffset(CGPoint(x: -listView.adjustedContentInset.left, y: newScrollContent), animated: true)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.25) {
                     self.updateTargetPointer()
                 }
             } else {
                 newScrollContent += autoScrollStep
                 newScrollContent = min(listView.contentSize.height - listView.bounds.height + listView.adjustedContentInset.bottom, newScrollContent)
-                listView.setContentOffset(CGPoint(x: 0, y: newScrollContent), animated: true)
+                listView.setContentOffset(CGPoint(x: -listView.adjustedContentInset.left, y: newScrollContent), animated: true)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.25) {
                     self.updateTargetPointer()
                 }
@@ -290,14 +319,14 @@ public class ItemMovingHandlerMaskView: UIView {
             if targetPoint.x < newScrollContent {
                 newScrollContent -= autoScrollStep
                 newScrollContent = max(-listView.adjustedContentInset.left, newScrollContent)
-                listView.setContentOffset(CGPoint(x: newScrollContent, y: 0), animated: true)
+                listView.setContentOffset(CGPoint(x: newScrollContent, y: -listView.adjustedContentInset.top), animated: true)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) {
                     self.updateTargetPointer()
                 }
             } else {
                 newScrollContent += autoScrollStep
                 newScrollContent = min(listView.contentSize.width - listView.bounds.width + listView.adjustedContentInset.right, newScrollContent)
-                listView.setContentOffset(CGPoint(x: newScrollContent, y: 0), animated: true)
+                listView.setContentOffset(CGPoint(x: newScrollContent, y: -listView.adjustedContentInset.top), animated: true)
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.2) {
                     self.updateTargetPointer()
                 }
@@ -346,7 +375,7 @@ public class ItemMovingHandlerMaskView: UIView {
                 targetIndicatorView.arrowSize = arrowSize
                 targetIndicatorView.lineColor = lineColor
                 targetIndicatorView.lineWidth = lineWidth
-                targetIndicatorView.isHidden = false
+                targetIndicatorView.alpha = 1
                 targetIndicatorView.layer.zPosition = cell.layer.zPosition + 1
                 let moveIndicatorToCellTop = {
                     DispatchQueue.main.async {
@@ -358,36 +387,146 @@ public class ItemMovingHandlerMaskView: UIView {
                         self.targetIndicatorView.updatePosition(to: CGRect(x: cell.frame.minX, y: cell.frame.maxY - lineWidth * 0.5 + section.lineSpace * 0.5, width: cell.frame.width, height: lineWidth), direction: .horizontal)
                     }
                 }
-                if section.column == 1 {
-                    let positionInCell = moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: cell)
-                    if positionInCell.y < cell.bounds.height * 0.5 {
-                        if
-                            currentItemIndexPath.section == targetIndexPath.section,
-                            currentItemIndexPath.row == targetIndexPath.row - 1
-                        {
-                            removeTargetIndicator()
-                            return
-                        }
-                        if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
-                            targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                let moveIndicatorToCellLeft = {
+                    DispatchQueue.main.async {
+                        self.targetIndicatorView.updatePosition(to: CGRect(x: cell.frame.minX - lineWidth * 0.5 - section.itemSpace * 0.5, y: cell.frame.minY, width: lineWidth, height: cell.frame.height), direction: .vertical)
+                    }
+                }
+                let moveIndicatorToCellRight = {
+                    DispatchQueue.main.async {
+                        self.targetIndicatorView.updatePosition(to: CGRect(x: cell.frame.maxX - lineWidth * 0.5 + section.itemSpace * 0.5, y: cell.frame.minY, width: lineWidth, height: cell.frame.height), direction: .vertical)
+                    }
+                }
+                let positionInCell = moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: cell)
+                if section.column == 1 || section.column <= item.weight {
+                    switch listView.scrollDirection {
+                    case .vertical:
+                        if positionInCell.y < cell.bounds.height * 0.5 {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row - 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                            } else {
+                                targetMoveIndexPath = targetIndexPath
+                            }
+                            moveIndicatorToCellTop()
                         } else {
-                            targetMoveIndexPath = targetIndexPath
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row + 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = targetIndexPath
+                            } else {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                            }
+                            moveIndicatorToCellBottom()
                         }
-                        moveIndicatorToCellTop()
-                    } else {
-                        if
-                            currentItemIndexPath.section == targetIndexPath.section,
-                            currentItemIndexPath.row == targetIndexPath.row + 1
-                        {
-                            removeTargetIndicator()
-                            return
-                        }
-                        if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
-                            targetMoveIndexPath = targetIndexPath
+                    case .horizontal:
+                        if positionInCell.x < cell.bounds.width * 0.5 {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row - 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                            } else {
+                                targetMoveIndexPath = targetIndexPath
+                            }
+                            moveIndicatorToCellLeft()
                         } else {
-                            targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row + 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = targetIndexPath
+                            } else {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                            }
+                            moveIndicatorToCellRight()
                         }
-                        moveIndicatorToCellBottom()
+                    default:
+                        return
+                    }
+                } else {
+                    switch listView.scrollDirection {
+                    case .horizontal:
+                        if positionInCell.y < cell.bounds.height * 0.5 {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row - 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                            } else {
+                                targetMoveIndexPath = targetIndexPath
+                            }
+                            moveIndicatorToCellTop()
+                        } else {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row + 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = targetIndexPath
+                            } else {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                            }
+                            moveIndicatorToCellBottom()
+                        }
+                    case .vertical:
+                        if positionInCell.x < cell.bounds.width * 0.5 {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row - 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                            } else {
+                                targetMoveIndexPath = targetIndexPath
+                            }
+                            moveIndicatorToCellLeft()
+                        } else {
+                            if
+                                currentItemIndexPath.section == targetIndexPath.section,
+                                currentItemIndexPath.row == targetIndexPath.row + 1
+                            {
+                                removeTargetIndicator()
+                                return
+                            }
+                            if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                                targetMoveIndexPath = targetIndexPath
+                            } else {
+                                targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                            }
+                            moveIndicatorToCellRight()
+                        }
+                    default:
+                        return
                     }
                 }
             case .exchange:
@@ -415,7 +554,7 @@ public class ItemMovingHandlerMaskView: UIView {
         }
     }
     private func removeTargetIndicator() {
-        targetIndicatorView.isHidden = true
+        targetIndicatorView.alpha = 0
         targetMoveIndexPath = nil
     }
 
