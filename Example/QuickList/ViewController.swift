@@ -169,17 +169,30 @@ class ViewController: UIViewController {
         
         
         let editItemSection = Section("Test Edit Item") { section in
-            section.column = 1
+            section.column = 3
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
         }
-        for i in 0 ... 3 {
+        for i in 0 ... 30 {
             editItemSection <<< TestEditMoveItem("Move Item \(i)") { item in
                 item.isEditing = true
             }
         }
         formlist.form +++ editItemSection
+        
+        let editItemSection1 = Section("Test Edit Item1") { section in
+            section.column = 1
+            section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+            section.lineSpace = 10
+            section.itemSpace = 10
+        }
+        for i in 0 ... 30 {
+            editItemSection1 <<< TestEditMoveItem("Move Item \(i)") { item in
+                item.isEditing = true
+            }
+        }
+        formlist.form +++ editItemSection1
         
         formlist.form +++ Section(header: "Automatic Wrap", footer: nil) { section in
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)

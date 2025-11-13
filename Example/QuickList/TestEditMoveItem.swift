@@ -39,8 +39,8 @@ final class TestEditMoveItem: EditableItemOf<TestEditMoveItemCell>, ItemType {
     
     required init(title: String? = nil, tag: String? = nil) {
         super.init(title: title, tag: tag)
-        // editType = .move(.indicator(arrowColor: .black, arrowSize: CGSize(width: 16, height: 16), lineColor: .black, lineWidth: 1))
-        editType = .move(.exchange)
+        editType = .move(.indicator(arrowColor: .black, arrowSize: CGSize(width: 16, height: 16), lineColor: .black, lineWidth: 1))
+//        editType = .move(.exchange)
         editIcon = UIImage(named: "icon_move")
         editIconColor = .black
         editIconSize = CGSize(width: 16, height: 16)

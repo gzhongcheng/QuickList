@@ -55,11 +55,7 @@ public class ItemMovingHandlerMaskView: UIView {
      */
     public static var shared: ItemMovingHandlerMaskView {
         guard let instance = _sharedInstance else {
-            let newView = ItemMovingHandlerMaskView()
-            let moveGesture = UIPanGestureRecognizer(target: newView, action: #selector(handleMoveGestureRecognizer(_:)))
-            moveGesture.delegate = _sharedInstance
-            newView.addGestureRecognizer(moveGesture)
-            _sharedInstance = newView
+            _sharedInstance = ItemMovingHandlerMaskView()
             return _sharedInstance!
         }
         return instance
@@ -70,20 +66,25 @@ public class ItemMovingHandlerMaskView: UIView {
      Destruction of single instance object
      */
     public static func destroy() {
-        _sharedInstance?.stopAutoScroll()
-        _sharedInstance?.moveSnapshot?.removeFromSuperview()
-        _sharedInstance?.moveSnapshot = nil
-        _sharedInstance?.item = nil
-        _sharedInstance?.moveStartPointInItem = .zero
-        _sharedInstance?.moveStartPointInWindow = .zero
-        _sharedInstance?.restoreScroll()
-        _sharedInstance?.removeFromSuperview()
+        _sharedInstance?.reset()
         _sharedInstance = nil
     }
-
+    
+    public func reset() {
+        removeTargetIndicator()
+        stopAutoScroll()
+        moveSnapshot?.removeFromSuperview()
+        moveSnapshot = nil
+        item = nil
+        moveStartPointInItem = .zero
+        moveStartPointInWindow = .zero
+        restoreScroll()
+        self.removeFromSuperview()
+    }
+    
     @objc private func handleMoveGestureRecognizer(_ gesture: UIPanGestureRecognizer) {
         guard self.item != nil else {
-            ItemMovingHandlerMaskView.destroy()
+            reset()
             return
         }
         switch gesture.state {
@@ -103,7 +104,7 @@ public class ItemMovingHandlerMaskView: UIView {
             return
         }
         guard let item = self.item, let cell = item.cell, let indexPath = item.indexPath else {
-            ItemMovingHandlerMaskView.destroy()
+            reset()
             return
         }
         item.isDragging = true
@@ -164,19 +165,47 @@ public class ItemMovingHandlerMaskView: UIView {
         stopAutoScroll()
         restoreScroll()
         guard let indexPath = item.indexPath else { return }
-        let itemAttr = item.form?.listLayout?.layoutAttributesForItem(at: indexPath)
-        let itemFrame = itemAttr?.frame ?? .zero
-        let itemPointInWindow = item.form?.delegate?.formView?.convert(itemFrame.origin, to: UIApplication.shared.keyWindow) ?? .zero
-        UIView.animate(withDuration: 0.3, animations: {
-            self.moveSnapshot?.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
-        }, completion: { _ in
-            itemAttr?.alpha = 1
-            self.item?.cell?.alpha = 1
-            self.moveSnapshot?.removeFromSuperview()
-            self.moveSnapshot = nil
-            item.isDragging = false
-            ItemMovingHandlerMaskView.destroy()
-        })
+        if let targetMoveIndexPath = self.targetMoveIndexPath {
+            removeTargetIndicator()
+            item.form?.delegate?.formView?.handler.updateLayout(section: item.section, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+                guard
+                  let section = item.section, 
+                  let currentItemIndexPath = item.indexPath, 
+                  let targetSection = item.form?.sections[targetMoveIndexPath.section]
+                else {
+                    return 
+                }
+                section.remove(at: currentItemIndexPath.row)
+                targetSection.insert(item, at: targetMoveIndexPath.row)
+                listView?.deleteItems(at: [currentItemIndexPath])
+                listView?.insertItems(at: [targetMoveIndexPath])
+                layout?.reloadSectionsAfter(index: min(currentItemIndexPath.section, targetMoveIndexPath.section), needOldSectionAttributes: true)
+                if
+                    let targetCellFrame = layout?.layoutAttributesForItem(at: targetMoveIndexPath)?.frame,
+                    let targetCellFrameInWindow = listView?.convert(targetCellFrame.origin, to: UIApplication.shared.keyWindow)
+                {
+                    self.moveSnapshot?.frame = CGRect(x: targetCellFrameInWindow.x, y: targetCellFrameInWindow.y, width: targetCellFrame.width, height: targetCellFrame.height)
+                }
+            } completion: {
+                self.item?.form?.listLayout?.layoutAttributesForItem(at: targetMoveIndexPath)?.alpha = 1
+                self.item?.cell?.alpha = 1
+                item.isDragging = false
+                self.reset()
+            }
+        } else {
+            let itemAttr = item.form?.listLayout?.layoutAttributesForItem(at: indexPath)
+            let itemFrame = itemAttr?.frame ?? .zero
+            let itemPointInWindow = item.form?.delegate?.formView?.convert(itemFrame.origin, to: UIApplication.shared.keyWindow) ?? .zero
+            UIView.animate(withDuration: 0.3, animations: {
+                self.moveSnapshot?.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
+            }, completion: { _ in
+                itemAttr?.alpha = 1
+                self.item?.cell?.alpha = 1
+                item.isDragging = false
+                self.reset()
+            })
+        }
+        
     }
     
     // MARK: - auto scroll behavior
@@ -281,7 +310,9 @@ public class ItemMovingHandlerMaskView: UIView {
         }
     }
 
+    private var targetIndicatorView: EditableItemMoveIndicator = EditableItemMoveIndicator(frame: .zero)
     private var isUpdatingTargetPointer: Bool = false
+    private var targetMoveIndexPath: IndexPath?
     private func updateTargetPointer() {
         guard
             !isUpdatingTargetPointer,
@@ -291,35 +322,101 @@ public class ItemMovingHandlerMaskView: UIView {
             let targetItem = item.form?.listLayout?.getTargetItem(at: moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: listView)),
             let targetIndexPath = targetItem.indexPath,
             targetItem != item
-        else { return }
+        else {
+            return 
+        }
         switch item.editType {
         case .move(let moveAnimation):
             switch moveAnimation {
             case .indicator(let arrowColor, let arrowSize, let lineColor, let lineWidth):
-                let indicatorView = UIView()
-                indicatorView.backgroundColor = arrowColor
-                indicatorView.frame = CGRect(x: 0, y: 0, width: arrowSize.width, height: arrowSize.height)
-                self.addSubview(indicatorView)
+                guard 
+                    item != targetItem,
+                    let section = targetItem.section,
+                    let cell = targetItem.cell,
+                    let currentItemIndexPath = item.indexPath
+                else { 
+                    removeTargetIndicator()
+                    return
+                }
+                if targetIndicatorView.superview != listView {
+                    targetIndicatorView.removeFromSuperview()
+                    listView.addSubview(targetIndicatorView)
+                }
+                targetIndicatorView.arrowColor = arrowColor
+                targetIndicatorView.arrowSize = arrowSize
+                targetIndicatorView.lineColor = lineColor
+                targetIndicatorView.lineWidth = lineWidth
+                targetIndicatorView.isHidden = false
+                targetIndicatorView.layer.zPosition = cell.layer.zPosition + 1
+                let moveIndicatorToCellTop = {
+                    DispatchQueue.main.async {
+                        self.targetIndicatorView.updatePosition(to: CGRect(x: cell.frame.minX, y: cell.frame.minY - lineWidth * 0.5 - section.lineSpace * 0.5, width: cell.frame.width, height: lineWidth), direction: .horizontal)
+                    }
+                }
+                let moveIndicatorToCellBottom = {
+                    DispatchQueue.main.async {
+                        self.targetIndicatorView.updatePosition(to: CGRect(x: cell.frame.minX, y: cell.frame.maxY - lineWidth * 0.5 + section.lineSpace * 0.5, width: cell.frame.width, height: lineWidth), direction: .horizontal)
+                    }
+                }
+                if section.column == 1 {
+                    let positionInCell = moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: cell)
+                    if positionInCell.y < cell.bounds.height * 0.5 {
+                        if
+                            currentItemIndexPath.section == targetIndexPath.section,
+                            currentItemIndexPath.row == targetIndexPath.row - 1
+                        {
+                            removeTargetIndicator()
+                            return
+                        }
+                        if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                            targetMoveIndexPath = IndexPath(row: targetIndexPath.row - 1, section: targetIndexPath.section)
+                        } else {
+                            targetMoveIndexPath = targetIndexPath
+                        }
+                        moveIndicatorToCellTop()
+                    } else {
+                        if
+                            currentItemIndexPath.section == targetIndexPath.section,
+                            currentItemIndexPath.row == targetIndexPath.row + 1
+                        {
+                            removeTargetIndicator()
+                            return
+                        }
+                        if currentItemIndexPath.section == targetIndexPath.section, currentItemIndexPath.row < targetIndexPath.row {
+                            targetMoveIndexPath = targetIndexPath
+                        } else {
+                            targetMoveIndexPath = IndexPath(row: targetIndexPath.row + 1, section: targetIndexPath.section)
+                        }
+                        moveIndicatorToCellBottom()
+                    }
+                }
             case .exchange:
+                removeTargetIndicator()
                 isUpdatingTargetPointer = true
-                item.form?.delegate?.formView?.handler.updateLayout(section: item.section, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
-                    guard 
-                        let section = item.section,
-                        let currentItemIndexPath = item.indexPath,
-                        let targetSection = targetItem.section
-                    else { return }
-                    section.remove(at: currentItemIndexPath.row)
-                    targetSection.insert(item, at: targetIndexPath.row)
-                    listView?.deleteItems(at: [currentItemIndexPath])
-                    listView?.insertItems(at: [targetIndexPath])
-                    layout?.reloadSectionsAfter(index: min(currentItemIndexPath.section, targetIndexPath.section), needOldSectionAttributes: true)
-                } completion: {
-                    self.isUpdatingTargetPointer = false
+                DispatchQueue.main.async {
+                    item.form?.delegate?.formView?.handler.updateLayout(section: item.section, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+                        guard
+                            let section = item.section,
+                            let currentItemIndexPath = item.indexPath,
+                            let targetSection = targetItem.section
+                        else { return }
+                        section.remove(at: currentItemIndexPath.row)
+                        targetSection.insert(item, at: targetIndexPath.row)
+                        listView?.deleteItems(at: [currentItemIndexPath])
+                        listView?.insertItems(at: [targetIndexPath])
+                        layout?.reloadSectionsAfter(index: min(currentItemIndexPath.section, targetIndexPath.section), needOldSectionAttributes: true)
+                    } completion: {
+                        self.isUpdatingTargetPointer = false
+                    }
                 }
             }
         case .delete:
             return
         }
+    }
+    private func removeTargetIndicator() {
+        targetIndicatorView.isHidden = true
+        targetMoveIndexPath = nil
     }
 
     // MARK: - control scroll behavior

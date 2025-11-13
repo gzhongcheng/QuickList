@@ -159,7 +159,8 @@ open class EditableItemCell: ItemCell {
         self.editContainer.isUserInteractionEnabled = true
         deleteGestureRecognizer.addTarget(self, action: #selector(handleDeleteGestureRecognizer(_:)))
         moveGestureRecognizer.addTarget(self, action: #selector(handleMoveGestureRecognizer(_:)))
-//        moveGestureRecognizer.delegate = self
+        moveGestureRecognizer.addTarget(ItemMovingHandlerMaskView.shared, action: #selector(handleMoveGestureRecognizer(_:)))
+        moveGestureRecognizer.delegate = self
 
         /**
          * 直接添加到contentView中的内容不会跟随编辑状态改变尺寸
@@ -172,7 +173,7 @@ open class EditableItemCell: ItemCell {
     open override func prepareForReuse() {
         super.prepareForReuse()
     }
-
+    
     open func beginEditing(animation: Bool) {
         let changeBlock = {
             switch self.editContentCompression {
@@ -226,7 +227,7 @@ open class EditableItemCell: ItemCell {
         }
     }
 
-    @objc private func handleDeleteGestureRecognizer(_ gesture: UITapGestureRecognizer) {
+    @objc fileprivate func handleDeleteGestureRecognizer(_ gesture: UITapGestureRecognizer) {
         guard let item = self.item as? EditableItemType else { return }
         item.delegate?.onDeleteAction(item: item)
     }
@@ -237,14 +238,18 @@ open class EditableItemCell: ItemCell {
         let pointInWindow = gesture.location(in: UIApplication.shared.keyWindow)
         switch gesture.state {
         case .began:
+            print("cellStartMoveAnimation")
             ItemMovingHandlerMaskView.shared.item = item
             ItemMovingHandlerMaskView.shared.startMoveAnimation(pointInCell: pointInSelf, pointInWindow: pointInWindow)
-//        case .changed:
-//            ItemMovingHandlerMaskView.shared.updateMoveAnimationSnapshot(pointInWindow: pointInWindow)
-//        case .ended, .cancelled:
-//            ItemMovingHandlerMaskView.shared.endMoveAnimation()
+        case .changed:
+            print("cellMovingMoveAnimation")
+            ItemMovingHandlerMaskView.shared.updateMoveAnimationSnapshot(pointInWindow: pointInWindow)
+        case .ended, .cancelled:
+            print("cellEndMoveAnimation")
+            ItemMovingHandlerMaskView.shared.endMoveAnimation()
         default:
-//            ItemMovingHandlerMaskView.shared.endMoveAnimation()
+            print("cellEndMoveAnimation")
+            ItemMovingHandlerMaskView.shared.endMoveAnimation()
             return
         }
     }
