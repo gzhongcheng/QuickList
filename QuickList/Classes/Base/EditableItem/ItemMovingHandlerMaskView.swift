@@ -581,13 +581,3 @@ public class ItemMovingHandlerMaskView: UIView {
         prohibitedScrollViews.removeAllObjects()
     }
 }
-
-extension ItemMovingHandlerMaskView: UIGestureRecognizerDelegate {
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let cell = self.item?.cell as? EditableItemCell else { return false }
-        if otherGestureRecognizer is UIPanGestureRecognizer, otherGestureRecognizer.view === cell.editContainer {
-            return true
-        }
-        return false
-    }
-}

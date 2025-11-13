@@ -134,15 +134,15 @@ form.deleteSections(with: [section], inAnimation: .leftSlide, outAnimation: .rig
 
 #### item拖动
 支持item的拖动动画交互功能
-（待开发）
+[EditableItem](./Doc/EditableItem_CN.md)
 
-#### 左(右)滑展开按钮
+#### 左滑展开按钮
 支持类似tableView的侧滑展开按钮列表功能
-（待开发）
+[SwipeItem](./Doc/SwipeItem_CN.md)
 
 #### SegmentPage
 使用QuickList为基础创建的可以嵌入List中的pageController
-[使用文档](./Doc/SegmentPage的使用_CN.md)
+[SegmentPage的使用](./Doc/SegmentPage的使用_CN.md)
 
 #### Picker
 使用QuickList为基础创建的PickerView

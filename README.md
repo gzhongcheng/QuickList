@@ -136,15 +136,15 @@ Associate two items with each other, making one serve as an inline cell for the 
 
 #### Item Dragging
 Support drag animation interaction functionality for items
-(To be developed)
+[EditableItem](./Doc/EditableItem.md)
 
-#### Left (Right) Swipe Expand Buttons
+#### Left Swipe Expand Buttons
 Support side swipe expand button list functionality similar to tableView
-(To be developed)
+[SwipeItem](./Doc/SwipeItem.md)
 
 #### SegmentPage
 A pageController created based on QuickList that can be embedded in Lists
-[Usage Documentation](./Doc/SegmentPage的使用.md)
+[SegmentPage](./Doc/SegmentPage的使用.md)
 
 #### Picker
 A PickerView created based on QuickList

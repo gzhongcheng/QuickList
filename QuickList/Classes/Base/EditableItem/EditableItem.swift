@@ -160,7 +160,6 @@ open class EditableItemCell: ItemCell {
         deleteGestureRecognizer.addTarget(self, action: #selector(handleDeleteGestureRecognizer(_:)))
         moveGestureRecognizer.addTarget(self, action: #selector(handleMoveGestureRecognizer(_:)))
         moveGestureRecognizer.addTarget(ItemMovingHandlerMaskView.shared, action: #selector(handleMoveGestureRecognizer(_:)))
-        moveGestureRecognizer.delegate = self
 
         /**
          * 直接添加到contentView中的内容不会跟随编辑状态改变尺寸
@@ -252,12 +251,6 @@ open class EditableItemCell: ItemCell {
             ItemMovingHandlerMaskView.shared.endMoveAnimation()
             return
         }
-    }
-}
-
-extension EditableItemCell: UIGestureRecognizerDelegate {
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return gestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer is UIPanGestureRecognizer && otherGestureRecognizer.view == ItemMovingHandlerMaskView._sharedInstance
     }
 }
 
