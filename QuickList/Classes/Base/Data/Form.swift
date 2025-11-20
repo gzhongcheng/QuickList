@@ -277,6 +277,7 @@ public final class Form: NSObject {
         self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
+            var removedSections: [Section] = []
             self.sections.enumerated().forEach { (index, section) in
                 if index < range.lowerBound || index >= range.upperBound {
                     if let outAnimation = outAnimation {
@@ -288,9 +289,10 @@ public final class Form: NSObject {
                     }
                     section.form = nil
                     removedSectionIndexSet.insert(index)
+                    removedSections.append(section)
                 }
             }
-            self.sections.removeAll(where: { removedSectionIndexSet.contains($0.index ?? 0) })
+            self.sections.removeAll(where: { removedSections.contains($0) })
             var addedSectionIndexSet: IndexSet = IndexSet()
             sections.enumerated().forEach { (index, section) in
                 self.insert(section, at: index + range.lowerBound)
@@ -327,6 +329,7 @@ public final class Form: NSObject {
                     removedSectionIndexSet.insert(index)
                 }
             }
+            self.removeAll(where: { sections.contains($0) })
             listView?.deleteSections(removedSectionIndexSet)
             layout?.reloadSectionsAfter(index: removedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
         }, completion: completion)
