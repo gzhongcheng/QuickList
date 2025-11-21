@@ -207,7 +207,7 @@ public class ItemMovingHandlerMaskView: UIView {
         guard let indexPath = item.indexPath else { return }
         if let targetMoveIndexPath = self.targetMoveIndexPath {
             removeTargetIndicator()
-            item.form?.delegate?.formView?.handler.updateLayout(section: item.section, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+            item.form?.delegate?.formView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
                 guard
                   let section = item.section, 
                   let currentItemIndexPath = item.indexPath, 
@@ -533,7 +533,7 @@ public class ItemMovingHandlerMaskView: UIView {
                 removeTargetIndicator()
                 isUpdatingTargetPointer = true
                 DispatchQueue.main.async {
-                    item.form?.delegate?.formView?.handler.updateLayout(section: item.section, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+                    item.form?.delegate?.formView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
                         guard
                             let section = item.section,
                             let currentItemIndexPath = item.indexPath,

@@ -25,16 +25,16 @@ public protocol FormDelegate : AnyObject {
     var isScrolling: Bool { get }
     
     /**
-     * 更新指定SectionIndex及之后的Section的Layout
-     * Update Layout for specified SectionIndex and subsequent Sections
+     * 更新指定Sections及之后的Section的Layout
+     * Update Layout for specified Sections and subsequent Sections
      * - Parameters:
-     *   - section: 需要更新的Section / Section to update
+     *   - sections: 需要更新的Sections / Sections to update
      *   - inAnimation: 本Section进入动画 / This section enter animation
      *   - othersInAnimation: 其他Section进入动画 / Other sections enter animation
      *   - performBatchUpdates: 批量更新数据的逻辑 / Batch update logic
      *   - completion: 更新动画完成后的回调 / Completion after update
      */
-    func updateLayout(section: Section?, inAnimation: ListReloadAnimation?, othersInAnimation: ListReloadAnimation?, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)?, completion: (() -> Void)?)
+    func updateLayout(sections: [Section]?, inAnimation: ListReloadAnimation?, othersInAnimation: ListReloadAnimation?, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)?, completion: (() -> Void)?)
     
     /**
      * 获取控件尺寸
@@ -203,7 +203,7 @@ public final class Form: NSObject {
             self.append(contentsOf: sections)
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var addedSectionIndexSet: IndexSet = IndexSet()
             sections.forEach { section in
@@ -228,7 +228,7 @@ public final class Form: NSObject {
             self.append(section)
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             self.append(section)
             listView?.insertSections(IndexSet(integer: self.sections.count - 1))
@@ -250,7 +250,7 @@ public final class Form: NSObject {
             self.insert(section, at: index)
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             self.insert(section, at: index)
             listView?.insertSections(IndexSet(integer: index))
@@ -273,7 +273,7 @@ public final class Form: NSObject {
             self.append(contentsOf: sections)
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
             self.sections.forEach { section in
@@ -313,12 +313,12 @@ public final class Form: NSObject {
             self.replaceSubrange(range, with: sections)
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
             var removedSections: [Section] = []
             self.sections.enumerated().forEach { (index, section) in
-                if index < range.lowerBound || index >= range.upperBound {
+                if index >= range.lowerBound && index < range.upperBound  {
                     if let outAnimation = outAnimation {
                         section.items.forEach { item in
                             if let cell = item.cell, let section = item.section {
@@ -351,12 +351,12 @@ public final class Form: NSObject {
      *   - animation: 动画 / Animation
      *   - completion: 完成回调 / Completion callback
      */
-    public func deleteSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+    public func deleteSections(with sections: [Section], inAnimation: ListReloadAnimation? = .transform, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.removeAll(where: { sections.contains($0) })
             return
         }
-        self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
             sections.forEach { section in
@@ -410,10 +410,6 @@ extension Form: MutableCollection {
                 }
                 sections[position] = newValue
                 newValue.form = self
-                self.delegate?.updateLayout(section: newValue, inAnimation: nil, othersInAnimation: ListReloadAnimation.fade, performBatchUpdates: { (listView, layout) in
-                    listView?.reloadSections(IndexSet(integer: position))
-                    layout?.reloadSectionsAfter(index: position, needOldSectionAttributes: false)
-                }, completion: nil)
             } else {
                 sections.append(newValue)
             }

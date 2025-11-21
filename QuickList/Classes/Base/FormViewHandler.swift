@@ -80,7 +80,7 @@ public class FormViewHandler: NSObject {
      * 当前正在进行的Section
      * Current section
      */
-    private weak var currentUpdateSection: Section?
+    private var currentUpdateSections: [Section]?
     /**
      * 当前正在进行的Section进入动画
      * Current section enter animation
@@ -271,9 +271,9 @@ public class FormViewHandler: NSObject {
 // MARK: - FormDelegate
 extension FormViewHandler: FormDelegate {
     
-    public func updateLayout(section: Section?, inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, othersInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)? = nil, completion: (() -> Void)? = nil) {
+    public func updateLayout(sections: [Section]?, inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, othersInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)? = nil, completion: (() -> Void)? = nil) {
         guard formView?.superview != nil, formView?.window != nil else { return }
-        currentUpdateSection = section
+        currentUpdateSections = sections?.sorted(by: { ($0.index ?? 0) < ($1.index ?? 0) })
         currentUpdateSectionInAnimation = inAnimation
         currentUpdateOthersInAnimation = othersInAnimation
         let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0
@@ -284,7 +284,7 @@ extension FormViewHandler: FormDelegate {
         CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
         CATransaction.setCompletionBlock { [weak self] in
             self?.layout.oldSectionAttributes.removeAll()
-            self?.currentUpdateSection = nil
+            self?.currentUpdateSections = nil
             self?.currentUpdateSectionInAnimation = nil
             self?.currentUpdateOthersInAnimation = nil
             DispatchQueue.main.async {
@@ -295,7 +295,7 @@ extension FormViewHandler: FormDelegate {
             if let customUpdates = performBatchUpdates {
                 customUpdates(self?.formView, self?.layout)
             } else {
-                self?.layout.reloadSectionsAfter(index: section?.index ?? 0, needOldSectionAttributes: true)
+                self?.layout.reloadSectionsAfter(index: sections?.first?.index ?? 0, needOldSectionAttributes: true)
             }
         })
         CATransaction.commit()
@@ -637,7 +637,7 @@ extension FormViewHandler: UICollectionViewDelegate {
     }
     
     private func doAnimationForCell(_ cell: ItemCell, at indexPath: IndexPath) {
-        if let section = cell.item?.section, section == currentUpdateSection {
+        if let section = cell.item?.section, currentUpdateSections?.contains(section) ?? false {
             if
                 let inAnimation = currentUpdateSectionInAnimation
             {
@@ -658,7 +658,7 @@ extension FormViewHandler: UICollectionViewDelegate {
     public func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         guard let index = indexPath.safeSection(), form.count > index else { return }
         let section = form[index]
-        if section == currentUpdateSection {
+        if currentUpdateSections?.contains(section) ?? false {
             if let inAnimation = currentUpdateSectionInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)

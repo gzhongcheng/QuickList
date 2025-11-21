@@ -143,7 +143,7 @@ open class QuickListView: UICollectionView {
             needUpdateLayout = false
             firstUpdateSection = .max
         } else if needUpdateLayout, firstUpdateSection < form.count {
-            handler.updateLayout(section: nil, othersInAnimation: updateLayoutInAnimation)
+            handler.updateLayout(sections: nil, othersInAnimation: updateLayoutInAnimation)
             firstUpdateSection = .max
             updateLayoutInAnimation = nil
         }

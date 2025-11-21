@@ -225,7 +225,7 @@ open class Section: NSObject {
                 outAnimation?.animateOut(view: cell, to: item, at: section)
             }
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     /**
      * 显示所有item
@@ -235,7 +235,7 @@ open class Section: NSObject {
         self.items.forEach { (item) in
             item.isHidden = false
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     
     /**
@@ -246,7 +246,7 @@ open class Section: NSObject {
         guard let sectionIndex = form?.firstIndex(of: self) else {
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: nil, othersInAnimation: nil, performBatchUpdates: nil, completion: nil)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: nil, othersInAnimation: nil, performBatchUpdates: nil, completion: nil)
         self.form?.delegate?.formView?.reloadSections(IndexSet(integer: sectionIndex))
     }
 
@@ -263,7 +263,7 @@ open class Section: NSObject {
             self.append(item)
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             self.append(item)
@@ -285,7 +285,7 @@ open class Section: NSObject {
             self.append(contentsOf: items)
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             var addedItemIndexPaths: [IndexPath] = []
@@ -311,7 +311,7 @@ open class Section: NSObject {
             self.insert(item, at: index)
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             self.insert(item, at: index)
@@ -333,7 +333,7 @@ open class Section: NSObject {
             self.removeAll(where: { items.contains($0) })
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             var removedItemIndexPaths: [IndexPath] = []
@@ -379,7 +379,7 @@ open class Section: NSObject {
             self.append(contentsOf: newItems)
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             var removedItemIndexPaths: [IndexPath] = []
@@ -416,12 +416,12 @@ open class Section: NSObject {
             self.replaceSubrange(range, with: newItems)
             return
         }
-        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             var removedItemIndexPaths: [IndexPath] = []
             self.items.enumerated().forEach { (index, item) in
-                if index < range.lowerBound || index >= range.upperBound {
+                if index >= range.lowerBound && index < range.upperBound {
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
@@ -447,7 +447,7 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func updateLayout(animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
-        self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: animation, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: animation, performBatchUpdates: nil, completion: completion)
     }
 }
 
