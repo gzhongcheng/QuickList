@@ -199,6 +199,10 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addSections(with sections: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.append(contentsOf: sections)
+            return
+        }
         self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var addedSectionIndexSet: IndexSet = IndexSet()
@@ -220,11 +224,37 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addSection(with section: Section, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.append(section)
+            return
+        }
         self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             self.append(section)
             listView?.insertSections(IndexSet(integer: self.sections.count - 1))
             layout?.reloadSectionsAfter(index: self.sections.count - 1, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+
+    /**
+     * 插入Section, 更新界面布局
+     * Insert Section, update interface layout
+     * - Parameters:
+     *   - section: Section / Section
+     *   - index: 插入位置 / Insert position
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func insetSection(with section: Section, at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.insert(section, at: index)
+            return
+        }
+        self.delegate?.updateLayout(section: nil, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            self.insert(section, at: index)
+            listView?.insertSections(IndexSet(integer: index))
+            layout?.reloadSectionsAfter(index: index, needOldSectionAttributes: false)
         }, completion: completion)
     }
 
@@ -238,6 +268,11 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.removeAll()
+            self.append(contentsOf: sections)
+            return
+        }
         self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
@@ -274,6 +309,10 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceSections(with sections: [Section], at range: Range<Int>, inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.replaceSubrange(range, with: sections)
+            return
+        }
         self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
@@ -313,6 +352,10 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func deleteSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.removeAll(where: { sections.contains($0) })
+            return
+        }
         self.delegate?.updateLayout(section: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()

@@ -259,6 +259,10 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addItem(with item: Item, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.append(item)
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -277,6 +281,10 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.append(contentsOf: items)
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -299,6 +307,10 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func insertItem(with item: Item, at index: Int, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.insert(item, at: index)
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -317,6 +329,10 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.leftSlide, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.removeAll(where: { items.contains($0) })
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -358,6 +374,11 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceItems(with newItems: [Item], inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, outAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsOutAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.removeAll()
+            self.append(contentsOf: newItems)
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
@@ -391,6 +412,10 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceItems(with newItems: [Item], at range: Range<Int>, animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.replaceSubrange(range, with: newItems)
+            return
+        }
         self.form?.delegate?.updateLayout(section: self, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
