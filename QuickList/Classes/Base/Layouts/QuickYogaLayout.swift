@@ -148,7 +148,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
             if layout.scrollDirection == .vertical {
                 itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalWidth, height: itemTotalWidth), in: formView, layoutType: .free) ?? .zero
                 itemSize.width = min(itemSize.width, itemTotalWidth)
-                if itemOffsetX + itemSize.width > itemTotalWidth {
+                if itemOffsetX - itemStartPoint.x + itemSize.width > itemTotalWidth {
                     /**
                      * 超出尺寸，需要换行后再设置位置
                      * Exceed size, need to wrap and then set position
@@ -158,7 +158,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
                     itemOffsetX += itemSize.width + section.itemSpace
                     lineItemAttrs.append(attr)
                     visibleLineCount += 1
-                } else if itemOffsetX + itemSize.width == itemTotalWidth {
+                } else if itemOffsetX - itemStartPoint.x + itemSize.width == itemTotalWidth {
                     /**
                      * 尺寸刚好，设置完位置直接换行
                      * Size is just right, wrap directly after setting position
@@ -176,7 +176,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
             } else {
                 itemSize = item.representableItem()?.sizeForItem(item, with: CGSize(width: itemTotalHeight, height: itemTotalHeight), in: formView, layoutType: .free) ?? .zero
                 itemSize.height = min(itemSize.height, itemTotalHeight)
-                if itemOffsetY + itemSize.height > itemTotalHeight {
+                if itemOffsetY - itemStartPoint.y + itemSize.height > itemTotalHeight {
                     /**
                      * 超出尺寸，需要换行后再设置位置
                      * Exceed size, need to wrap and then set position
@@ -185,7 +185,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
                     attr.frame = CGRect(x: itemOffsetX, y: itemOffsetY, width: itemSize.width, height: itemSize.height)
                     lineItemAttrs.append(attr)
                     visibleLineCount += 1
-                } else if itemOffsetY + itemSize.height == itemTotalHeight {
+                } else if itemOffsetY - itemStartPoint.y + itemSize.height == itemTotalHeight {
                     /**
                      * 尺寸刚好，设置完位置直接换行
                      * Size is just right, wrap directly after setting position
