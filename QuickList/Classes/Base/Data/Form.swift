@@ -288,13 +288,8 @@ public final class Form: NSObject {
                 removedSectionIndexSet.insert(section.index ?? 0)
             }
             self.sections.removeAll()
-            var addedSectionIndexSet: IndexSet = IndexSet()
-            sections.forEach { section in
-                self.append(section)
-                addedSectionIndexSet.insert(self.sections.count - 1)
-            }
-            listView?.deleteSections(removedSectionIndexSet)
-            listView?.insertSections(addedSectionIndexSet)
+            self.append(contentsOf: sections)
+            listView?.reloadData()
             layout?.reloadSectionsAfter(index: 0, needOldSectionAttributes: false)
         }, completion: completion)
     }
