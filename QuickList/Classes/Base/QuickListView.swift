@@ -165,6 +165,10 @@ open class QuickListView: UICollectionView {
         }
     }
     
+    public func setNeedsReload() {
+        needReload = true
+    }
+    
     public func reload() {
         if self.superview == nil {
             needReload = true
