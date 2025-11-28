@@ -131,8 +131,8 @@ public protocol EditableItemDelegate: AnyObject {
     func onDeleteAction(item: EditableItemType)
     
     /**
-     * 是否可以交换位置(当move的动画类型为exchange时，会调用此方法)
-     * Whether can exchange position(when the move animation type is exchange, this method will be called)
+     * 是否可以交换位置
+     * Whether can exchange position
      * - Parameters:
      *   - item: 要移动的Item / The item to move
      *   - targetItem: 要移动到的目标Item位置，目标位置将会被交换 / The item to move to, the target position will be exchanged
@@ -141,34 +141,43 @@ public protocol EditableItemDelegate: AnyObject {
     func canExchange(item: EditableItemType, to targetItem: Item) -> Bool
     
     /**
-     * 是否可以移动到某个Item前(当move的动画类型为indicator时，会调用此方法)
-     * Whether can move to the item before(when the move animation type is indicator, this method will be called)
+     * 交换完成
+     * Exchange finished
      * - Parameters:
-     *   - item: 要移动的Item / The item to move
-     *   - before: 要移动到的Item前 / The item before
-     * - Returns: 是否可以移动 / Whether can move
+     *   - item: 交换的Item / The item to exchange
+     *   - targetItem: 交换到的目标Item / The item to exchange to
      */
-    func canMove(item: EditableItemType, before: Item) -> Bool
+    func didFinishExchange(item: EditableItemType)
+
     /**
-     * 是否可以移动到某个Item后(当move的动画类型为indicator时，会调用此方法)
-     * Whether can move to the item after(when the move animation type is indicator, this method will be called)
-     * Whether can move to the item after
+     * cell截图移动前的预处理
+     * Pre-process the cell screenshot before moving
      * - Parameters:
-     *   - item: 要移动的Item / The item to move
-     *   - after: 要移动到的Item后 / The item after
-     * - Returns: 是否可以移动 / Whether can move
+     *   - view: 要预处理的Cell截图 / The cell screenshot to pre-process
      */
-    func canMove(item: EditableItemType, after: Item) -> Bool
+    func preProcessScreenshot(view: UIView)
 }
 
 extension EditableItemDelegate where Self: AnyObject {
     func canExchange(item: EditableItemType, to targetItem: Item) -> Bool {
         return true
     }
-    func canMove(item: EditableItemType, before: Item) -> Bool {
-        return true
+    func didFinishExchange(item: EditableItemType) {
+        // Do nothing by default
     }
-    func canMove(item: EditableItemType, after: Item) -> Bool {
-        return true
+    func preProcessScreenshot(view: UIView) {
+        var blurEffect: UIBlurEffect = UIBlurEffect(style: .regular)
+        if #available(iOS 13.0, *) {
+            blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+        }
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        view.insertSubview(blurEffectView, at: 0)
+        blurEffectView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        view.layer.shadowColor = UIColor.systemGray.cgColor
+        view.layer.shadowOffset = CGSize(width: 0, height: 2)
+        view.layer.shadowOpacity = 0.5
+        view.layer.shadowRadius = 2
     }
 }

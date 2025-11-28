@@ -92,7 +92,6 @@ open class SwipeItemCell: ItemCell {
     
     open override func setup() {
         super.setup()
-        self.clipsToBounds = true
         
         self.contentView.addSubview(swipeContentView)
         self.swipeContentView.snp.makeConstraints { make in
@@ -110,11 +109,12 @@ open class SwipeItemCell: ItemCell {
     }
     
     private func configureSwipeGesture() {
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         panGesture.delegate = self
         self.addGestureRecognizer(panGesture)
         self.isUserInteractionEnabled = true
     }
+    
+    public lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
     
     var gestureBeginProgress: CGFloat = 0
     var lastGestureProgress: CGFloat = 0
@@ -134,7 +134,14 @@ open class SwipeItemCell: ItemCell {
             gestureBeginProgress = swipeProgress
             self.contentView.bringSubviewToFront(self.buttonsContainerView)
         case .changed:
-            let progress = max(0, -translation.x / totalWidth + gestureBeginProgress)
+            var progress = max(0, -translation.x / totalWidth + gestureBeginProgress)
+            if 
+                let item = self.item as? SwipeItemType, 
+                !item.canContinueSwipeAfterAllButtonsDisplayed, 
+                progress >= 1 
+            {
+                progress = 1
+            }
             swipeProgressUpdated(progress: progress)
             lastGestureProgress = progress
         case .ended, .cancelled:
@@ -195,7 +202,7 @@ open class SwipeItemCell: ItemCell {
         let realProgress = min(max(progress, 0), 1)
         let totalWidth = totalButtonsWidth()
         self.swipeContentView.snp.updateConstraints { make in
-            make.centerX.equalToSuperview().offset(-totalWidth * realProgress)
+            make.centerX.equalToSuperview().offset(-totalWidth * progress)
         }
         self.buttonsContainerView.snp.updateConstraints { make in
             make.width.equalTo(totalWidth * progress)
@@ -276,7 +283,12 @@ public protocol SwipeItemType: Item {
      * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
-    var autoTriggerFirstButton: Bool { get set }
+    var autoTriggerFirstButton: Bool { get }
+    /**
+     * 左滑按钮全部展示后是否还可以继续左滑
+     * Whether can continue to swipe left after all buttons are displayed
+     */
+    var canContinueSwipeAfterAllButtonsDisplayed: Bool { get }
 }
 
 // MARK: - SwipedAutolayoutItemOf
@@ -296,7 +308,16 @@ open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, S
      * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
-    public var autoTriggerFirstButton: Bool = false
+    open var autoTriggerFirstButton: Bool {
+        return false
+    }
+    /**
+     * 左滑按钮全部展示后是否还可以继续左滑
+     * Whether can continue to swipe left after all buttons are displayed
+     */
+    open var canContinueSwipeAfterAllButtonsDisplayed: Bool {
+        return true
+    }
 }
 
 // MARK: - SwipedItemOf
@@ -316,7 +337,16 @@ open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
      * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
-    public var autoTriggerFirstButton: Bool = false
+    open var autoTriggerFirstButton: Bool {
+        return false
+    }
+    /**
+     * 左滑按钮全部展示后是否还可以继续左滑
+     * Whether can continue to swipe left after all buttons are displayed
+     */
+    open var canContinueSwipeAfterAllButtonsDisplayed: Bool {
+        return true
+    }
 }
 
 // MARK: - SwipedActionButton

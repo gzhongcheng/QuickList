@@ -22,25 +22,6 @@ public class ItemMovingHandlerMaskView: UIView {
     public var autoScrollTimeSpace: TimeInterval = 1
 
     /**
-     * 添加阴影到移动的截图
-     * Add shadow to the move snapshot
-     */
-    public var addShadowToMoveSnapshotBlock: ((UIView) -> Void)? = { view in
-        var blurEffect: UIBlurEffect = UIBlurEffect(style: .regular)
-        if #available(iOS 13.0, *) {
-            blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        }
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        view.insertSubview(blurEffectView, at: 0)
-        blurEffectView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        view.layer.shadowColor = UIColor.systemGray.cgColor
-        view.layer.shadowOffset = CGSize(width: 0, height: 2)
-        view.layer.shadowOpacity = 0.5
-        view.layer.shadowRadius = 2
-    }
-    /**
      * 要移动的Item
      * The item to move
      */
@@ -159,7 +140,7 @@ public class ItemMovingHandlerMaskView: UIView {
         moveSnapshot = cell.snapshotView(afterScreenUpdates: false)
         moveSnapshot?.contentMode = .topLeft
         moveSnapshotContainerView.frame = CGRect(x: pointInWindow.x - pointInCell.x, y: pointInWindow.y - pointInCell.y, width: cell.frame.width, height: cell.frame.height)
-        addShadowToMoveSnapshotBlock?(moveSnapshotContainerView)
+        item.delegate?.preProcessScreenshot(view: moveSnapshotContainerView)
         UIApplication.shared.keyWindow?.addSubview(ItemMovingHandlerMaskView.shared)
         ItemMovingHandlerMaskView.shared.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -230,6 +211,7 @@ public class ItemMovingHandlerMaskView: UIView {
                 self.item?.form?.listLayout?.layoutAttributesForItem(at: targetMoveIndexPath)?.alpha = 1
                 self.item?.cell?.alpha = 1
                 item.isDragging = false
+                item.delegate?.didFinishExchange(item: item)
                 self.reset()
             }
         } else {
@@ -360,6 +342,7 @@ public class ItemMovingHandlerMaskView: UIView {
             case .indicator(let arrowColor, let arrowSize, let lineColor, let lineWidth):
                 guard 
                     item != targetItem,
+                    item.delegate?.canExchange(item: item, to: targetItem) == true,
                     let section = targetItem.section,
                     let cell = targetItem.cell,
                     let currentItemIndexPath = item.indexPath
@@ -530,6 +513,12 @@ public class ItemMovingHandlerMaskView: UIView {
                     }
                 }
             case .exchange:
+                guard
+                    item.delegate?.canExchange(item: item, to: targetItem) == true
+                else {
+                    removeTargetIndicator()
+                    return
+                }
                 removeTargetIndicator()
                 isUpdatingTargetPointer = true
                 DispatchQueue.main.async {
@@ -546,6 +535,7 @@ public class ItemMovingHandlerMaskView: UIView {
                         layout?.reloadSectionsAfter(index: min(currentItemIndexPath.section, targetIndexPath.section), needOldSectionAttributes: true)
                     } completion: {
                         self.isUpdatingTargetPointer = false
+                        item.delegate?.didFinishExchange(item: item)
                     }
                 }
             }
