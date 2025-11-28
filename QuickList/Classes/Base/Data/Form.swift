@@ -279,21 +279,35 @@ public final class Form: NSObject {
         }
         self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
-            var removedSectionIndexSet: IndexSet = IndexSet()
-            self.sections.forEach { section in
-                if let outAnimation = outAnimation {
-                    section.items.forEach { item in
-                        if let cell = item.cell, let section = item.section {
-                            outAnimation.animateOut(view: cell, to: item, at: section)
+            if self.sections.count > 0 {
+                var removedSectionIndexSet: IndexSet = IndexSet()
+                var removedItemIndexPath: [IndexPath] = []
+                self.sections.enumerated().forEach { (sectionIndex, section) in
+                    if let outAnimation = outAnimation {
+                        section.items.enumerated().forEach { (itemIndex, item) in
+                            if let cell = item.cell, let section = item.section {
+                                outAnimation.animateOut(view: cell, to: item, at: section)
+                            }
+                            removedItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
                         }
                     }
+                    section.form = nil
+                    removedSectionIndexSet.insert(sectionIndex)
                 }
-                section.form = nil
-                removedSectionIndexSet.insert(section.index ?? 0)
+                self.sections.removeAll()
+                listView?.deleteItems(at: removedItemIndexPath)
+                listView?.deleteSections(removedSectionIndexSet)
             }
-            self.sections.removeAll()
-            self.append(contentsOf: sections)
-            listView?.reloadData()
+            var insertSectionIndexSet: IndexSet = IndexSet()
+            var insertItemIndexPath: [IndexPath] = []
+            sections.enumerated().forEach { sectionIndex, section in
+                self.append(section)
+                insertSectionIndexSet.insert(sectionIndex)
+                section.items.enumerated().forEach { (itemIndex, item) in
+                    insertItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
+                }
+            }
+            listView?.insertSections(insertSectionIndexSet)
             layout?.reloadSectionsAfter(index: 0, needOldSectionAttributes: false)
         }, completion: completion)
     }
