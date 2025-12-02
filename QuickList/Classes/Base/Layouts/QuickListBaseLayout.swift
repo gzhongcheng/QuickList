@@ -99,6 +99,8 @@ open class QuickListBaseLayout {
         
         var sectionAttr = QuickListSectionAttribute()
         sectionAttr.column = section.column
+        sectionAttr.startPoint = currentStart
+        sectionAttr.endPoint = currentStart
         
         if !section.isHidden {
             sectionAttr = calculateOrUpdateXYOnly()

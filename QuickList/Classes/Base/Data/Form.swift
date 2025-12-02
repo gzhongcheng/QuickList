@@ -450,16 +450,21 @@ extension Form : RangeReplaceableCollection {
     public func append(_ formSection: Section) {
         sections.append(formSection)
         formSection.form = self
+        formSection.needUpdateLayout = true
     }
 
     public func append<S: Sequence>(contentsOf newElements: S) where S.Iterator.Element == Section {
         sections.append(contentsOf: newElements)
-        newElements.forEach({ $0.form = self })
+        newElements.forEach({
+            $0.form = self
+            $0.needUpdateLayout = true
+        })
     }
 
     public func insert(_ newElement: Section, at i: Int) {
         sections.insert(newElement, at: i)
         newElement.form = self
+        newElement.needUpdateLayout = true
     }
 
     public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C) where C.Iterator.Element == Section {
@@ -467,7 +472,10 @@ extension Form : RangeReplaceableCollection {
         let upper = Swift.min(subRange.upperBound, sections.count)
         sections[lower ..< upper].forEach({ $0.form = self })
         sections.replaceSubrange(lower ..< upper, with: newElements)
-        newElements.forEach({ $0.form = self })
+        newElements.forEach({
+            $0.form = self
+            $0.needUpdateLayout = true
+        })
     }
     
     public func remove(at i: Int) -> Section {
