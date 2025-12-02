@@ -568,7 +568,8 @@ extension FormViewHandler: UICollectionViewDelegate {
          */
         if item.isSelectable {
             var needUpdateLayout: Bool = false
-            for section in form.sections {
+            var minSectionIndexNeedUpdate: Int = .max
+            for (sectionIndex, section) in form.sections.enumerated() {
                 for i in section.items {
                     var targetSelect: Bool = i.isSelected
                     if form.singleSelection || form.selectedItemDecoration != nil {
@@ -580,13 +581,15 @@ extension FormViewHandler: UICollectionViewDelegate {
                         i.isSelected = targetSelect
                         if i.onSelectedChanged() {
                             i.needReSize = true
+                            section.needUpdateLayout = true
                             needUpdateLayout = true
+                            minSectionIndexNeedUpdate = min(minSectionIndexNeedUpdate, sectionIndex)
                         }
                     }
                 }
             }
             if needUpdateLayout {
-                layout.reloadAll()
+                layout.reloadSectionsAfter(index: minSectionIndexNeedUpdate)
             }
         }
         

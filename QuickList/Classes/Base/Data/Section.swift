@@ -36,10 +36,22 @@ open class Section: NSObject {
     public var index: Int? { return form?.firstIndex(of: self) }
     
     /**
+     * 是否隐藏
+     * Whether hidden
+     */
+    public var isHidden: Bool = false
+    
+    /**
      * 存储所有Item的数组
      * Array storing all Items
      */
     public var items = [Item]()
+    
+    /**
+     * 更新Layout时是否需要重新计算
+     * Is it necessary to recalculate when updating the layout
+     */
+    public var needUpdateLayout: Bool = true
     
     /**
      * 可独立指定的item与cell的映射关系表
@@ -225,6 +237,7 @@ open class Section: NSObject {
                 outAnimation?.animateOut(view: cell, to: item, at: section)
             }
         }
+        self.needUpdateLayout = true
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     /**
@@ -235,6 +248,7 @@ open class Section: NSObject {
         self.items.forEach { (item) in
             item.isHidden = false
         }
+        self.needUpdateLayout = true
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
     }
     
@@ -246,6 +260,7 @@ open class Section: NSObject {
         guard let sectionIndex = form?.firstIndex(of: self) else {
             return
         }
+        self.needUpdateLayout = true
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: nil, othersInAnimation: nil, performBatchUpdates: nil, completion: nil)
         self.form?.delegate?.formView?.reloadSections(IndexSet(integer: sectionIndex))
     }
@@ -269,6 +284,7 @@ open class Section: NSObject {
             let sectionIndex = self.index ?? 0
             self.append(item)
             listView?.insertItems(at: [IndexPath(row: sectionIndex, section: sectionIndex)])
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -296,6 +312,7 @@ open class Section: NSObject {
                 addedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
             }
             listView?.insertItems(at: addedItemIndexPaths)
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -319,6 +336,7 @@ open class Section: NSObject {
             let sectionIndex = self.index ?? 0
             self.insert(item, at: index)
             listView?.insertItems(at: [IndexPath(row: index, section: sectionIndex)])
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -352,6 +370,7 @@ open class Section: NSObject {
             }
             self.items.removeAll(where: { items.contains($0) })
             listView?.deleteItems(at: removedItemIndexPaths)
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: true)
         }, completion: completion)
     }
@@ -403,6 +422,7 @@ open class Section: NSObject {
             }
             listView?.deleteItems(at: removedItemIndexPaths)
             listView?.insertItems(at: addedItemIndexPaths)
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: true)
         }, completion: completion)
     }
@@ -441,6 +461,7 @@ open class Section: NSObject {
             }
             listView?.deleteItems(at: removedItemIndexPaths)
             listView?.insertItems(at: addedItemIndexPaths)
+            self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -453,10 +474,12 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func updateLayout(animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        needUpdateLayout = true
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: animation, performBatchUpdates: nil, completion: completion)
     }
     
     func setNeedReloadList() {
+        self.needUpdateLayout = true
         self.form?.listView?.setNeedsReload()
     }
 }
@@ -509,16 +532,19 @@ extension Section: RangeReplaceableCollection {
     public func insert(_ newElement: Item, at i: Int) {
         items.insert(newElement, at: i)
         newElement.section = self
+        needUpdateLayout = true
     }
     
     public func append(_ formItem: Item) {
         items.append(formItem)
         formItem.section = self
+        needUpdateLayout = true
     }
     
     public func append<S: Sequence>(contentsOf newElements: S) where S.Iterator.Element == Item {
         items.append(contentsOf: newElements)
         newElements.forEach({ $0.section = self })
+        needUpdateLayout = true
     }
 
     public func replaceSubrange<C>(_ subRange: Range<Int>, with newElements: C) where C : Collection, C.Element == Item {
@@ -527,6 +553,7 @@ extension Section: RangeReplaceableCollection {
         items[lower ..< upper].forEach({ $0.section = nil })
         items.replaceSubrange(lower..<upper, with: newElements)
         newElements.forEach({ $0.section = self })
+        needUpdateLayout = true
     }
     
     @discardableResult
@@ -537,16 +564,20 @@ extension Section: RangeReplaceableCollection {
         let old = items[i]
         items.remove(at: i)
         old.section = nil
+        needUpdateLayout = true
         return old
     }
     
     public func removeFirst() -> Item {
-        return remove(at: 0)
+        let old = remove(at: 0)
+        needUpdateLayout = true
+        return old
     }
 
     public func removeAll(keepingCapacity keepCapacity: Bool = false) {
         items.forEach({ $0.section = nil })
         items.removeAll(keepingCapacity: keepCapacity)
+        needUpdateLayout = true
     }
     
     public func removeAll(where shouldBeRemoved: (Item) throws -> Bool) rethrows {
@@ -556,5 +587,6 @@ extension Section: RangeReplaceableCollection {
             }
         })
         try items.removeAll(where: shouldBeRemoved)
+        needUpdateLayout = true
     }
 }

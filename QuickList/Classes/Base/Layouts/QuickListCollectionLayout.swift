@@ -7,16 +7,6 @@
 
 import Foundation
 
-public enum QuickListDataChangeType {
-    case all
-    case appendSection
-    case insetSection
-    case appendCell
-    case deleteSection
-    case changeSection
-    case appendSections
-}
-
 extension UICollectionViewLayoutAttributes {
     private struct AssociatedKey {
         @UniqueAddress static var caculatedFrameIdentifier
@@ -69,11 +59,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
      * Default layout
      */
     lazy var defaultLayout: QuickListBaseLayout = QuickListFlowLayout()
-    /**
-     * 更新类型
-     * Update type
-     */
-    var dataChangeType: QuickListDataChangeType = .all
     /**
      * 整个form的Header和Footer的尺寸
      * Size of entire form's Header and Footer

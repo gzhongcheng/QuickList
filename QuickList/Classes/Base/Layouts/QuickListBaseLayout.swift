@@ -68,7 +68,6 @@ public class QuickListSectionAttribute: NSObject {
 }
 
 open class QuickListBaseLayout {
-    var needUpdate: Bool = true
     var cacheAttrs: [Section: QuickListSectionAttribute] = [:]
     
     /**
@@ -85,14 +84,14 @@ open class QuickListBaseLayout {
         }
         
         let updateAttXY = {
-            if self.needUpdate {
+            if section.needUpdateLayout {
                 return calculateLayout()
             }
             return self.update(with: CGPoint(x: currentStart.x - oldStart.x, y: currentStart.y - oldStart.y), start: currentStart, section: section)
         }
         
         let calculateOrUpdateXYOnly = {
-            if isFirstSection || self.needUpdate {
+            if isFirstSection || section.needUpdateLayout {
                 return calculateLayout()
             }
             return updateAttXY()
@@ -101,16 +100,11 @@ open class QuickListBaseLayout {
         var sectionAttr = QuickListSectionAttribute()
         sectionAttr.column = section.column
         
-        switch layout.dataChangeType {
-        case .all:
-            sectionAttr = calculateLayout()
-        case .appendSection, .insetSection, .appendCell, .appendSections, .changeSection:
+        if !section.isHidden {
             sectionAttr = calculateOrUpdateXYOnly()
-        case .deleteSection:
-            sectionAttr = updateAttXY()
+            section.needUpdateLayout = false
         }
         
-        self.needUpdate = false
         self.cacheAttrs[section] = sectionAttr
         return sectionAttr
     }
