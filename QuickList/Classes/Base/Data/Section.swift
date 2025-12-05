@@ -257,12 +257,8 @@ open class Section: NSObject {
      * Reload all items
      */
     public func reload() {
-        guard let sectionIndex = form?.firstIndex(of: self) else {
-            return
-        }
         self.needUpdateLayout = true
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: nil, othersInAnimation: nil, performBatchUpdates: nil, completion: nil)
-        self.form?.delegate?.formView?.reloadSections(IndexSet(integer: sectionIndex))
+        self.form?.listView?.reload()
     }
 
     /**
@@ -282,8 +278,9 @@ open class Section: NSObject {
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
+            let itemIndex = self.items.count
             self.append(item)
-            listView?.insertItems(at: [IndexPath(row: sectionIndex, section: sectionIndex)])
+            listView?.insertItems(at: [IndexPath(row: itemIndex, section: sectionIndex)])
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
@@ -306,10 +303,11 @@ open class Section: NSObject {
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
+            let itemIndex = self.items.count
             var addedItemIndexPaths: [IndexPath] = []
             items.enumerated().forEach { (index, item) in
                 self.append(item)
-                addedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
+                addedItemIndexPaths.append(IndexPath(row: index + itemIndex, section: sectionIndex))
             }
             listView?.insertItems(at: addedItemIndexPaths)
             self.needUpdateLayout = true

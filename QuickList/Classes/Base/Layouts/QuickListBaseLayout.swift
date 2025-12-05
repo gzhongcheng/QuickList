@@ -64,7 +64,6 @@ public class QuickListSectionAttribute: NSObject {
     public var singleItemWidth: CGFloat = 0
     public var singleItemHeight: CGFloat = 0
     
-    public var column: Int = 1
 }
 
 open class QuickListBaseLayout {
@@ -75,38 +74,16 @@ open class QuickListBaseLayout {
      * Layout gets layout object
      */
     func getAttsWithLayout(_ layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint, isFirstSection: Bool) -> QuickListSectionAttribute {
-        let cacheAttr = cacheAttrs[section] ?? QuickListSectionAttribute()
-        let oldStart = cacheAttr.startPoint
-        cacheAttr.startPoint = currentStart
-        
-        let calculateLayout = {
-            return self.layoutWith(layout: layout, section: section, currentStart: currentStart)
+        if section.isHidden {
+            var sectionAttr = QuickListSectionAttribute()
+            sectionAttr.startPoint = currentStart
+            sectionAttr.endPoint = currentStart
+            self.cacheAttrs[section] = sectionAttr
+            return sectionAttr
         }
         
-        let updateAttXY = {
-            if section.needUpdateLayout {
-                return calculateLayout()
-            }
-            return self.update(with: CGPoint(x: currentStart.x - oldStart.x, y: currentStart.y - oldStart.y), start: currentStart, section: section)
-        }
-        
-        let calculateOrUpdateXYOnly = {
-            if isFirstSection || section.needUpdateLayout {
-                return calculateLayout()
-            }
-            return updateAttXY()
-        }
-        
-        var sectionAttr = QuickListSectionAttribute()
-        sectionAttr.column = section.column
-        sectionAttr.startPoint = currentStart
-        sectionAttr.endPoint = currentStart
-        
-        if !section.isHidden {
-            sectionAttr = calculateOrUpdateXYOnly()
-            section.needUpdateLayout = false
-        }
-        
+        let sectionAttr = self.layoutWith(layout: layout, section: section, currentStart: currentStart)
+        section.needUpdateLayout = false
         self.cacheAttrs[section] = sectionAttr
         return sectionAttr
     }
@@ -120,54 +97,6 @@ open class QuickListBaseLayout {
         assertionFailure("Method must be override!")
         #endif
         return QuickListSectionAttribute()
-    }
-    
-    /**
-     * 仅需更新所有frame的x和y位置
-     * Only need to update x and y positions of all frames
-     */
-    private func update(with offsetXY: CGPoint, start: CGPoint, section: Section) -> QuickListSectionAttribute {
-        let cacheAttr = cacheAttrs[section] ?? QuickListSectionAttribute()
-        guard let sectionIndex = section.index else {
-            return cacheAttr
-        }
-        /**
-         * 更新header、footer、items
-         * Update header, footer, items
-         */
-        if let headerAttr = cacheAttr.headerAttributes {
-            headerAttr.frame = moveXY(offsetXY: offsetXY, to: headerAttr.frame)
-            headerAttr.indexPath = IndexPath(index: sectionIndex)
-        }
-        if let footerAttr = cacheAttr.headerAttributes {
-            footerAttr.frame = moveXY(offsetXY: offsetXY, to: footerAttr.frame)
-            footerAttr.indexPath = IndexPath(index: sectionIndex)
-        }
-        for itemAttr in cacheAttr.itemAttributes.values {
-            itemAttr.frame = moveXY(offsetXY: offsetXY, to: itemAttr.frame)
-            itemAttr.indexPath = IndexPath(item: itemAttr.indexPath.item, section: sectionIndex)
-        }
-        cacheAttr.endPoint = CGPoint(x: cacheAttr.endPoint.x + offsetXY.x, y: cacheAttr.endPoint.y + offsetXY.y)
-        
-        if let decorationAttr = cacheAttr.decorationAttributes {
-            decorationAttr.frame = moveXY(offsetXY: offsetXY, to: decorationAttr.frame)
-            decorationAttr.indexPath = IndexPath(index: sectionIndex)
-        }
-        if let decorationAttr = cacheAttr.suspensionDecorationAttributes {
-            decorationAttr.frame = moveXY(offsetXY: offsetXY, to: decorationAttr.frame)
-            decorationAttr.indexPath = IndexPath(index: sectionIndex)
-        }
-        
-        return cacheAttr
-    }
-    
-    private func moveXY(offsetXY: CGPoint, to frame: CGRect) -> CGRect {
-        return CGRect(
-            x: frame.minX + offsetXY.x,
-            y: frame.minY + offsetXY.y,
-            width: frame.width,
-            height: frame.height
-        )
     }
     
     /**
