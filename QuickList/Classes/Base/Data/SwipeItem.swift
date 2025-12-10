@@ -308,9 +308,7 @@ open class SwipeAutolayoutItemOf<Cell: SwipeItemCell>: AutolayoutItemOf<Cell>, S
      * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
-    open var autoTriggerFirstButton: Bool {
-        return false
-    }
+    open var autoTriggerFirstButton: Bool = false
     /**
      * 左滑按钮全部展示后是否还可以继续左滑
      * Whether can continue to swipe left after all buttons are displayed
@@ -337,9 +335,7 @@ open class SwipeItemOf<Cell: SwipeItemCell>: ItemOf<Cell>, SwipeItemType {
      * 左滑超过cell一半时放手，是否自动触发第一个按钮的事件
      * Whether to automatically trigger the first button's event when releasing after swiping left more than half of the cell
      */
-    open var autoTriggerFirstButton: Bool {
-        return false
-    }
+    open var autoTriggerFirstButton: Bool = false
     /**
      * 左滑按钮全部展示后是否还可以继续左滑
      * Whether can continue to swipe left after all buttons are displayed

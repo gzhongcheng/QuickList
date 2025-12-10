@@ -27,9 +27,14 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
         let formContentInset = form.contentInset
         let sectionContentInset = section.contentInset
         
-        let maxWidth = formView.bounds.width - formContentInset.left - formContentInset.right
-        let maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom - formView.adjustedContentInset.top - formView.adjustedContentInset.bottom
-        
+        var maxWidth = formView.bounds.width - formContentInset.left - formContentInset.right
+        var maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom - formView.adjustedContentInset.top - formView.adjustedContentInset.bottom
+
+        if section.sizeRatio > 0 && section.sizeRatio < 1 {
+            maxWidth *= section.sizeRatio
+            maxHeight *= section.sizeRatio
+        }
+
         if layout.scrollDirection == .horizontal, maxHeight <= 0 {
             return attribute
         }
@@ -50,7 +55,7 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
          * 添加header的位置
          * Add header position
          */
-        addHeaderAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
+        addHeaderAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, tempStart: &tempStart)
         
         /**
          * item展示区域起点
@@ -264,21 +269,28 @@ public class RowEqualHeightLayout: QuickListBaseLayout {
          * 添加footer的位置
          * Add footer position
          */
-        addFooterAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset, tempStart: &tempStart)
+        addFooterAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, tempStart: &tempStart)
         
-        attribute.endPoint = tempStart
+        switch layout.scrollDirection {
+        case .vertical:
+            attribute.endPoint = CGPoint(x: tempStart.x + maxWidth, y: tempStart.y)
+        case .horizontal:
+            attribute.endPoint = CGPoint(x: tempStart.x, y: tempStart.y + maxHeight)
+        @unknown default:
+            break
+        }
         
         /**
          * 添加decoration的位置
          * Add decoration position
          */
-        addDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
+        addDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, maxWidth: maxWidth, maxHeight: maxHeight, tempStart: tempStart)
         
         /**
          * 添加suspensionDecoration的位置
          * Add suspensionDecoration position
          */
-        addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, formContentInset: formContentInset)
+        addSuspensionDecorationAttributes(to: attribute, layout: layout, section: section, sectionIndex: sectionIndex, currentStart: currentStart, maxWidth: maxWidth, maxHeight: maxHeight, tempStart: tempStart)
         return attribute
     }
 

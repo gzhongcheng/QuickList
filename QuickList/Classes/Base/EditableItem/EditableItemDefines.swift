@@ -157,27 +157,3 @@ public protocol EditableItemDelegate: AnyObject {
      */
     func preProcessScreenshot(view: UIView)
 }
-
-extension EditableItemDelegate where Self: AnyObject {
-    func canExchange(item: EditableItemType, to targetItem: Item) -> Bool {
-        return true
-    }
-    func didFinishExchange(item: EditableItemType) {
-        // Do nothing by default
-    }
-    func preProcessScreenshot(view: UIView) {
-        var blurEffect: UIBlurEffect = UIBlurEffect(style: .regular)
-        if #available(iOS 13.0, *) {
-            blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
-        }
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        view.insertSubview(blurEffectView, at: 0)
-        blurEffectView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        view.layer.shadowColor = UIColor.systemGray.cgColor
-        view.layer.shadowOffset = CGSize(width: 0, height: 2)
-        view.layer.shadowOpacity = 0.5
-        view.layer.shadowRadius = 2
-    }
-}

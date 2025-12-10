@@ -73,9 +73,9 @@ open class QuickListBaseLayout {
      * layout获取布局对象
      * Layout gets layout object
      */
-    func getAttsWithLayout(_ layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint, isFirstSection: Bool) -> QuickListSectionAttribute {
+    func getAttsWithLayout(_ layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint) -> QuickListSectionAttribute {
         if section.isHidden {
-            var sectionAttr = QuickListSectionAttribute()
+            let sectionAttr = QuickListSectionAttribute()
             sectionAttr.startPoint = currentStart
             sectionAttr.endPoint = currentStart
             self.cacheAttrs[section] = sectionAttr
@@ -110,7 +110,6 @@ open class QuickListBaseLayout {
         sectionIndex: Int,
         maxWidth: CGFloat,
         maxHeight: CGFloat,
-        formContentInset: UIEdgeInsets,
         tempStart: inout CGPoint
     ) {
         if let header = section.header {
@@ -118,14 +117,12 @@ open class QuickListBaseLayout {
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let headerHeight = header.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
-                frame = CGRect(x: formContentInset.left, y: tempStart.y, width: maxWidth, height: headerHeight)
+                frame = CGRect(x: tempStart.x, y: tempStart.y, width: maxWidth, height: headerHeight)
                 tempStart.y += headerHeight
-                tempStart.x = formContentInset.left
             } else {
                 let headerWidth = header.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
-                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: headerWidth, height: maxHeight)
+                frame = CGRect(x: tempStart.x, y: tempStart.y, width: headerWidth, height: maxHeight)
                 tempStart.x += headerWidth
-                tempStart.y = formContentInset.top
             }
             headerAttributes.frame = frame
             attribute.shouldSuspensionHeader = header.shouldSuspension
@@ -144,7 +141,6 @@ open class QuickListBaseLayout {
         sectionIndex: Int,
         maxWidth: CGFloat,
         maxHeight: CGFloat,
-        formContentInset: UIEdgeInsets,
         tempStart: inout CGPoint
     ) {
         if let footer = section.footer {
@@ -152,11 +148,11 @@ open class QuickListBaseLayout {
             var frame: CGRect = .zero
             if layout.scrollDirection == .vertical {
                 let footerHeight = footer.height(section, CGSize(width: maxWidth, height: maxWidth), layout.scrollDirection)
-                frame = CGRect(x: formContentInset.left, y: tempStart.y, width: maxWidth, height: footerHeight)
+                frame = CGRect(x: tempStart.x, y: tempStart.y, width: maxWidth, height: footerHeight)
                 tempStart.y += footerHeight
             } else {
                 let footerWidth = footer.height(section, CGSize(width: maxHeight, height: maxHeight), layout.scrollDirection)
-                frame = CGRect(x: tempStart.x, y: formContentInset.top, width: footerWidth, height: maxHeight)
+                frame = CGRect(x: tempStart.x, y: tempStart.y, width: footerWidth, height: maxHeight)
                 tempStart.x += footerWidth
             }
             footerAttributes.frame = frame
@@ -176,7 +172,7 @@ open class QuickListBaseLayout {
         sectionIndex: Int,
         maxWidth: CGFloat,
         maxHeight: CGFloat,
-        formContentInset: UIEdgeInsets
+        tempStart: CGPoint
     ) {
         if section.decoration != nil {
             let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.decoration.elementKind, with: IndexPath(index: sectionIndex))
@@ -184,13 +180,13 @@ open class QuickListBaseLayout {
             if layout.scrollDirection == .vertical {
                 let startY = attribute.headerAttributes?.frame.maxY ?? attribute.startPoint.y
                 let endY = attribute.footerAttributes?.frame.minY ?? attribute.endPoint.y
-                let startX = formContentInset.left
+                let startX = tempStart.x
                 let viewHeight = endY - startY
                 frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
             } else {
                 let startX = attribute.headerAttributes?.frame.maxX ?? attribute.startPoint.x
                 let endX = attribute.footerAttributes?.frame.maxX ?? attribute.endPoint.x
-                let startY = formContentInset.top
+                let startY = tempStart.y
                 let viewWidth = endX - startX
                 frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
             }
@@ -211,7 +207,7 @@ open class QuickListBaseLayout {
         currentStart: CGPoint,
         maxWidth: CGFloat,
         maxHeight: CGFloat,
-        formContentInset: UIEdgeInsets
+        tempStart: CGPoint
     ) {
         if section.isFormHeader, section.suspensionDecoration != nil {
             let decorationAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: QuickListReusableType.suspensionDecoration.elementKind, with: IndexPath(index: sectionIndex))
@@ -219,13 +215,13 @@ open class QuickListBaseLayout {
             if layout.scrollDirection == .vertical {
                 let startY = attribute.headerAttributes?.frame.minY ?? attribute.startPoint.y
                 let endY = attribute.footerAttributes?.frame.maxY ?? attribute.endPoint.y
-                let startX = formContentInset.left
+                let startX = tempStart.x
                 let viewHeight = endY - startY
                 frame = CGRect(x: startX, y: startY, width: maxWidth, height: viewHeight)
             } else {
                 let startX = attribute.headerAttributes?.frame.minX ?? attribute.startPoint.x
                 let endX = attribute.footerAttributes?.frame.maxX ?? attribute.endPoint.x
-                let startY = formContentInset.top
+                let startY = tempStart.y
                 let viewWidth = endX - startX
                 frame = CGRect(x: startX, y: startY, width: viewWidth, height: maxHeight)
             }

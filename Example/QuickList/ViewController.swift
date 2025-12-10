@@ -152,6 +152,7 @@ class ViewController: UIViewController {
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
+            section.sizeRatio = 0.5
         }
         for i in 0 ... 4 {
             swipItemSection <<< TestSwipeItem("Swipe Delete \(i)") { item in
@@ -173,10 +174,13 @@ class ViewController: UIViewController {
             section.contentInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
             section.lineSpace = 10
             section.itemSpace = 10
+            section.sizeRatio = 0.5
+            section.header?.shouldSuspension = true
         }
         for i in 0 ... 3 {
             editItemSection <<< TestEditMoveItem("Move Item \(i)") { item in
                 item.isEditing = true
+//                item.delegate = self
             }
         }
         formlist.form +++ editItemSection

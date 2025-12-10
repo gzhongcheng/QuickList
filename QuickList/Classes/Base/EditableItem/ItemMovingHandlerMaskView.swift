@@ -140,7 +140,23 @@ public class ItemMovingHandlerMaskView: UIView {
         moveSnapshot = cell.snapshotView(afterScreenUpdates: false)
         moveSnapshot?.contentMode = .topLeft
         moveSnapshotContainerView.frame = CGRect(x: pointInWindow.x - pointInCell.x, y: pointInWindow.y - pointInCell.y, width: cell.frame.width, height: cell.frame.height)
-        item.delegate?.preProcessScreenshot(view: moveSnapshotContainerView)
+        if let delegate = item.delegate {
+            delegate.preProcessScreenshot(view: moveSnapshotContainerView)
+        } else {
+            var blurEffect: UIBlurEffect = UIBlurEffect(style: .regular)
+            if #available(iOS 13.0, *) {
+                blurEffect = UIBlurEffect(style: .systemUltraThinMaterial)
+            }
+            let blurEffectView = UIVisualEffectView(effect: blurEffect)
+            moveSnapshotContainerView.insertSubview(blurEffectView, at: 0)
+            blurEffectView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            moveSnapshotContainerView.layer.shadowColor = UIColor.systemGray.cgColor
+            moveSnapshotContainerView.layer.shadowOffset = CGSize(width: 0, height: 2)
+            moveSnapshotContainerView.layer.shadowOpacity = 0.5
+            moveSnapshotContainerView.layer.shadowRadius = 2
+        }
         UIApplication.shared.keyWindow?.addSubview(ItemMovingHandlerMaskView.shared)
         ItemMovingHandlerMaskView.shared.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -342,13 +358,23 @@ public class ItemMovingHandlerMaskView: UIView {
             case .indicator(let arrowColor, let arrowSize, let lineColor, let lineWidth):
                 guard 
                     item != targetItem,
-                    item.delegate?.canExchange(item: item, to: targetItem) == true,
                     let section = targetItem.section,
                     let cell = targetItem.cell,
                     let currentItemIndexPath = item.indexPath
                 else { 
                     removeTargetIndicator()
                     return
+                }
+                if let delegate = item.delegate {
+                    if delegate.canExchange(item: item, to: targetItem) != true {
+                        removeTargetIndicator()
+                        return
+                    }
+                } else {
+                    if !(targetItem is EditableItemType) {
+                        removeTargetIndicator()
+                        return
+                    }
                 }
                 if targetIndicatorView.superview != listView {
                     targetIndicatorView.removeFromSuperview()

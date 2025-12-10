@@ -142,7 +142,7 @@ public final class Form: NSObject {
      * 所有Section的数组
      * Array of all Sections
      */
-    public private(set) var sections = [Section]()
+    public private(set) var sections: [Section] = []
     
     /**
      * 可独立指定的item与cell的映射关系表（section中也可指定，且优先级高于这个）

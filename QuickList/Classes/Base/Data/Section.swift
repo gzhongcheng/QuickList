@@ -40,12 +40,26 @@ open class Section: NSObject {
      * Whether hidden
      */
     public var isHidden: Bool = false
+
+    /**
+     * 尺寸占比（横向滚动时为宽度占比，纵向滚动时为高度占比），范围为0-1，默认1
+     * Size ratio (width ratio for horizontal scrolling, height ratio for vertical scrolling), range is 0-1, default is 1
+     */
+    public var sizeRatio: CGFloat = 1.0 {
+        didSet {
+            guard sizeRatio > 0, sizeRatio <= 1 else {
+                assertionFailure("Section: sizeRatio must be between 0 and 1")
+                sizeRatio = 1.0
+                return
+            }
+        }
+    }
     
     /**
      * 存储所有Item的数组
-     * Array storing all Items
+     * Array storing all Items  
      */
-    public var items = [Item]()
+    public var items: [Item] = []
     
     /**
      * 更新Layout时是否需要重新计算

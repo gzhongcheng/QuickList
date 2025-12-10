@@ -138,6 +138,8 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             }
         }
         
+        var realStartIndex = index
+        
         if index == 0 {
             resetData()
             /**
@@ -174,16 +176,98 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     continue
                 }
                 if i == index {
-                    self.currentOffset = attr.startPoint
+                    switch self.scrollDirection {
+                    case .vertical:
+                        if attr.startPoint.x != form.contentInset.left {
+                            var j: Int = i - 1
+                            var findJ: Int?
+                            while j >= 0 {
+                                if
+                                    let lastAttr = self.sectionAttributes[j],
+                                    lastAttr.startPoint.x == form.contentInset.left
+                                {
+                                    self.currentOffset = lastAttr.startPoint
+                                    findJ = j
+                                    break
+                                }
+                                j -= 1
+                            }
+                            if let firstIndex = findJ {
+                                for j in firstIndex ..< i {
+                                    self.sectionAttributes[j] = nil
+                                }
+                                realStartIndex = firstIndex
+                            } else {
+                                self.currentOffset = attr.startPoint
+                                realStartIndex = i
+                            }
+                        } else {
+                            self.currentOffset = attr.startPoint
+                            realStartIndex = i
+                        }
+                    case .horizontal:
+                        var j: Int = i - 1
+                        var findJ: Int?
+                        while j >= 0 {
+                            if
+                                let lastAttr = self.sectionAttributes[j],
+                                lastAttr.startPoint.y == form.contentInset.top
+                            {
+                                self.currentOffset = lastAttr.startPoint
+                                findJ = j
+                                break
+                            }
+                            j -= 1
+                        }   
+                        if attr.startPoint.y != form.contentInset.top {
+                            if let firstIndex = findJ {
+                                for j in firstIndex ..< i {
+                                    self.sectionAttributes[j] = nil
+                                }
+                                realStartIndex = firstIndex
+                            } else {
+                                self.currentOffset = attr.startPoint
+                                realStartIndex = i
+                            }
+                        } else {
+                            self.currentOffset = attr.startPoint
+                            realStartIndex = i
+                        }
+                    @unknown default:
+                        break
+                    }
                     continue
                 }
                 self.sectionAttributes[i] = nil
             }
         }
         
-        for i in index ..< form.sections.count {
+        var sectionsInSameLine: [Section] = []
+        for i in realStartIndex ..< form.sections.count {
             let section = form.sections[i]
-            self.addSection(section: section, isFirst: i == index)
+            if section.sizeRatio == 1 {
+                if sectionsInSameLine.count > 0 {
+                    addSectionsInSameLine(sections: sectionsInSameLine)
+                    sectionsInSameLine.removeAll()
+                }
+                self.addSection(section: section)
+                continue
+            }
+            let currentTotalSizeRatio = sectionsInSameLine.reduce(0) { $0 + $1.sizeRatio }
+            let addedSizeRatio = currentTotalSizeRatio + section.sizeRatio
+            if addedSizeRatio < 1 {
+                sectionsInSameLine.append(section)
+                continue
+            }
+            if addedSizeRatio == 1 {
+                sectionsInSameLine.append(section)
+                addSectionsInSameLine(sections: sectionsInSameLine)
+                sectionsInSameLine.removeAll()
+                continue
+            }
+            addSectionsInSameLine(sections: sectionsInSameLine)
+            sectionsInSameLine.removeAll()
+            sectionsInSameLine.append(section)
         }
         
         /**
@@ -338,64 +422,89 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             }
         }
     }
+
+    func addSectionsInSameLine(sections: [Section]) {
+        var currentStart: CGPoint = self.currentOffset
+        var maxEndPoint: CGPoint = .zero
+        for section in sections {
+            guard let sectionAttr = addSection(section: section, customStartPoint: currentStart, changeCurrentOffset: false) else { continue }
+            switch self.scrollDirection {
+            case .vertical:
+                currentStart.x = sectionAttr.endPoint.x
+                maxEndPoint.y = max(maxEndPoint.y, sectionAttr.endPoint.y)
+            case .horizontal:
+                currentStart.y = sectionAttr.endPoint.y
+                maxEndPoint.x = max(maxEndPoint.x, sectionAttr.endPoint.x)
+            @unknown default:
+                break
+            }
+        }
+        if self.scrollDirection == .vertical {
+            self.currentOffset = CGPoint(x: self.currentOffset.x, y: maxEndPoint.y)
+        } else {
+            self.currentOffset = CGPoint(x: maxEndPoint.x, y: self.currentOffset.y)
+        }
+    }
     
-    func addSection(section: Section, isFirst: Bool) {
+    @discardableResult
+    func addSection(section: Section, customStartPoint: CGPoint? = nil, changeCurrentOffset: Bool = true) -> QuickListSectionAttribute? {
         guard
             let sectionIndex = section.index,
             let collectionView = self.collectionView as? QuickListView
-        else { return }
+        else { return nil }
+
+        var layout: QuickListBaseLayout = self.defaultLayout
         
-        let layoutExecute = { (layout: QuickListBaseLayout) in
-            let sectionAttr = layout.getAttsWithLayout(self, section: section, currentStart: self.currentOffset, isFirstSection: isFirst)
-            if sectionIndex == 0 {
-                if section.isFormHeader {
-                    if self.scrollDirection == .vertical {
-                        self.suspensionHeaderSectionSize = CGSize(width: collectionView.bounds.width, height: sectionAttr.endPoint.y - sectionAttr.startPoint.y)
-                    } else {
-                        self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: collectionView.bounds.height)
-                    }
-                    /**
-                     * 记录初始位置
-                     * Record initial position
-                     */
-                    sectionAttr.headerAttributes?.caculatedFrame = sectionAttr.headerAttributes?.frame
-                    sectionAttr.footerAttributes?.caculatedFrame = sectionAttr.footerAttributes?.frame
-                    sectionAttr.decorationAttributes?.caculatedFrame = sectionAttr.decorationAttributes?.frame
-                    sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
-                    sectionAttr.itemAttributes.values.forEach { $0.caculatedFrame = $0.frame }
+        if let sectionLayout = section.layout {
+            layout = sectionLayout
+        } else if let formLayout = form?.layout {
+            layout = formLayout
+        }
+
+        let sectionAttr = layout.getAttsWithLayout(self, section: section, currentStart: customStartPoint ?? self.currentOffset)
+        if sectionIndex == 0 {
+            if section.isFormHeader {
+                if self.scrollDirection == .vertical {
+                    self.suspensionHeaderSectionSize = CGSize(width: collectionView.bounds.width, height: sectionAttr.endPoint.y - sectionAttr.startPoint.y)
                 } else {
-                    self.suspensionHeaderSectionSize = nil
-                    sectionAttr.headerAttributes?.zIndex = 502
-                    sectionAttr.footerAttributes?.zIndex = 501
-                    sectionAttr.decorationAttributes?.zIndex = 498
-                    sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
+                    self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: collectionView.bounds.height)
                 }
-                sectionAttr.isFormHeader = section.isFormHeader
+                /**
+                    * 记录初始位置
+                    * Record initial position
+                    */
+                sectionAttr.headerAttributes?.caculatedFrame = sectionAttr.headerAttributes?.frame
+                sectionAttr.footerAttributes?.caculatedFrame = sectionAttr.footerAttributes?.frame
+                sectionAttr.decorationAttributes?.caculatedFrame = sectionAttr.decorationAttributes?.frame
+                sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
+                sectionAttr.itemAttributes.values.forEach { $0.caculatedFrame = $0.frame }
             } else {
-                sectionAttr.isFormHeader = false
+                self.suspensionHeaderSectionSize = nil
                 sectionAttr.headerAttributes?.zIndex = 502
                 sectionAttr.footerAttributes?.zIndex = 501
                 sectionAttr.decorationAttributes?.zIndex = 498
                 sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
             }
-            self.sectionAttributes[sectionIndex] = sectionAttr
-            guard sectionAttr.endPoint != .zero else {
-                return
-            }
+            sectionAttr.isFormHeader = section.isFormHeader
+        } else {
+            sectionAttr.isFormHeader = false
+            sectionAttr.headerAttributes?.zIndex = 502
+            sectionAttr.footerAttributes?.zIndex = 501
+            sectionAttr.decorationAttributes?.zIndex = 498
+            sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
+        }
+        self.sectionAttributes[sectionIndex] = sectionAttr
+        guard sectionAttr.endPoint != .zero else {
+            return sectionAttr
+        }
+        if changeCurrentOffset {
             if self.scrollDirection == .vertical {
                 self.currentOffset = CGPoint(x: sectionAttr.startPoint.x, y: sectionAttr.endPoint.y)
             } else {
                 self.currentOffset = CGPoint(x: sectionAttr.endPoint.x, y: sectionAttr.startPoint.y)
             }
         }
-        
-        if let sectionLayout = section.layout {
-            layoutExecute(sectionLayout)
-        } else if let formLayout = form?.layout {
-            layoutExecute(formLayout)
-        } else {
-            layoutExecute(self.defaultLayout)
-        }
+        return sectionAttr
     }
 
     public func getTargetItem(at point: CGPoint) -> Item? {
