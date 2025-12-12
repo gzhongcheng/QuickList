@@ -223,9 +223,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
              */
             alignVItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalWidth: itemTotalWidth, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
             tempStart.y = itemOffsetY + section.contentInset.bottom
-            if visibleLineCount > 0 {
-                tempStart.y -= section.lineSpace
-            }
+            tempStart.y -= section.lineSpace
         } else {
             /**
              * 排序最后一行
@@ -233,9 +231,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
              */
             alignHItemsAttribute(itemStartPoint: itemStartPoint, lineItemAttrs: &lineItemAttrs, itemTotalHeight: itemTotalHeight, itemOffsetX: &itemOffsetX, itemOffsetY: &itemOffsetY, lineSpace: section.lineSpace)
             tempStart.x = itemOffsetX + section.contentInset.right
-            if visibleLineCount > 0 {
-                tempStart.x -= section.lineSpace
-            }
+            tempStart.x -= section.lineSpace
         }
         
         /**

@@ -136,6 +136,17 @@ public func +++ (left: Item, right: Item) -> Form {
     return form
 }
 
+/**
+ * 添加Section到Section数组
+ * Add Section to Section array
+ * 
+ * - parameter left:  Section数组
+ * - parameter right: Section
+ */
+public func +++ (left: inout [Section], right: Section) {
+    left.append(right)
+}
+
 // MARK: - +++!
 /**
  * 添加 Section 到 Form, 并通知到代理
@@ -201,6 +212,17 @@ public func <<< (left: Item, right: Item) -> Section {
     section.append(left)
     section.append(right)
     return section
+}
+
+/**
+ * 添加Item到Item数组
+ * Add Item to Item array
+ * 
+ * - parameter left:  Item数组
+ * - parameter right: Item
+ */
+public func <<< (left: inout [Item], right: Item) {
+    left.append(right)
 }
 
 // MARK: - <<<!
