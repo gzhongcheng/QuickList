@@ -80,24 +80,29 @@ public class QuickSegmentScrollManager {
         rootScrollView: QuickSegmentRootListView? = nil,
         bouncesType: BouncesType = .root
     ) -> QuickSegmentScrollManager {
+        var result: QuickSegmentScrollManager
         switch rootScrollView?.scrollDirection {
         case .vertical:
             switch bouncesType {
             case .root:
-                return QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
+                result = QuickSegmentVerticalRootScrollManager(rootScrollView: rootScrollView)
             case .page:
-                return QuickSegmentVerticalPageScrollManager(rootScrollView: rootScrollView)
+                rootScrollView?.bounces = false
+                result = QuickSegmentVerticalPageScrollManager(rootScrollView: rootScrollView)
             }
         case .horizontal:
             switch bouncesType {
             case .root:
-                return QuickSegmentHorizontalRootScrollManager(rootScrollView: rootScrollView)
+                result = QuickSegmentHorizontalRootScrollManager(rootScrollView: rootScrollView)
             case .page:
-                return QuickSegmentHorizontalPageScrollManager(rootScrollView: rootScrollView)
+                rootScrollView?.bounces = false
+                result = QuickSegmentHorizontalPageScrollManager(rootScrollView: rootScrollView)
             }
         default:
-            return QuickSegmentScrollManager(rootScrollView: rootScrollView)
+            result = QuickSegmentScrollManager(rootScrollView: rootScrollView)
         }
+        result.bouncesType = bouncesType
+        return result
     }
     
     private init() {

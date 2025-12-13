@@ -10,7 +10,11 @@ import UIKit
 public class QuickSegmentPageListView: QuickListView, QuickSegmentPageScrollViewType {
     public var scrollOffsetObserve: NSKeyValueObservation?
     public var isQuickSegmentSubPage: Bool = false
-    public weak var scrollManager: QuickSegmentScrollManager?
+    public weak var scrollManager: QuickSegmentScrollManager? {
+        didSet {
+            self.bounces = scrollManager?.bouncesType == .page
+        }
+    }
     public weak var pageBoxView: QuickSegmentPagesListView?
     
     public override var contentOffset: CGPoint {

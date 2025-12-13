@@ -12,7 +12,11 @@ public class QuickSegmentPageCollectionView: UICollectionView, QuickSegmentPageS
     public var scrollOffsetObserve: NSKeyValueObservation?
     public var isQuickSegmentSubPage: Bool = false
     public var scrollDirection: UICollectionView.ScrollDirection = .vertical
-    public weak var scrollManager: QuickSegmentScrollManager?
+    public weak var scrollManager: QuickSegmentScrollManager? {
+        didSet {
+            self.bounces = scrollManager?.bouncesType == .page
+        }
+    }
     public weak var pageBoxView: QuickSegmentPagesListView?
     
     public override var contentOffset: CGPoint {
