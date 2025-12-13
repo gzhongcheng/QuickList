@@ -117,14 +117,14 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
                 } else {
                     switch scrollableView.scrollDirection {
                     case .horizontal:
-                        if scrollableView.contentOffset.x > (scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right) {
-                            let targetX = max(0, scrollableView.contentSize.width - scrollableView.bounds.width - scrollableView.adjustedContentInset.left - scrollableView.adjustedContentInset.right)
+                        if scrollableView.contentOffset.x > scrollableView.maxContentOffsetX {
+                            let targetX = max(0, scrollableView.maxContentOffsetX)
                             scrollableView.contentOffsetX = targetX
                             scrollableView.layoutIfNeeded()
                         }
                     case .vertical:
-                        if scrollableView.contentOffset.y > (scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom) {
-                            let targetY = max(0, scrollableView.contentSize.height - scrollableView.bounds.height - scrollableView.adjustedContentInset.top - scrollableView.adjustedContentInset.bottom)
+                        if scrollableView.contentOffset.y > scrollableView.maxContentOffsetY {
+                            let targetY = max(0, scrollableView.maxContentOffsetY)
                             scrollableView.contentOffsetY = targetY
                             scrollableView.layoutIfNeeded()
                         }

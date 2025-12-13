@@ -88,7 +88,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
             x: rootView.contentOffset.x + rootView.adjustedContentInset.left,
             y: rootView.contentOffset.y + rootView.adjustedContentInset.top,
             width: rootView.bounds.width - rootView.adjustedContentInset.left - rootView.adjustedContentInset.right,
-            height: rootView.bounds.height - rootView.adjustedContentInset.top - rootView.adjustedContentInset.bottom
+            height: rootView.bounds.height - rootView.adjustedContentInset.top + rootView.adjustedContentInset.bottom
         )
         
         visibleSections = []
@@ -107,64 +107,68 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 visibleSections.append(section)
             }
         }
-        if
-            let touchSection = touchSection,
-            let pagesBox = touchSection.pagesItem.currentListView
-        {
-            let findLastSection: () -> QuickSegmentSection? = {
-                let currentIndex = self.allScrollableSections.firstIndex(of: touchSection) ?? 0
-                if currentIndex - 1 >= 0 {
-                    let targetSection = self.allScrollableSections[currentIndex - 1]
-                    /**
-                     * 如果上一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到顶了，就不切换
-                     * If the previous section does not have a scrollable sub list, or has not been completely displayed, or has been scrolled to the top, do not switch
-                     */
-                    if
-                        targetSection.sectionStartPoint.x >= contentOffsetX,
-                        let targetPage = targetSection.currentPageScrollView,
-                        let targetPagesBox = targetSection.pagesItem.currentListView,
-                        targetPagesBox.contentOffset.x > 0 || targetPage.contentOffset.x > 0
-                    {
-                        return targetSection
-                    }
+        
+        let findLastSection: (QuickSegmentSection) -> QuickSegmentSection? = { section in
+            let currentIndex = self.allScrollableSections.firstIndex(of: section) ?? 0
+            if currentIndex - 1 >= 0 {
+                let targetSection = self.allScrollableSections[currentIndex - 1]
+                /**
+                 * 如果上一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到顶了，就不切换
+                 * If the previous section does not have a scrollable sub list, or has not been completely displayed, or has been scrolled to the top, do not switch
+                 */
+                if
+                    targetSection.sectionStartPoint.x >= contentOffsetX,
+                    let targetPage = targetSection.currentPageScrollView,
+                    let targetPagesBox = targetSection.pagesItem.currentListView,
+                    targetPagesBox.contentOffset.x > 0 || targetPage.contentOffset.x > 0
+                {
+                    return targetSection
                 }
-                return nil
             }
-            
-            let findNextSection: () -> QuickSegmentSection? = {
-                let currentIndex = self.allScrollableSections.firstIndex(of: touchSection) ?? 0
-                if currentIndex + 1 < self.allScrollableSections.count {
-                    let targetSection = self.allScrollableSections[currentIndex + 1]
-                    /**
-                     * 如果下一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到底了，就不切换
-                     * If the next section does not have a scrollable sub list, or has not been completely displayed, or has been scrolled to the bottom, do not switch
-                     */
-                    if
-                        targetSection.sectionEndPoint.x <= contentOffsetX + rootView.bounds.width - rootView.adjustedContentInset.right,
-                        let targetPage = targetSection.currentPageScrollView,
-                        let targetPagesBox = targetSection.pagesItem.currentListView,
-                        targetPagesBox.contentOffset.x < (targetPagesBox.contentSize.width - targetPagesBox.bounds.width + targetPagesBox.adjustedContentInset.left + targetPagesBox.adjustedContentInset.right) || targetPage.contentOffset.x < (targetPage.contentSize.width - targetPage.bounds.width + targetPage.adjustedContentInset.left + targetPage.adjustedContentInset.right)
-                    {
-                        return targetSection
-                    }
+            return nil
+        }
+        
+        let findNextSection: (QuickSegmentSection) -> QuickSegmentSection? = { section in
+            let currentIndex = self.allScrollableSections.firstIndex(of: section) ?? 0
+            if currentIndex + 1 < self.allScrollableSections.count {
+                let targetSection = self.allScrollableSections[currentIndex + 1]
+                /**
+                 * 如果下一个section没有可滚动的子列表，或者还没有完全展示出来，或者已经滚动到底了，就不切换
+                 * If the next section does not have a scrollable sub list, or has not been completely displayed, or has been scrolled to the bottom, do not switch
+                 */
+                if
+                    targetSection.sectionEndPoint.x <= contentOffsetX + rootView.bounds.width - rootView.adjustedContentInset.right,
+                    let targetPage = targetSection.currentPageScrollView,
+                    let targetPagesBox = targetSection.pagesItem.currentListView,
+                    targetPagesBox.contentOffset.x < targetPagesBox.maxContentOffsetX || targetPage.contentOffset.x < targetPage.maxContentOffsetX
+                {
+                    return targetSection
                 }
-                return nil
             }
-            
-            if let sectionScrollView = touchSection.currentPageScrollView {
+            return nil
+        }
+        
+        let updateScrollableSection: (QuickSegmentSection, QuickSegmentPagesListView) -> Void = { (section, pagesBox) in
+            if
+                let sectionScrollView = section.currentPageScrollView,
+                sectionScrollView.isHidden == false,
+                sectionScrollView.alpha > 0,
+                sectionScrollView.isUserInteractionEnabled,
+                sectionScrollView.isScrollEnabled
+            {
                 if
                     lastOffset.x < rootView.contentOffset.x,
-                    sectionScrollView.contentOffset.x >= (sectionScrollView.contentSize.width - sectionScrollView.bounds.width - sectionScrollView.adjustedContentInset.left - sectionScrollView.adjustedContentInset.right),
-                    pagesBox.contentOffset.x >= (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
+                    sectionScrollView.contentOffset.x >= sectionScrollView.maxContentOffsetX,
+                    pagesBox.contentOffset.x >= pagesBox.maxContentOffsetX
                 {
                     /**
                      * 左滑，且当前触摸的section已经滚动到底部，就需要切换到下一个section
                      * If the current touched section has been scrolled to the bottom, it needs to switch to the next section
                      */
-                    if let nextSection = findNextSection() {
+                    if let nextSection = findNextSection(section) {
                         self.scrollableSection = nextSection
                     } else {
-                        self.scrollableSection = touchSection
+                        self.scrollableSection = section
                     }
                 } else if
                     lastOffset.x > rootView.contentOffset.x,
@@ -175,26 +179,26 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                      * 右滑，且当前触摸的section已经滚动到顶部，就需要切换到上一个section
                      * If the current touched section has been scrolled to the top, it needs to switch to the previous section
                      */
-                    if let lastSection = findLastSection() {
+                    if let lastSection = findLastSection(section) {
                         self.scrollableSection = lastSection
                     } else {
-                        self.scrollableSection = touchSection
+                        self.scrollableSection = section
                     }
                 } else {
-                    self.scrollableSection = touchSection
+                    self.scrollableSection = section
                 }
             } else if
                 lastOffset.x < rootView.contentOffset.x,
-                pagesBox.contentOffset.x >= (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
+                pagesBox.contentOffset.x >= pagesBox.maxContentOffsetX
             {
                 /**
                  * 左滑，且当前触摸的section已经滚动到底部，就需要切换到下一个section
                  * If the current touched section has been scrolled to the bottom, it needs to switch to the next section
                  */
-                if let nextSection = findNextSection() {
+                if let nextSection = findNextSection(section) {
                     self.scrollableSection = nextSection
                 } else {
-                    self.scrollableSection = touchSection
+                    self.scrollableSection = section
                 }
             } else if
                 lastOffset.x > rootView.contentOffset.x,
@@ -204,14 +208,33 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                  * 右滑，且当前触摸的section已经滚动到顶部，就需要切换到上一个section
                  * If the current touched section has been scrolled to the top, it needs to switch to the previous section
                  */
-                if let lastSection = findLastSection() {
+                if let lastSection = findLastSection(section) {
                     self.scrollableSection = lastSection
                 } else {
-                    self.scrollableSection = touchSection
+                    self.scrollableSection = section
                 }
             } else {
-                self.scrollableSection = touchSection
+                self.scrollableSection = section
             }
+        }
+        
+        if
+            let section = touchSection,
+            let pagesBox = section.pagesItem.currentListView
+        {
+            updateScrollableSection(section, pagesBox)
+        } else if
+            lastOffset.x < rootView.contentOffset.x,
+            let section = visibleSections.first,
+            let pagesBox = section.pagesItem.currentListView
+        {
+            updateScrollableSection(section, pagesBox)
+        } else if
+            lastOffset.x > rootView.contentOffset.x,
+            let section = visibleSections.last,
+            let pagesBox = section.pagesItem.currentListView
+        {
+            updateScrollableSection(section, pagesBox)
         } else {
             self.scrollableSection = nil
         }
@@ -296,8 +319,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     sectionScrollView.contentOffsetX = 0
                     return true
                 }
-                let maxOffsetX = sectionScrollView.contentSize.width - sectionScrollView.bounds.width + sectionScrollView.adjustedContentInset.right
-                if sectionScrollView.contentOffset.x < maxOffsetX{
+                if sectionScrollView.contentOffset.x < sectionScrollView.maxContentOffsetX {
                     /**
                      * 子列表还在滚动范围
                      * The sub list is still in the scroll range
@@ -350,7 +372,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 sectionScrollView.scrollDirection == .horizontal,
                 self.isCurrentPageLast()
             {
-                let sectionMaxOffsetX = sectionScrollView.contentSize.width - sectionScrollView.bounds.width + sectionScrollView.adjustedContentInset.right
+                let sectionMaxOffsetX = sectionScrollView.maxContentOffsetX
                 if sectionScrollView.contentOffset.x > sectionMaxOffsetX {
                     /**
                      * 下拉，但子列表还在上拉状态未归位
@@ -398,7 +420,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 if
                     lastOffset.x < scrollView.contentOffset.x,
                     contentOffsetX >= section.sectionStartPoint.x,
-                    sectionScrollView.contentOffset.x < (sectionScrollView.contentSize.width - sectionScrollView.bounds.width - sectionScrollView.adjustedContentInset.left - sectionScrollView.adjustedContentInset.right)
+                    sectionScrollView.contentOffset.x < sectionScrollView.maxContentOffsetX
                 {
                     /**
                      * 左滑，目标section已完全展示，且当前可滚动的section还没滚动到底时，不能再滚动了
@@ -427,7 +449,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 if
                     lastOffset.x < scrollView.contentOffset.x,
                     contentOffsetX >= section.sectionStartPoint.x,
-                    pagesBox.contentOffset.x < (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
+                    pagesBox.contentOffset.x < pagesBox.maxContentOffsetX
                 {
                     /**
                      * 左滑，目标section已完全展示，且当前可滚动的section还没滚动到底时，不能再滚动了
@@ -535,7 +557,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
             if
                 lastOffset.x < scrollView.contentOffset.x,
                 contentOffsetX >= section.sectionStartPoint.x,
-                sectionScrollView.contentOffset.x < (sectionScrollView.contentSize.width - sectionScrollView.bounds.width - sectionScrollView.adjustedContentInset.left - sectionScrollView.adjustedContentInset.right)
+                sectionScrollView.contentOffset.x < sectionScrollView.maxContentOffsetX
             {
                 /**
                  * 左滑，目标section已完全展示，且当前可滚动的section还没滚动到底时，不能再滚动了
@@ -570,7 +592,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
             if
                 lastOffset.x < scrollView.contentOffset.x,
                 contentOffsetX >= section.sectionStartPoint.x,
-                pagesBox.contentOffset.x < (pagesBox.contentSize.width - pagesBox.bounds.width - pagesBox.adjustedContentInset.left - pagesBox.adjustedContentInset.right)
+                pagesBox.contentOffset.x < pagesBox.maxContentOffsetX
             {
                 /**
                  * 左滑，目标section已完全展示，且当前可滚动的section还没滚动到底时，不能再滚动了
@@ -679,14 +701,14 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     canRootScroll = true
                     canPagesBoxScroll = false
                 }
-                scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left + scrollView.adjustedContentInset.right)
                 return
             }
             if self.rootScrollView?.scrollDirection != currentScrollDirection {
                 if let pageScrollView = section.pageViewControllers[targetPageIndex].listScrollView(), pageScrollView.scrollDirection == .horizontal {
                     if
                         scrollView.contentOffset.x > lastOffset.x,
-                        pageScrollView.contentOffset.x < (pageScrollView.contentSize.width - pageScrollView.bounds.width + pageScrollView.adjustedContentInset.right)
+                        pageScrollView.contentOffset.x < pageScrollView.maxContentOffsetX
                     {
                         canPagesBoxScroll = false
                         canPageScroll = true
@@ -694,7 +716,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                          * 当前子列表可以滚动
                          * The current sub list can scroll
                          */
-                        scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                        scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left + scrollView.adjustedContentInset.right)
                         return
                     }
                     if
@@ -707,7 +729,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                          * 当前子列表可以滚动
                          * The current sub list can scroll
                          */
-                        scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right)
+                        scrollView.contentOffsetX = CGFloat(targetPageIndex) * (scrollView.bounds.width - scrollView.adjustedContentInset.left + scrollView.adjustedContentInset.right)
                         return
                     }
                 }
@@ -718,10 +740,10 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     scrollView.contentOffsetX = 0
                     return
                 }
-                if scrollView.contentOffset.x > (scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right) {
+                if scrollView.contentOffset.x > scrollView.maxContentOffsetX {
                     canPagesBoxScroll = false
                     canRootScroll = true
-                    scrollView.contentOffsetX = scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.right
+                    scrollView.contentOffsetX = scrollView.maxContentOffsetX
                     return
                 }
             }
@@ -751,7 +773,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 if let pageScrollView = section.pageViewControllers[targetPageIndex].listScrollView(), pageScrollView.scrollDirection == .vertical {
                     if
                         scrollView.contentOffset.y > lastOffset.y,
-                        pageScrollView.contentOffset.y < (pageScrollView.contentSize.height - pageScrollView.bounds.height + pageScrollView.adjustedContentInset.bottom)
+                        pageScrollView.contentOffset.y < pageScrollView.maxContentOffsetY
                     {
                         canPagesBoxScroll = false
                         canPageScroll = true
@@ -810,7 +832,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 if lastOffset.x < 0 || scrollView.contentOffset.x < 0 {
                     scrollView.contentOffsetX = 0
                 } else {
-                    let maxX = scrollView.contentSize.width - scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right
+                    let maxX = scrollView.maxContentOffsetX
                     if
                         lastOffset.x > maxX || scrollView.contentOffset.x > maxX
                     {
@@ -823,7 +845,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 if lastOffset.y < 0 || scrollView.contentOffset.y < 0 {
                     scrollView.contentOffsetY = 0
                 } else {
-                    let maxY = scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
+                    let maxY = scrollView.maxContentOffsetY
                     if lastOffset.y > maxY || scrollView.contentOffset.y > maxY {
                         scrollView.contentOffsetY = maxY
                     } else {
@@ -862,15 +884,15 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     return
                 }
                 scrollView.contentOffsetX = 0
-            } else if targetOffset.x >= (scrollView.contentSize.width - scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right) {
-                if isCurrentPageLast(), rootScrollView.contentOffset.x >= rootScrollView.contentSize.width - rootScrollView.bounds.width - rootScrollView.adjustedContentInset.right {
+            } else if targetOffset.x >= scrollView.maxContentOffsetX {
+                if isCurrentPageLast(), rootScrollView.contentOffset.x >= rootScrollView.maxContentOffsetX {
                     /**
                      * 当前是最后一个可滚动的页面时，允许继续拉
                      * The current page is the last scrollable page, allow continue to pull
                      */
                     return
                 }
-                scrollView.contentOffsetX = scrollView.contentSize.width - scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right
+                scrollView.contentOffsetX = scrollView.maxContentOffsetX
             } else if
                 lastOffset.x == 0,
                 targetOffset.x > 0
@@ -884,7 +906,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     scrollView.contentOffsetX = 0
                 }
             } else if
-                lastOffset.x == (scrollView.contentSize.width - scrollView.bounds.width - scrollView.adjustedContentInset.left - scrollView.adjustedContentInset.right),
+                lastOffset.x == scrollView.maxContentOffsetX,
                 targetOffset.x < lastOffset.x
             {
                 if
@@ -917,10 +939,13 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
             return
         }
         if
-            targetOffset.x >= (scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.left + scrollView.adjustedContentInset.right),
+            targetOffset.x >= scrollView.maxContentOffsetX,
             lastOffset.x < targetOffset.x
         {
-            if isCurrentPageLast(), rootScrollView.contentOffset.x >= rootScrollView.contentSize.width - rootScrollView.bounds.width + rootScrollView.adjustedContentInset.left + rootScrollView.adjustedContentInset.right {
+            if
+                isCurrentPageLast(),
+                rootScrollView.contentOffset.x >= rootScrollView.maxContentOffsetX
+            {
                 /**
                  * 当前是最后一个可滚动的页面时，允许继续拉
                  * The current page is the last scrollable page, allow continue to pull
@@ -931,7 +956,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
              * 左滑，到底时，不能再滚动
              * Slide left, do not scroll anymore
              */
-            scrollView.contentOffsetX = scrollView.contentSize.width - scrollView.bounds.width + scrollView.adjustedContentInset.left + scrollView.adjustedContentInset.right
+            scrollView.contentOffsetX = scrollView.maxContentOffsetX
             canRootScroll = true
             canPageScroll = false
             return
@@ -954,8 +979,8 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                 {
                     canPagesBoxScroll = true
                 }
-            } else if targetOffset.y >= (scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom) {
-                scrollView.contentOffsetY = scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
+            } else if targetOffset.y >= scrollView.maxContentOffsetY {
+                scrollView.contentOffsetY = scrollView.maxContentOffsetY
                 if
                     let currentSection = self.scrollableSection,
                     currentSection.pagesItem.currentListView?.scrollDirection == .vertical
@@ -976,7 +1001,7 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
                     scrollView.contentOffsetY = 0
                 }
             } else if
-                lastOffset.y == (scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom),
+                lastOffset.y == scrollView.maxContentOffsetY,
                 targetOffset.y < lastOffset.y
             {
                 if
@@ -1002,14 +1027,14 @@ class QuickSegmentHorizontalPageScrollManager: QuickSegmentScrollManager {
             return
         }
         if
-            targetOffset.y >= (scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom),
+            targetOffset.y >= scrollView.maxContentOffsetY,
             lastOffset.y < targetOffset.y
         {
             /**
              * 上拉，到底时，不能再滚动
              * Pull up, do not scroll anymore
              */
-            scrollView.contentOffsetY = scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom
+            scrollView.contentOffsetY = scrollView.maxContentOffsetY
             canPagesBoxScroll = true
             canPageScroll = false
             return

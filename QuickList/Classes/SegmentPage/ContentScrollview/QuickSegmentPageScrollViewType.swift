@@ -8,6 +8,9 @@
 import UIKit
 
 public protocol QuickSegmentScrollViewType: UIScrollView {
+    var maxContentOffsetX: CGFloat { get }
+    var maxContentOffsetY: CGFloat { get }
+    
     /**
      * 设置contentOffsetX时和contentOffsetY时会同步更新scrollLastOffset，避免重复触发监听
      * When setting contentOffsetX and contentOffsetY, the scrollLastOffset will be updated synchronously to avoid repeated triggering of monitoring
@@ -46,6 +49,14 @@ public protocol QuickSegmentPageScrollViewType: QuickSegmentScrollViewType {
 }
 
 extension QuickSegmentScrollViewType {
+    public var maxContentOffsetX: CGFloat {
+        self.contentSize.width - self.bounds.width - self.adjustedContentInset.left + self.adjustedContentInset.right
+    }
+    
+    public var maxContentOffsetY: CGFloat {
+        self.contentSize.height - self.bounds.height - self.adjustedContentInset.top + self.adjustedContentInset.bottom
+    }
+    
     public var contentOffsetX: CGFloat {
         get {
             return contentOffset.x
