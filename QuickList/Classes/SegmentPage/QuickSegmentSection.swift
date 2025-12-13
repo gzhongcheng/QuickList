@@ -363,6 +363,7 @@ public class QuickSegmentSection: Section {
             pageVC.pageTabItem.isSelected = index == 0
             pageVC.pageTabItem.callbackCellOnSelection = { [weak self] in
                 guard let self = self else { return }
+                self.currentPageScrollView?.forceStopScroll()
                 self.pagesItem.scrollToPage(index: index, animated: true)
                 self.currentPageIndex = index
                 self.scrollManager?.pageDidChanged(in: self, fromMenu: true)
