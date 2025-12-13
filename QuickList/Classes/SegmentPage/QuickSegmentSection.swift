@@ -355,6 +355,11 @@ public class QuickSegmentSection: Section {
             if let manager = self.scrollManager {
                 pageVC.listScrollView()?.scrollManager = manager
             }
+            pageVC.callbackOnScrollViewChanged = { [weak self] in
+                if index == self?.currentPageIndex {
+                    self?.didSetCurrentPage()
+                }
+            }
             pageVC.pageTabItem.isSelected = index == 0
             pageVC.pageTabItem.callbackCellOnSelection = { [weak self] in
                 guard let self = self else { return }
@@ -375,6 +380,10 @@ public class QuickSegmentSection: Section {
     
     func didSetCurrentPage() {
         self.currentPageScrollView = self.pageViewControllers[self.currentPageIndex].listScrollView()
+        if self.currentPageScrollView?.scrollManager !== self.scrollManager {
+            self.currentPageScrollView?.isQuickSegmentSubPage = true
+            self.currentPageScrollView?.scrollManager = self.scrollManager
+        }
     }
 }
 

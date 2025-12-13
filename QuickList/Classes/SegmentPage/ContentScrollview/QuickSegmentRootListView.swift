@@ -71,20 +71,24 @@ extension QuickSegmentRootListView: UIGestureRecognizerDelegate {
                 break
             }
         }
-        guard
-            let sectionIndex = touchSectionIndex,
-            sectionIndex < self.form.count,
-            let section = self.form[sectionIndex] as? QuickSegmentSection,
-            let scrollManager = section.scrollManager
-        else {
+        guard let scrollManager = self.scrollManager else {
             if gestureRecognizer is UIPanGestureRecognizer, otherGestureRecognizer is UIPanGestureRecognizer {
                 return true
             }
             return false
         }
-        if gestureRecognizer.state == .possible {
-            scrollManager.touchSection = section
+        guard
+            let sectionIndex = touchSectionIndex,
+            sectionIndex < self.form.count,
+            let section = self.form[sectionIndex] as? QuickSegmentSection
+        else {
+            scrollManager.touchSection = nil
+            if gestureRecognizer is UIPanGestureRecognizer, otherGestureRecognizer is UIPanGestureRecognizer {
+                return true
+            }
+            return false
         }
+        scrollManager.touchSection = section
         if gestureRecognizer is UIPanGestureRecognizer, otherGestureRecognizer is UIPanGestureRecognizer {
             return true
         }

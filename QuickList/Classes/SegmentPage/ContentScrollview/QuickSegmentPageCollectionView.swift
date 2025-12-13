@@ -25,6 +25,9 @@ public class QuickSegmentPageCollectionView: UICollectionView, QuickSegmentPageS
             }
             let oldValue = super.contentOffset
             super.contentOffset = newValue
+            if ItemMovingHandlerMaskView._sharedInstance?.item?.isDragging == true {
+                return
+            }
             self.scrollManager?.scrollViewDidScroll(self, from: oldValue)
         }
     }

@@ -16,3 +16,18 @@ public protocol QuickSegmentPageViewDelegate: UIViewController {
     
     func listScrollView() -> QuickSegmentPageScrollViewType?
 }
+
+private struct QuickSegmentPageViewDelegateAssociatedKey {
+    @UniqueAddress static var callbackOnScrollViewChangedIdentifier
+}
+public extension QuickSegmentPageViewDelegate {
+    typealias ChangeBlock = (() -> Void)
+    var callbackOnScrollViewChanged: ChangeBlock? {
+        get {
+            return objc_getAssociatedObject(self, QuickSegmentPageViewDelegateAssociatedKey.callbackOnScrollViewChangedIdentifier) as? ChangeBlock
+        }
+        set {
+            objc_setAssociatedObject(self, QuickSegmentPageViewDelegateAssociatedKey.callbackOnScrollViewChangedIdentifier, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        }
+    }
+}
