@@ -215,7 +215,7 @@ class QuickSegmentHorizontalRootScrollManager: QuickSegmentScrollManager {
                     self.scrollableSection = section
                 }
             } else {
-                self.scrollableSection = section
+                self.scrollableSection = nil
             }
         }
         if
