@@ -353,7 +353,7 @@ public final class Form: NSObject {
             }
             listView?.deleteSections(removedSectionIndexSet)
             listView?.insertSections(addedSectionIndexSet)
-            layout?.reloadSectionsAfter(index: removedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+            layout?.reloadSectionsAfter(index: Swift.max(range.lowerBound - 1, 0), needOldSectionAttributes: false)
         }, completion: completion)
     }
 
