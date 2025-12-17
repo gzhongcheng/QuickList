@@ -236,7 +236,6 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     @unknown default:
                         break
                     }
-                    continue
                 }
                 self.sectionAttributes[i] = nil
             }
