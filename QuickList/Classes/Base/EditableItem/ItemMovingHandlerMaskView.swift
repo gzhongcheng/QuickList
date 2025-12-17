@@ -204,6 +204,7 @@ public class ItemMovingHandlerMaskView: UIView {
         guard let indexPath = item.indexPath else { return }
         if let targetMoveIndexPath = self.targetMoveIndexPath {
             removeTargetIndicator()
+            item.isDragging = false
             item.form?.delegate?.formView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
                 guard
                   let section = item.section, 
@@ -226,7 +227,6 @@ public class ItemMovingHandlerMaskView: UIView {
             } completion: {
                 self.item?.form?.listLayout?.layoutAttributesForItem(at: targetMoveIndexPath)?.alpha = 1
                 self.item?.cell?.alpha = 1
-                item.isDragging = false
                 item.delegate?.didFinishExchange(item: item)
                 self.reset()
             }
@@ -237,9 +237,9 @@ public class ItemMovingHandlerMaskView: UIView {
             UIView.animate(withDuration: 0.3, animations: {
                 self.moveSnapshotContainerView.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
             }, completion: { _ in
+                item.isDragging = false
                 itemAttr?.alpha = 1
                 self.item?.cell?.alpha = 1
-                item.isDragging = false
                 self.reset()
             })
         }
