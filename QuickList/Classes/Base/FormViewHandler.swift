@@ -272,35 +272,38 @@ public class FormViewHandler: NSObject {
 extension FormViewHandler: FormDelegate {
     
     public func updateLayout(sections: [Section]?, inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, othersInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)? = nil, completion: (() -> Void)? = nil) {
-        guard formView?.superview != nil, formView?.window != nil else { return }
-        currentUpdateSections = sections?.sorted(by: { ($0.index ?? 0) < ($1.index ?? 0) })
-        currentUpdateSectionInAnimation = inAnimation
-        currentUpdateOthersInAnimation = othersInAnimation
-        let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0
-        UIView.beginAnimations(nil, context: nil)
-        UIView.setAnimationDuration(duration)
-        CATransaction.begin()
-        CATransaction.setAnimationDuration(duration)
-        CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
-        CATransaction.setCompletionBlock { [weak self] in
-            self?.layout.oldSectionAttributes.removeAll()
-            self?.currentUpdateSections = nil
-            self?.currentUpdateSectionInAnimation = nil
-            self?.currentUpdateOthersInAnimation = nil
-            DispatchQueue.main.async {
-                self?.updateSelectedItemDecorationIfNeeded()
-                completion?()
+        DispatchQueue.main.async { [weak self] in
+            guard let `self` = self, self.formView?.superview != nil, self.formView?.window != nil else { return }
+            self.currentUpdateSections = sections?.sorted(by: { ($0.index ?? 0) < ($1.index ?? 0) })
+            self.currentUpdateSectionInAnimation = inAnimation
+            self.currentUpdateOthersInAnimation = othersInAnimation
+            let duration = othersInAnimation?.duration ?? inAnimation?.duration ?? 0
+            UIView.beginAnimations(nil, context: nil)
+            UIView.setAnimationDuration(duration)
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(duration)
+            CATransaction.setAnimationTimingFunction(CAMediaTimingFunction(name: .easeInEaseOut))
+            CATransaction.setCompletionBlock { [weak self] in
+                self?.layout.oldSectionAttributes.removeAll()
+                self?.currentUpdateSections = nil
+                self?.currentUpdateSectionInAnimation = nil
+                self?.currentUpdateOthersInAnimation = nil
+                self?.formView?.isUserInteractionEnabled = true
+                DispatchQueue.main.async {
+                    self?.updateSelectedItemDecorationIfNeeded()
+                    completion?()
+                }
             }
+            formView?.performBatchUpdates({ [weak self] in
+                if let customUpdates = performBatchUpdates {
+                    customUpdates(self?.formView, self?.layout)
+                } else {
+                    self?.layout.reloadSectionsAfter(index: sections?.first?.index ?? 0, needOldSectionAttributes: true)
+                }
+            })
+            CATransaction.commit()
+            UIView.commitAnimations()
         }
-        formView?.performBatchUpdates({ [weak self] in
-            if let customUpdates = performBatchUpdates {
-                customUpdates(self?.formView, self?.layout)
-            } else {
-                self?.layout.reloadSectionsAfter(index: sections?.first?.index ?? 0, needOldSectionAttributes: true)
-            }
-        })
-        CATransaction.commit()
-        UIView.commitAnimations()
     }
     
     fileprivate func representableItem(from item: Item, at indexPath: IndexPath) -> (any ItemViewRepresentable)? {
