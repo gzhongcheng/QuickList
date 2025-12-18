@@ -288,6 +288,7 @@ extension FormViewHandler: FormDelegate {
             self?.currentUpdateSectionInAnimation = nil
             self?.currentUpdateOthersInAnimation = nil
             DispatchQueue.main.async {
+                self?.updateSelectedItemDecorationIfNeeded()
                 completion?()
             }
         }
