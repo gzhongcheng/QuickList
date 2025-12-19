@@ -169,7 +169,7 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                     if let nextSection = findNextSection(section) {
                         self.scrollableSection = nextSection
                     } else {
-                        self.scrollableSection = section
+                        self.scrollableSection = nil
                     }
                 } else if
                     lastOffset.y > rootView.contentOffset.y,
@@ -183,7 +183,7 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                     if let lastSection = findLastSection(section) {
                         self.scrollableSection = lastSection
                     } else {
-                        self.scrollableSection = section
+                        self.scrollableSection = nil
                     }
                 } else {
                     self.scrollableSection = section
@@ -199,7 +199,7 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                 if let nextSection = findNextSection(section) {
                     self.scrollableSection = nextSection
                 } else {
-                    self.scrollableSection = section
+                    self.scrollableSection = nil
                 }
             } else if
                 lastOffset.y > rootView.contentOffset.y,
@@ -212,7 +212,7 @@ class QuickSegmentVerticalPageScrollManager: QuickSegmentScrollManager {
                 if let lastSection = findLastSection(section) {
                     self.scrollableSection = lastSection
                 } else {
-                    self.scrollableSection = section
+                    self.scrollableSection = nil
                 }
             } else {
                 self.scrollableSection = nil
