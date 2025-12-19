@@ -114,6 +114,7 @@ public class FormViewHandler: NSObject {
             formView?.reloadData()
         }
         self.layout.reloadAll()
+        updateSelectedItemDecorationIfNeeded()
     }
     /**
      * 仅刷新Layout
