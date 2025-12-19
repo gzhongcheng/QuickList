@@ -247,7 +247,7 @@ public final class Form: NSObject {
      *   - animation: 动画 / Animation
      *   - completion: 完成回调 / Completion callback
      */
-    public func insetSection(with section: Section, at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+    public func insertSection(with section: Section, at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.insert(section, at: index)
             setNeedReloadList()
@@ -257,6 +257,19 @@ public final class Form: NSObject {
             guard let `self` = self else { return }
             self.insert(section, at: index)
             listView?.insertSections(IndexSet(integer: index))
+            layout?.reloadSectionsAfter(index: index, needOldSectionAttributes: false)
+        }, completion: completion)
+    }
+    public func insertSections(with sections: [Section], at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            self.insert(contentsOf: sections, at: index)
+            setNeedReloadList()
+            return
+        }
+        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            self.insert(contentsOf: sections, at: index)
+            listView?.insertSections(IndexSet(integersIn: index ..< index + sections.count))
             layout?.reloadSectionsAfter(index: index, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -465,6 +478,14 @@ extension Form : RangeReplaceableCollection {
         sections.insert(newElement, at: i)
         newElement.form = self
         newElement.needUpdateLayout = true
+    }
+    
+    public func insert<S>(contentsOf newElements: S, at i: Int) where S : Collection, Section == S.Element {
+        sections.insert(contentsOf: newElements, at: i)
+        for secion in newElements {
+            secion.form = self
+            secion.needUpdateLayout = true
+        }
     }
 
     public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C) where C.Iterator.Element == Section {
