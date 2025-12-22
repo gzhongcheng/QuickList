@@ -177,8 +177,12 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
         else {
             return
         }
-        let indexPath = IndexPath(item: index, section: 0)
-        cell.pageList.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: animated)
+        switch cell.pageList.scrollDirection {
+        case .vertical:
+            cell.pageList.setContentOffset(CGPoint(x: 0, y: Int(cell.pageList.bounds.height) * index), animated: true)
+        case .horizontal:
+            cell.pageList.setContentOffset(CGPoint(x: Int(cell.pageList.bounds.width) * index, y: 0), animated: true)
+        }
     }
 }
 
