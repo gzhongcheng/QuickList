@@ -36,6 +36,16 @@ public class FormViewHandler: NSObject {
      * 用于存储已注册的header对应的identifier
      * Store registered header identifiers
      */
+    var registedFormHeaderIdentifier = [String]()
+    /**
+     * 用于存储已注册的footer对应的identifier
+     * Store registered footer identifiers
+     */
+    var registedFormFooterIdentifier = [String]()
+    /**
+     * 用于存储已注册的header对应的identifier
+     * Store registered header identifiers
+     */
     var registedHeaderIdentifier = [String]()
     /**
      * 用于存储已注册的footer对应的identifier
@@ -47,6 +57,11 @@ public class FormViewHandler: NSObject {
      * Store registered decoration identifiers
      */
     var registedDecorationIdentifier = [String]()
+    /**
+     * 用于存储已注册的suspensionDecoration对应的identifier
+     * Store registered suspensionDecoration identifiers
+     */
+    var registedSuspensionDecorationIdentifier = [String]()
     /**
      * 用于存储已注册的Cell对应的identifier
      * Store registered cell identifiers
@@ -385,9 +400,9 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = header.identifier
-            if !registedHeaderIdentifier.contains(identifier) {
+            if !registedFormHeaderIdentifier.contains(identifier) {
                 header.regist(to: collectionView, for: .formHeader)
-                registedHeaderIdentifier.append(identifier)
+                registedFormHeaderIdentifier.append(identifier)
             }
             guard let headerView = header.view(for: .formHeader, in: collectionView) else { return UICollectionReusableView() }
             headerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 503)
@@ -398,9 +413,9 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = footer.identifier
-            if !registedFooterIdentifier.contains(identifier) {
+            if !registedFormFooterIdentifier.contains(identifier) {
                 footer.regist(to: collectionView, for: .formFooter)
-                registedFooterIdentifier.append(identifier)
+                registedFormFooterIdentifier.append(identifier)
             }
             guard let footerView = footer.view(for: .formFooter, in: collectionView) else { return UICollectionReusableView() }
             footerView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 500)
@@ -459,9 +474,9 @@ extension FormViewHandler: UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             let identifier = decoration.identifier
-            if !registedDecorationIdentifier.contains(identifier) {
+            if !registedSuspensionDecorationIdentifier.contains(identifier) {
                 decoration.regist(to: collectionView, for: .suspensionDecoration)
-                registedDecorationIdentifier.append(identifier)
+                registedSuspensionDecorationIdentifier.append(identifier)
             }
             guard let decorationView = decoration.viewForSection(section, in: collectionView, type: .suspensionDecoration, for: indexPath) else { return UICollectionReusableView() }
             decorationView.layer.zPosition = CGFloat(layout.layoutAttributesForSupplementaryView(ofKind: kind, at: indexPath)?.zIndex ?? 497)

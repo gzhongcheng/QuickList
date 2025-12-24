@@ -476,12 +476,20 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 sectionAttr.footerAttributes?.caculatedFrame = sectionAttr.footerAttributes?.frame
                 sectionAttr.decorationAttributes?.caculatedFrame = sectionAttr.decorationAttributes?.frame
                 sectionAttr.suspensionDecorationAttributes?.caculatedFrame = sectionAttr.suspensionDecorationAttributes?.frame
-                sectionAttr.itemAttributes.values.forEach { $0.caculatedFrame = $0.frame }
+                sectionAttr.headerAttributes?.zIndex = 1026
+                sectionAttr.footerAttributes?.zIndex = 1026
+                sectionAttr.decorationAttributes?.zIndex = 1022
+                sectionAttr.suspensionDecorationAttributes?.zIndex = 1021
+                sectionAttr.itemAttributes.values.forEach {
+                    $0.zIndex = 1024
+                    $0.caculatedFrame = $0.frame
+                }
             } else {
                 self.suspensionHeaderSectionSize = nil
                 sectionAttr.headerAttributes?.zIndex = 502
                 sectionAttr.footerAttributes?.zIndex = 501
                 sectionAttr.decorationAttributes?.zIndex = 498
+                sectionAttr.suspensionDecorationAttributes?.zIndex = 497
                 sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
             }
             sectionAttr.isFormHeader = section.isFormHeader
@@ -490,6 +498,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             sectionAttr.headerAttributes?.zIndex = 502
             sectionAttr.footerAttributes?.zIndex = 501
             sectionAttr.decorationAttributes?.zIndex = 498
+            sectionAttr.suspensionDecorationAttributes?.zIndex = 497
             sectionAttr.itemAttributes.values.forEach { $0.zIndex = 500 }
         }
         self.sectionAttributes[sectionIndex] = sectionAttr
@@ -996,9 +1005,9 @@ extension QuickListSectionAttribute {
                 suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, headerSize: headerSize, with: scrollDirection)
                 switch scrollDirection {
                 case .horizontal:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.x > headerSize.width ? 1 : 0
+                    suspensionDecorationAttributes.alpha = view.contentOffset.x > headerSize.width - view.adjustedContentInset.left ? 1 : 0
                 case .vertical:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.y > headerSize.height ? 1 : 0
+                    suspensionDecorationAttributes.alpha = view.contentOffset.y > headerSize.height - view.adjustedContentInset.top ? 1 : 0
                 @unknown default:
                     break
                 }

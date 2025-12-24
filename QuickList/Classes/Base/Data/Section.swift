@@ -12,7 +12,15 @@ open class Section: NSObject {
      * 是否作为整个Form的悬停header，仅对首个section生效
      * Whether as the entire Form's floating header, only effective for the first section
      */
-    public var isFormHeader: Bool = false
+    public var isFormHeader: Bool = false {
+        didSet {
+            if self.isFormHeader, sizeRatio < 1 {
+                assertionFailure("Section: FormHeader does not support setting sizeRatio.")
+                sizeRatio = 1.0
+                return
+            }
+        }
+    }
     /**
      * 整个section悬浮时的装饰view，这个装饰view的展示区域为整个section，包括header和footer的区域，仅悬浮时展示，结束悬浮就会消失
      * Decoration view when the entire section is floating, this decoration view's display area is the entire section, including header and footer areas, only displayed when floating, disappears when floating ends
@@ -49,6 +57,11 @@ open class Section: NSObject {
         didSet {
             guard sizeRatio > 0, sizeRatio <= 1 else {
                 assertionFailure("Section: sizeRatio must be between 0 and 1")
+                sizeRatio = 1.0
+                return
+            }
+            if self.isFormHeader, sizeRatio < 1 {
+                assertionFailure("Section: FormHeader does not support setting sizeRatio.")
                 sizeRatio = 1.0
                 return
             }
