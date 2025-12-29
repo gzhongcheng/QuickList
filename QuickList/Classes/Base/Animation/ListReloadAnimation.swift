@@ -108,7 +108,7 @@ open class ListReloadAnimation: NSObject {
     public func addOutSnapshotAndDoAnimation(view: UIView, at section: Section, delay: TimeInterval = 0, options: UIView.AnimationOptions = [.curveEaseInOut], animation: @escaping (UIView) -> Void) {
         guard
             let snapshot = view.snapshotView(afterScreenUpdates: true),
-            let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
+            let targetView = section.form?.scrollView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)

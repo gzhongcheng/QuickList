@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public enum ItemCellLayoutType: Int {
     /**
@@ -26,8 +27,8 @@ public enum ItemCellLayoutType: Int {
 }
 
 /**
- *  collectionView的item或itemBinder需要实现的协议
- *  Protocol that collectionView items or itemBinders need to implement
+ *  Item 视图协议
+ *  Item view protocol
  */
 public protocol ItemViewRepresentable {
     /**
@@ -40,43 +41,29 @@ public protocol ItemViewRepresentable {
      * 调用此方法来注册
      * Call this method to register
      */
-    func regist(to view: QuickListView)
+    func regist(to view: QuickListScrollView)
 
     /**
      调用此方法来获取指定item相对应的cell
      Call this method to get the cell corresponding to the specified item
      
-     - parameter item:    要获取view的section
-     - parameter view:    所在的view
-     - parameter indexPath: 位置
-     - parameter item:    Section to get view for
-     - parameter view:    The view it belongs to
-     - parameter indexPath: Position
+     - parameter item:    要获取view的item / Item to get view for
+     - parameter view:    所在的view / The view it belongs to
+     - parameter indexPath: 位置 / Position
      
-     - returns: 对应的cell
-     - returns: Corresponding cell
+     - returns: 对应的cell / Corresponding cell
      */
-    func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell?
+    func cellForItem(_ item: Item, in view: QuickListScrollView, for indexPath: IndexPath) -> ItemCell?
     
     /**
      * 调用此方法计算尺寸
      * Call this method to calculate size
      * 
      * - parameter estimateItemSize: 预估尺寸，根据配置预估的一个正方形尺寸
-     *         以垂直滚动的formView为例：
-     *             QuickFlowLayout下，section共3列，item的weight为2，则这个size就是两个item的宽度加上一个间距的正方形，按需获取这个尺寸根据滚动方向计算实际尺寸（即使返回的实际宽度小于两个item的宽度，该item也会占用两列的位置）
-     *             QuickYogaLayout下, estimateItemSize返回的是item可绘制区域（即扣除formView.contentInset和section.contentInset的两边间距后的剩余宽度）的正方形尺寸
      * - parameter view:    所在的view
-     * - parameter layoutType: 布局方式，QuickYogaLayout下值为free，其他布局下根据滚动方向设置为对应的布局方式
-
-     * - parameter estimateItemSize: Estimated size, a square size estimated based on configuration
-     *         Taking a vertically scrolling formView as an example:
-     *             Under QuickFlowLayout, if the section has 3 columns and the item's weight is 2, then this size is a square of two item widths plus one spacing. Get this size as needed and calculate the actual size based on scroll direction (even if the returned actual width is less than two item widths, the item will occupy two column positions)
-     *             Under QuickYogaLayout, estimateItemSize returns the square size of the item's drawable area (i.e., the remaining width after deducting the left and right spacing of formView.contentInset and section.contentInset)
-     * - parameter view:    The view it belongs to
-     * - parameter layoutType: Layout method, free under QuickYogaLayout, set to corresponding layout method based on scroll direction under other layouts
+     * - parameter layoutType: 布局方式
      */
-    func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize?
+    func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListScrollView, layoutType: ItemCellLayoutType) -> CGSize?
 }
 
 /**
@@ -109,23 +96,38 @@ open class ItemOf<Cell: ItemCell>: Item, ItemViewRepresentable {
         }
     }
     
-    public func regist(to view: QuickListView) {
-        if let fromNib = self.fromNib {
-            view.register(fromNib, forCellWithReuseIdentifier: identifier)
-        } else {
-            view.register(Cell.self, forCellWithReuseIdentifier: identifier)
-        }
+    public func regist(to view: QuickListScrollView) {
+        view.reuseManager.registerCell(Cell.self, identifier: identifier)
     }
     
-    public func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell? {
-        let cell = view.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? Cell
+    public func cellForItem(_ item: Item, in view: QuickListScrollView, for indexPath: IndexPath) -> ItemCell? {
+        var cell: Cell?
+        
+        if let fromNib = self.fromNib {
+            // 从 NIB 创建
+            // Create from NIB
+            cell = fromNib.instantiate(withOwner: nil, options: nil).first as? Cell
+        } else {
+            // 从重用池获取或创建新的
+            // Get from reuse pool or create new
+            if let reusedCell = view.reuseManager.dequeueCell(identifier: identifier, indexPath: indexPath) as? Cell {
+                cell = reusedCell
+            } else {
+                cell = Cell(frame: .zero)
+            }
+        }
+        
+        cell?.reuseIdentifier = identifier
+        cell?.indexPath = indexPath
+        
         if let cell = cell {
             onCreated?(item, cell)
         }
+        
         return cell
     }
     
-    open func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
+    open func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListScrollView, layoutType: ItemCellLayoutType) -> CGSize? {
         assertionFailure("Need to override this method to set size")
         return nil
     }
@@ -149,7 +151,7 @@ public protocol ItemViewBinderRepresentable: ItemViewRepresentable {
  */
 public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentable {
     public typealias ViewCreatedBlock = ((_ item: I, _ view: Cell) -> Void)
-    public typealias SizeBlock = ((_ item: I, _ estimateItemSize: CGSize, _ view: QuickListView, _ layoutType: ItemCellLayoutType) -> CGSize)
+    public typealias SizeBlock = ((_ item: I, _ estimateItemSize: CGSize, _ view: QuickListScrollView, _ layoutType: ItemCellLayoutType) -> CGSize)
     
     /**
      * 从xib创建的对象传入对应的xib（将影响注册逻辑）
@@ -179,7 +181,7 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
      */
     public var onCreated: ViewCreatedBlock?
     
-    init(fromNib: UINib? = nil, onSizeGet: @escaping SizeBlock, onCreated: ViewCreatedBlock? = nil) {
+    public init(fromNib: UINib? = nil, onSizeGet: @escaping SizeBlock, onCreated: ViewCreatedBlock? = nil) {
         self.fromNib = fromNib
         self.onSizeGet = onSizeGet
         self.onCreated = onCreated
@@ -189,12 +191,8 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
      * 调用此方法来注册
      * Call this method to register
      */
-    public func regist(to view: QuickListView) {
-        if let fromNib = self.fromNib {
-            view.register(fromNib, forCellWithReuseIdentifier: identifier)
-        } else {
-            view.register(Cell.self, forCellWithReuseIdentifier: identifier)
-        }
+    public func regist(to view: QuickListScrollView) {
+        view.reuseManager.registerCell(Cell.self, identifier: identifier)
     }
     
     open func updateCell() {
@@ -204,22 +202,34 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
      调用此方法来获取指定item相对应的cell
      Call this method to get the cell corresponding to the specified item
      
-     - parameter item:    要获取view的section
-     - parameter view:    所在的view
-     - parameter indexPath: 位置
-     - parameter item:    Section to get view for
-     - parameter view:    The view it belongs to
-     - parameter indexPath: Position
+     - parameter item:    要获取view的item / Item to get view for
+     - parameter view:    所在的view / The view it belongs to
+     - parameter indexPath: 位置 / Position
      
-     - returns: 对应的cell
-     - returns: Corresponding cell
+     - returns: 对应的cell / Corresponding cell
      */
-    public func viewForItem(_ item: Item, in view: QuickListView, for indexPath: IndexPath) -> UICollectionViewCell? {
+    public func cellForItem(_ item: Item, in view: QuickListScrollView, for indexPath: IndexPath) -> ItemCell? {
         guard let item = item as? I else { return nil }
-        let cell = view.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as? Cell
+        
+        var cell: Cell?
+        
+        if let fromNib = self.fromNib {
+            cell = fromNib.instantiate(withOwner: nil, options: nil).first as? Cell
+        } else {
+            if let reusedCell = view.reuseManager.dequeueCell(identifier: identifier, indexPath: indexPath) as? Cell {
+                cell = reusedCell
+            } else {
+                cell = Cell(frame: .zero)
+            }
+        }
+        
+        cell?.reuseIdentifier = identifier
+        cell?.indexPath = indexPath
+        
         if let cell = cell {
             onCreated?(item, cell)
         }
+        
         return cell
     }
     
@@ -227,7 +237,7 @@ public class ItemCellBinder<I: Item, Cell: ItemCell>: ItemViewBinderRepresentabl
      * 调用此方法计算尺寸
      * Call this method to calculate size
      */
-    public func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListView, layoutType: ItemCellLayoutType) -> CGSize? {
+    public func sizeForItem(_ item: Item, with estimateItemSize: CGSize, in view: QuickListScrollView, layoutType: ItemCellLayoutType) -> CGSize? {
         guard let item = item as? I else { return nil }
         return onSizeGet(item, estimateItemSize, view, layoutType)
     }
@@ -251,11 +261,11 @@ open class Item: NSObject {
         return section?.form
     }
     /**
-     * Item所在的列表视图对象(只读)
-     * List view object where Item belongs (read-only)
+     * Item所在的滚动视图对象(只读)
+     * Scroll view object where Item belongs (read-only)
      */
-    public var listView: QuickListView? {
-        return form?.listView
+    public var scrollView: QuickListScrollView? {
+        return form?.scrollView
     }
     /**
      * Item所在的Section

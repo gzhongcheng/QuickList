@@ -6,10 +6,13 @@
 //
 
 import Foundation
+import UIKit
 import SnapKit
 
 // MARK: - Auto-adjusting content size HeaderFooterView
-open class FormCompressibleHeaderFooterView: UICollectionReusableView {
+/// 可压缩的 Header/Footer 视图基类
+/// Compressible Header/Footer view base class
+open class FormCompressibleHeaderFooterView: QuickScrollViewReusableView {
     // MARK: - Public
     /**
      * 展示内容尺寸变化的方法，子类中可以在这里做内容的压缩、拉伸等处理
@@ -21,7 +24,7 @@ open class FormCompressibleHeaderFooterView: UICollectionReusableView {
     }
     
     // MARK: - Life Cycle
-    public override init(frame: CGRect) {
+    public required init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
     }

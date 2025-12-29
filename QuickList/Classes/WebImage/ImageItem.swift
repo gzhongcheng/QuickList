@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Kingfisher
 
-public extension ScrollObserverCellType where Self: UICollectionViewCell {
+public extension ScrollObserverCellType where Self: QuickScrollViewCell {
     /**
      * 所在的Scrollview是否正在滚动
      * Whether the Scrollview is scrolling
@@ -17,11 +17,8 @@ public extension ScrollObserverCellType where Self: UICollectionViewCell {
     func isScrolling() -> Bool {
         var superView = superview
         while superView != nil {
-            if let collectionView = superView as? UICollectionView {
-                if let handler = collectionView.delegate as? FormDelegate {
-                    return handler.isScrolling
-                }
-                return false
+            if let scrollView = superView as? QuickListScrollView {
+                return scrollView.handler.isScrolling
             }
             superView = superView?.superview
         }
@@ -30,7 +27,7 @@ public extension ScrollObserverCellType where Self: UICollectionViewCell {
 }
 
 // MARK: - ImageCell
-open class CollectionImageCell: ItemCell, ScrollObserverCellType {
+open class CollectionImageCell: ItemCell {
     
     public let imageBoxView: AnimatedImageView = AnimatedImageView()
     
@@ -49,11 +46,11 @@ open class CollectionImageCell: ItemCell, ScrollObserverCellType {
      * 滚动时停止播放gif
      * Stop playing gif when scrolling
      */
-    public func willBeginScrolling() {
+    open override func willBeginScrolling() {
         imageBoxView.stopAnimating()
     }
     
-    public func didEndScrolling() {
+    open override func didEndScrolling() {
         imageBoxView.startAnimating()
     }
 }

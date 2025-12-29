@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 open class Section: NSObject {
     /**
@@ -138,14 +139,14 @@ open class Section: NSObject {
         guard
             let form = self.form,
             let delegate = form.delegate,
-            let formView = delegate.formView
+            let scrollView = delegate.scrollFormView
         else {
             return .zero
         }
         let formContentInset = form.contentInset
         switch delegate.scrollDirection {
         case .vertical:
-            let maxWidth = formView.bounds.width - formContentInset.left - formContentInset.right
+            let maxWidth = scrollView.bounds.width - formContentInset.left - formContentInset.right
             if column > 1 {
                 let itemTotalWidth = maxWidth - self.contentInset.left - self.contentInset.right
                 let singleItemWidth: CGFloat = (itemTotalWidth - (column > 1 ? (itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
@@ -155,8 +156,8 @@ open class Section: NSObject {
                 return CGSize(width: maxWidth, height: maxWidth)
             }
         case .horizontal:
-            let formAutoInset = formView.adjustedContentInset
-            let maxHeight = formView.bounds.height - formContentInset.top - formContentInset.bottom - formAutoInset.top - formAutoInset.bottom
+            let formAutoInset = scrollView.adjustedContentInset
+            let maxHeight = scrollView.bounds.height - formContentInset.top - formContentInset.bottom - formAutoInset.top - formAutoInset.bottom
             if self.column > 1 {
                 let itemTotalHeight = maxHeight - self.contentInset.top - self.contentInset.bottom
                 let singleItemHeight: CGFloat = (itemTotalHeight - (column > 1 ? (itemSpace * CGFloat(column - 1)) : 0)) / CGFloat(column)
@@ -285,7 +286,7 @@ open class Section: NSObject {
      */
     public func reload() {
         self.needUpdateLayout = true
-        self.form?.listView?.reload()
+        self.form?.scrollView?.reload()
     }
 
     /**
@@ -297,17 +298,15 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addItem(with item: Item, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.append(item)
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
-            let itemIndex = self.items.count
             self.append(item)
-            listView?.insertItems(at: [IndexPath(row: itemIndex, section: sectionIndex)])
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
@@ -322,21 +321,17 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.append(contentsOf: items)
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
-            let itemIndex = self.items.count
-            var addedItemIndexPaths: [IndexPath] = []
-            items.enumerated().forEach { (index, item) in
+            items.forEach { item in
                 self.append(item)
-                addedItemIndexPaths.append(IndexPath(row: index + itemIndex, section: sectionIndex))
             }
-            listView?.insertItems(at: addedItemIndexPaths)
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
@@ -351,16 +346,15 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func insertItem(with item: Item, at index: Int, animation: ListReloadAnimation? = ListReloadAnimation.bottomSlide, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.insert(item, at: index)
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
             self.insert(item, at: index)
-            listView?.insertItems(at: [IndexPath(row: index, section: sectionIndex)])
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
@@ -375,18 +369,16 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func deleteItems(with items: [Item], animation: ListReloadAnimation? = ListReloadAnimation.leftSlide, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.removeAll(where: { items.contains($0) })
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
-            var removedItemIndexPaths: [IndexPath] = []
-            items.enumerated().forEach { (index, item) in
+            items.forEach { item in
                 if self.items.contains(item) {
-                    removedItemIndexPaths.append(item.indexPath!)
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
@@ -394,7 +386,6 @@ open class Section: NSObject {
                 }
             }
             self.items.removeAll(where: { items.contains($0) })
-            listView?.deleteItems(at: removedItemIndexPaths)
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: true)
         }, completion: completion)
@@ -422,31 +413,25 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceItems(with newItems: [Item], inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, outAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsInAnimation: ListReloadAnimation? = ListReloadAnimation.transform, otherSectionsOutAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.removeAll()
             self.append(contentsOf: newItems)
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
-            var removedItemIndexPaths: [IndexPath] = []
-            self.items.enumerated().forEach { (index, item) in
+            self.items.forEach { item in
                 if let cell = item.cell, let section = item.section {
                     outAnimation?.animateOut(view: cell, to: item, at: section)
                 }
                 item.section = nil
-                removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
             }
             self.items = newItems
-            var addedItemIndexPaths: [IndexPath] = []
-            newItems.enumerated().forEach { (index, item) in
+            newItems.forEach { item in
                 item.section = self
-                addedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
             }
-            listView?.deleteItems(at: removedItemIndexPaths)
-            listView?.insertItems(at: addedItemIndexPaths)
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: true)
         }, completion: completion)
@@ -462,30 +447,22 @@ open class Section: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceItems(with newItems: [Item], at range: Range<Int>, animation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
-        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+        guard self.form?.scrollView?.superview != nil, self.form?.scrollView?.window != nil else {
             self.replaceSubrange(range, with: newItems)
             setNeedReloadList()
             return
         }
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             let sectionIndex = self.index ?? 0
-            var removedItemIndexPaths: [IndexPath] = []
             self.items.enumerated().forEach { (index, item) in
                 if index >= range.lowerBound && index < range.upperBound {
                     if let cell = item.cell, let section = item.section {
                         animation?.animateOut(view: cell, to: item, at: section)
                     }
-                    removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
                 }
             }
             self.replaceSubrange(range, with: newItems)
-            var addedItemIndexPaths: [IndexPath] = []
-            newItems.enumerated().forEach { (index, item) in
-                addedItemIndexPaths.append(item.indexPath!)
-            }
-            listView?.deleteItems(at: removedItemIndexPaths)
-            listView?.insertItems(at: addedItemIndexPaths)
             self.needUpdateLayout = true
             layout?.reloadSectionsAfter(index: sectionIndex, needOldSectionAttributes: false)
         }, completion: completion)
@@ -505,7 +482,7 @@ open class Section: NSObject {
     
     func setNeedReloadList() {
         self.needUpdateLayout = true
-        self.form?.listView?.setNeedsReload()
+        self.form?.scrollView?.setNeedsReloadData()
     }
 }
 

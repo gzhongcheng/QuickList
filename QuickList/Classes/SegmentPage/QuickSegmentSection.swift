@@ -130,7 +130,7 @@ public class QuickSegmentSection: Section {
     
     public override var form: Form? {
         didSet {
-            self.form?.delegate?.formView?.handler.layout.add(self)
+            self.form?.delegate?.scrollFormView?.handler.layout.add(self)
         }
     }
     
@@ -192,7 +192,7 @@ public class QuickSegmentSection: Section {
         self.menuTabList.form.selectedItemDecoration = menuConfig.menuSelectedItemDecoration
         self.menuTabList.form.backgroundDecoration = menuConfig.menuBackgroundDecoration
         self.menuTabList.form.contentInset = menuConfig.menuListInsets
-        self.header = SectionHeaderFooterView<UICollectionReusableView>({[weak self] view, section in
+        self.header = SectionHeaderFooterView<QuickScrollViewReusableView>({[weak self] view, section in
             guard let self = self else { return }
             if let menuBackground = menuConfig.menuBackground {
                 view.addSubview(menuBackground)
@@ -222,7 +222,7 @@ public class QuickSegmentSection: Section {
         self.menuTabList.form.selectedItemDecoration = menuConfig.menuSelectedItemDecoration
         self.menuTabList.form.backgroundDecoration = menuConfig.menuBackgroundDecoration
         self.menuTabList.form.contentInset = menuConfig.menuListInsets
-        self.header = SectionHeaderFooterView<UICollectionReusableView>({[weak self] view, section in
+        self.header = SectionHeaderFooterView<QuickScrollViewReusableView>({[weak self] view, section in
             guard let self = self else { return }
             if let menuBackground = menuConfig.menuBackground {
                 view.addSubview(menuBackground)

@@ -3,22 +3,4 @@
    uuid = "D87D205A-83CF-433D-9B0B-49194951300C"
    type = "0"
    version = "2.0">
-   <Breakpoints>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "121B9EA5-AF89-462F-A4F8-77AB7C940CE1"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../QuickList/Classes/Base/Layouts/QuickListCollectionLayout.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1200"
-            endingLineNumber = "1200"
-            landmarkName = "suspensionHeaderAttributes(_:for:headerSize:suspensionHeader:suspensionHeaderSectionSize:with:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-   </Breakpoints>
 </Bucket>

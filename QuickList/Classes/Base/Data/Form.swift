@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public protocol FormDelegate : AnyObject {
     /**
@@ -14,10 +15,10 @@ public protocol FormDelegate : AnyObject {
      */
     var scrollDirection: UICollectionView.ScrollDirection { get }
     /**
-     * 列表控件
-     * List view
+     * 滚动视图控件
+     * Scroll view
      */
-    var formView: QuickListView? { get }
+    var scrollFormView: QuickListScrollView? { get }
     /**
      * 是否正在滚动
      * Whether scrolling
@@ -34,7 +35,7 @@ public protocol FormDelegate : AnyObject {
      *   - performBatchUpdates: 批量更新数据的逻辑 / Batch update logic
      *   - completion: 更新动画完成后的回调 / Completion after update
      */
-    func updateLayout(sections: [Section]?, inAnimation: ListReloadAnimation?, othersInAnimation: ListReloadAnimation?, performBatchUpdates: ((QuickListView?, QuickListCollectionLayout?) -> Void)?, completion: (() -> Void)?)
+    func updateLayout(sections: [Section]?, inAnimation: ListReloadAnimation?, othersInAnimation: ListReloadAnimation?, performBatchUpdates: ((QuickListScrollView?, QuickListCollectionLayout?) -> Void)?, completion: (() -> Void)?)
     
     /**
      * 获取控件尺寸
@@ -69,18 +70,18 @@ public final class Form: NSObject {
     /// delegate
     public weak var delegate: FormDelegate?
     /**
-     * 列表的总布局对象(实际传递给列表使用的UICollectionViewLayout对象, 只读)
-     * Total layout object for the list (the actual UICollectionViewLayout object passed to the list, read-only)
+     * 列表的总布局对象(只读)
+     * Total layout object for the list (read-only)
      */
     public var listLayout: QuickListCollectionLayout? {
-        return delegate?.formView?.handler.layout
+        return delegate?.scrollFormView?.handler.layout
     }
     /**
-     * 列表视图对象(只读)
-     * List view object (read-only)
+     * 滚动视图对象(只读)
+     * Scroll view object (read-only)
      */
-    public var listView: QuickListView? {
-        return delegate?.formView
+    public var scrollView: QuickListScrollView? {
+        return delegate?.scrollFormView
     }
     /**
      * 内容自定义布局（优先级 section.layout -> form.layout -> QuickListFlowLayout）
@@ -187,7 +188,7 @@ public final class Form: NSObject {
      * Only refresh interface layout
      */
     public func updateLayout(afterSection: Int, animation: ListReloadAnimation? = nil) {
-        delegate?.formView?.setNeedUpdateLayout(afterSection: afterSection, animation: animation)
+        delegate?.scrollFormView?.setNeedUpdateLayout(afterSection: afterSection, animation: animation)
     }
 
     /**
@@ -199,20 +200,17 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addSections(with sections: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.append(contentsOf: sections)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
-            var addedSectionIndexSet: IndexSet = IndexSet()
             sections.forEach { section in
                 self.append(section)
-                addedSectionIndexSet.insert(self.sections.count - 1)
             }
-            listView?.insertSections(addedSectionIndexSet)
-            layout?.reloadSectionsAfter(index: addedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+            layout?.reloadSectionsAfter(index: self.sections.count - sections.count, needOldSectionAttributes: false)
         }, completion: completion)
     }
 
@@ -225,15 +223,14 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func addSection(with section: Section, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.append(section)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             self.append(section)
-            listView?.insertSections(IndexSet(integer: self.sections.count - 1))
             layout?.reloadSectionsAfter(index: self.sections.count - 1, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -248,28 +245,27 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func insertSection(with section: Section, at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.insert(section, at: index)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             self.insert(section, at: index)
-            listView?.insertSections(IndexSet(integer: index))
             layout?.reloadSectionsAfter(index: index, needOldSectionAttributes: false)
         }, completion: completion)
     }
+    
     public func insertSections(with sections: [Section], at index: Int, animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.insert(contentsOf: sections, at: index)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             self.insert(contentsOf: sections, at: index)
-            listView?.insertSections(IndexSet(integersIn: index ..< index + sections.count))
             layout?.reloadSectionsAfter(index: index, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -284,43 +280,30 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceSections(with sections: [Section], inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.removeAll()
             self.append(contentsOf: sections)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
             if self.sections.count > 0 {
-                var removedSectionIndexSet: IndexSet = IndexSet()
-                var removedItemIndexPath: [IndexPath] = []
                 self.sections.enumerated().forEach { (sectionIndex, section) in
                     if let outAnimation = outAnimation {
                         section.items.enumerated().forEach { (itemIndex, item) in
                             if let cell = item.cell, let section = item.section {
                                 outAnimation.animateOut(view: cell, to: item, at: section)
                             }
-                            removedItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
                         }
                     }
                     section.form = nil
-                    removedSectionIndexSet.insert(sectionIndex)
                 }
                 self.sections.removeAll()
-                listView?.deleteItems(at: removedItemIndexPath)
-                listView?.deleteSections(removedSectionIndexSet)
             }
-            var insertSectionIndexSet: IndexSet = IndexSet()
-            var insertItemIndexPath: [IndexPath] = []
             sections.enumerated().forEach { sectionIndex, section in
                 self.append(section)
-                insertSectionIndexSet.insert(sectionIndex)
-                section.items.enumerated().forEach { (itemIndex, item) in
-                    insertItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
-                }
             }
-            listView?.insertSections(insertSectionIndexSet)
             layout?.reloadSectionsAfter(index: 0, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -335,14 +318,13 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func replaceSections(with sections: [Section], at range: Range<Int>, inAnimation: ListReloadAnimation? = nil, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.replaceSubrange(range, with: sections)
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
-            var removedSectionIndexSet: IndexSet = IndexSet()
             var removedSections: [Section] = []
             self.sections.enumerated().forEach { (index, section) in
                 if index >= range.lowerBound && index < range.upperBound  {
@@ -354,18 +336,13 @@ public final class Form: NSObject {
                         }
                     }
                     section.form = nil
-                    removedSectionIndexSet.insert(index)
                     removedSections.append(section)
                 }
             }
             self.sections.removeAll(where: { removedSections.contains($0) })
-            var addedSectionIndexSet: IndexSet = IndexSet()
             sections.enumerated().forEach { (index, section) in
                 self.insert(section, at: index + range.lowerBound)
-                addedSectionIndexSet.insert(index + range.lowerBound)
             }
-            listView?.deleteSections(removedSectionIndexSet)
-            listView?.insertSections(addedSectionIndexSet)
             layout?.reloadSectionsAfter(index: range.lowerBound, needOldSectionAttributes: false)
         }, completion: completion)
     }
@@ -379,16 +356,17 @@ public final class Form: NSObject {
      *   - completion: 完成回调 / Completion callback
      */
     public func deleteSections(with sections: [Section], inAnimation: ListReloadAnimation? = .transform, outAnimation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
-        guard self.listView?.superview != nil, self.listView?.window != nil else {
+        guard self.scrollView?.superview != nil, self.scrollView?.window != nil else {
             self.removeAll(where: { sections.contains($0) })
             setNeedReloadList()
             return
         }
-        self.delegate?.updateLayout(sections: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
+        var minIndex = Int.max
+        self.delegate?.updateLayout(sections: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (scrollView, layout) in
             guard let `self` = self else { return }
-            var removedSectionIndexSet: IndexSet = IndexSet()
             sections.forEach { section in
                 if let index = self.sections.firstIndex(where: { $0.index == section.index }) {
+                    minIndex = Swift.min(minIndex, index)
                     if let outAnimation = outAnimation {
                         section.items.forEach { item in
                             if let cell = item.cell, let section = item.section {
@@ -397,17 +375,15 @@ public final class Form: NSObject {
                         }
                     }
                     section.form = nil
-                    removedSectionIndexSet.insert(index)
                 }
             }
             self.removeAll(where: { sections.contains($0) })
-            listView?.deleteSections(removedSectionIndexSet)
-            layout?.reloadSectionsAfter(index: removedSectionIndexSet.first ?? 0, needOldSectionAttributes: false)
+            layout?.reloadSectionsAfter(index: minIndex, needOldSectionAttributes: false)
         }, completion: completion)
     }
     
     func setNeedReloadList() {
-        self.listView?.setNeedsReload()
+        self.scrollView?.setNeedsReloadData()
     }
 }
 

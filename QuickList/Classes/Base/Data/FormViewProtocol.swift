@@ -6,6 +6,17 @@
 //
 
 import Foundation
+import UIKit
+
+// MARK: - FormViewHandlerDelegate
+
+/// FormViewHandler 代理协议
+/// FormViewHandler delegate protocol
+@objc public protocol FormViewHandlerDelegate: UIScrollViewDelegate {
+    
+}
+
+// MARK: - FormViewLongTapProtorol
 
 /**
  * 长按事件处理代理

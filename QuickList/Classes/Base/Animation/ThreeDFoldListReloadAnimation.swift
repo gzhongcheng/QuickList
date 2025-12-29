@@ -63,7 +63,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         targetAttributes?.alpha = 1
         guard
             let snapshotImage = view.takeSnapshot(view.bounds),
-            let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
+            let targetView = section.form?.scrollView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
         let snapshot = UIImageView(image: snapshotImage)
         CATransaction.begin()
@@ -118,7 +118,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
     public override func animateOut(view: UIView, to item: Item?, at section: Section) {
         guard
             let snapshotImage = view.takeSnapshot(view.bounds),
-            let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
+            let targetView = section.form?.scrollView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
         let snapshot = UIImageView(image: snapshotImage)
         targetView.addSubview(snapshot)

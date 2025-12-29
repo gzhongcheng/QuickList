@@ -127,7 +127,7 @@ open class SwipeItemCell: ItemCell {
         
         switch gesture.state {
         case .began:
-            if let currentSwipeCell = self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell, currentSwipeCell != self {
+            if let currentSwipeCell = self.item?.section?.form?.delegate?.scrollFormView?.handler.currentOpenedSwipeCell, currentSwipeCell != self {
                 currentSwipeCell.closeSwipeActions()
             }
             prohibitScroll(for: self.contentView)
@@ -216,7 +216,7 @@ open class SwipeItemCell: ItemCell {
     }
 
     public func openSwipeActions() {
-        self.item?.section?.form?.delegate?.formView?.handler.currentOpenedSwipeCell = self
+        self.item?.section?.form?.delegate?.scrollFormView?.handler.currentOpenedSwipeCell = self
         if autoTriggerFirstButton, (1 - lastGestureProgress) * totalButtonsWidth() < autoTriggerFirstButtonThreshold {
             self.swipedActionButtons.first?.touchUpInsideAction?()
             UIView.animate(withDuration: 0.25, delay: 0) {

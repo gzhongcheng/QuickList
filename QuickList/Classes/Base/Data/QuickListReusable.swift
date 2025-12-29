@@ -23,8 +23,8 @@ public enum QuickListReusableType: String {
     case suspensionDecoration
     
     /**
-     * 系统collectionview对应的kind
-     * Corresponding kind for system collectionview
+     * 对应的 elementKind
+     * Corresponding elementKind
      */
     var elementKind: String {
         switch self {
@@ -101,19 +101,16 @@ public protocol FormHeaderFooterReusable {
      * 调用此方法来注册
      * Call this method to register
      */
-    func regist(to view: QuickListView, for type: QuickListReusableType)
+    func regist(to view: QuickListScrollView, for type: QuickListReusableType)
     
     /**
      * 调用此方法来获取指定form的header或footer相对应的view
      * Call this method to get the view corresponding to the specified form's header or footer
-     * - parameter type:       类型（header或footer）
-     * - parameter type:       Type (header or footer)
-     * - parameter collectionView: 所在的view
-     * - parameter collectionView: The view it belongs to
-     * - returns: 对应的view
-     * - returns: Corresponding view
+     * - parameter type:       类型（header或footer）/ Type (header or footer)
+     * - parameter view:       所在的view / The view it belongs to
+     * - returns: 对应的view / Corresponding view
      */
-    func view(for type: QuickListReusableType,in view: QuickListView) -> UICollectionReusableView?
+    func view(for type: QuickListReusableType, in view: QuickListScrollView, at indexPath: IndexPath) -> QuickScrollViewReusableView?
 }
 
 public protocol FormCompressibleHeaderFooterReusable: FormHeaderFooterReusable {
@@ -146,23 +143,19 @@ public protocol SectionReusableViewRepresentable {
      * 调用此方法来注册
      * Call this method to register
      */
-    func regist(to view: QuickListView, for type: QuickListReusableType)
+    func regist(to view: QuickListScrollView, for type: QuickListReusableType)
 
     /**
      * 调用此方法来获取指定section的header或footer相对应的view
      * Call this method to get the view corresponding to the specified section's header or footer
      *
-     * - parameter section:    要获取view的section
-     * - parameter section:    Section to get view for
-     * - parameter collectionView: 所在的view
-     * - parameter collectionView: The view it belongs to
-     * - parameter type:       类型（header或footer）
-     * - parameter type:       Type (header or footer)
+     * - parameter section:    要获取view的section / Section to get view for
+     * - parameter view:       所在的view / The view it belongs to
+     * - parameter type:       类型（header或footer）/ Type (header or footer)
      *
-     * - returns: 对应的view
-     * - returns: Corresponding view
+     * - returns: 对应的view / Corresponding view
      */
-    func viewForSection(_ section: Section, in view: QuickListView, type: QuickListReusableType, for indexPath: IndexPath) -> UICollectionReusableView?
+    func viewForSection(_ section: Section, in view: QuickListScrollView, type: QuickListReusableType, for indexPath: IndexPath) -> QuickScrollViewReusableView?
 }
 
 public protocol SectionHeaderFooterViewRepresentable: SectionReusableViewRepresentable {
@@ -190,7 +183,7 @@ public protocol SectionHeaderFooterViewRepresentable: SectionReusableViewReprese
  * 用于生成decoration
  * Used to generate decoration
  */
-public class FormDecorationView<ViewType: UICollectionReusableView>: FormHeaderFooterReusable {
+public class FormDecorationView<ViewType: QuickScrollViewReusableView>: FormHeaderFooterReusable {
     
     public typealias ViewSetupBlock = ((_ view: ViewType) -> Void)
     
@@ -257,24 +250,39 @@ public class FormDecorationView<ViewType: UICollectionReusableView>: FormHeaderF
     /**
      调用此方法来获取指定form的header或footer相对应的view
      - parameter type:       类型（header或footer）
-     - parameter collectionView: 所在的view
+     - parameter view:       所在的view
+     - parameter indexPath:  位置
      - returns: 对应的view
      */
-    public func view(for type: QuickListReusableType,in view: QuickListView) -> UICollectionReusableView? {
-        let resultView: ViewType? = view.dequeueReusableSupplementaryView(ofKind: type.elementKind, withReuseIdentifier: identifier, for: IndexPath(index: 0)) as? ViewType
+    public func view(for type: QuickListReusableType, in view: QuickListScrollView, at indexPath: IndexPath) -> QuickScrollViewReusableView? {
+        var resultView: ViewType?
+        
+        // 从重用池获取或创建新的
+        // Get from reuse pool or create new
+        if let reusedView = view.reuseManager.dequeueReusableView(
+            elementKind: type.elementKind,
+            identifier: identifier,
+            indexPath: indexPath
+        ) as? ViewType {
+            resultView = reusedView
+        } else if let fromNib = self.fromNib {
+            resultView = fromNib.instantiate(withOwner: nil, options: nil).first as? ViewType
+        } else {
+            resultView = ViewType(frame: .zero)
+        }
+        
         guard let v = resultView else { return nil }
+        v.reuseIdentifier = identifier
+        v.elementKind = type.elementKind
+        v.indexPath = indexPath
         onSetupView?(v)
         self.currentView = v
         return v
     }
     
     /// 注册decoration
-    public func regist(to view: QuickListView, for type: QuickListReusableType) {
-        if let fromNib = self.fromNib {
-            view.register(fromNib, forCellWithReuseIdentifier: identifier)
-        } else {
-            view.register(ViewType.self, forSupplementaryViewOfKind: type.elementKind, withReuseIdentifier: identifier)
-        }
+    public func regist(to view: QuickListScrollView, for type: QuickListReusableType) {
+        view.reuseManager.registerReusableView(ViewType.self, elementKind: type.elementKind, identifier: identifier)
     }
 
     /**
@@ -341,7 +349,7 @@ public class FormCompressibleDecorationView<ViewType: FormCompressibleHeaderFoot
 /**
  *  用于生成decoration
  */
-public class SectionDecorationView<ViewType: UICollectionReusableView>: SectionReusableViewRepresentable {
+public class SectionDecorationView<ViewType: QuickScrollViewReusableView>: SectionReusableViewRepresentable {
     
     public typealias ViewSetupBlock = ((_ view: ViewType, _ section: Section) -> Void)
     
@@ -368,16 +376,34 @@ public class SectionDecorationView<ViewType: UICollectionReusableView>: SectionR
     private var fromNib: UINib?
 
     /**
-     CollectionView中调用此方法来获取section中的headerView或footerView
+     调用此方法来获取section中的headerView或footerView
      
      - parameter section:    目标section
      - parameter type:       header 或 footer.
      
      - returns: view
      */
-    public func viewForSection(_ section: Section, in view: QuickListView, type: QuickListReusableType, for indexPath: IndexPath) -> UICollectionReusableView? {
-        let resultView: ViewType? = view.dequeueReusableSupplementaryView(ofKind: type.elementKind, withReuseIdentifier: identifier, for: indexPath) as? ViewType
+    public func viewForSection(_ section: Section, in view: QuickListScrollView, type: QuickListReusableType, for indexPath: IndexPath) -> QuickScrollViewReusableView? {
+        var resultView: ViewType?
+        
+        // 从重用池获取或创建新的
+        // Get from reuse pool or create new
+        if let reusedView = view.reuseManager.dequeueReusableView(
+            elementKind: type.elementKind,
+            identifier: identifier,
+            indexPath: indexPath
+        ) as? ViewType {
+            resultView = reusedView
+        } else if let fromNib = self.fromNib {
+            resultView = fromNib.instantiate(withOwner: nil, options: nil).first as? ViewType
+        } else {
+            resultView = ViewType(frame: .zero)
+        }
+        
         guard let v = resultView else { return nil }
+        v.reuseIdentifier = identifier
+        v.elementKind = type.elementKind
+        v.indexPath = indexPath
         onSetupView?(v, section)
         self.currentView = v
         return v
@@ -387,12 +413,8 @@ public class SectionDecorationView<ViewType: UICollectionReusableView>: SectionR
      * 注册decoration
      * Register decoration
      */
-    public func regist(to view: QuickListView, for type: QuickListReusableType) {
-        if let fromNib = self.fromNib {
-            view.register(fromNib, forCellWithReuseIdentifier: identifier)
-        } else {
-            view.register(ViewType.self, forSupplementaryViewOfKind: type.elementKind, withReuseIdentifier: identifier)
-        }
+    public func regist(to view: QuickListScrollView, for type: QuickListReusableType) {
+        view.reuseManager.registerReusableView(ViewType.self, elementKind: type.elementKind, identifier: identifier)
     }
 
     /**
@@ -410,7 +432,7 @@ public class SectionDecorationView<ViewType: UICollectionReusableView>: SectionR
 /**
  *  用于生成header或footer
  */
-public class SectionHeaderFooterView<ViewType: UICollectionReusableView>: SectionHeaderFooterViewRepresentable {
+public class SectionHeaderFooterView<ViewType: QuickScrollViewReusableView>: SectionHeaderFooterViewRepresentable {
     
     public typealias ViewSetupBlock = ((_ view: ViewType, _ section: Section) -> Void)
     
@@ -469,16 +491,34 @@ public class SectionHeaderFooterView<ViewType: UICollectionReusableView>: Sectio
     private var fromNib: UINib?
 
     /**
-     CollectionView中调用此方法来获取section中的headerView或footerView
+     调用此方法来获取section中的headerView或footerView
      
      - parameter section:    目标section
      - parameter type:       header 或 footer.
      
      - returns: view
      */
-    public func viewForSection(_ section: Section, in view: QuickListView, type: QuickListReusableType, for indexPath: IndexPath) -> UICollectionReusableView? {
-        let resultView: ViewType? = view.dequeueReusableSupplementaryView(ofKind: type.elementKind, withReuseIdentifier: identifier, for: indexPath) as? ViewType
+    public func viewForSection(_ section: Section, in view: QuickListScrollView, type: QuickListReusableType, for indexPath: IndexPath) -> QuickScrollViewReusableView? {
+        var resultView: ViewType?
+        
+        // 从重用池获取或创建新的
+        // Get from reuse pool or create new
+        if let reusedView = view.reuseManager.dequeueReusableView(
+            elementKind: type.elementKind,
+            identifier: identifier,
+            indexPath: indexPath
+        ) as? ViewType {
+            resultView = reusedView
+        } else if let fromNib = self.fromNib {
+            resultView = fromNib.instantiate(withOwner: nil, options: nil).first as? ViewType
+        } else {
+            resultView = ViewType(frame: .zero)
+        }
+        
         guard let v = resultView else { return nil }
+        v.reuseIdentifier = identifier
+        v.elementKind = type.elementKind
+        v.indexPath = indexPath
         onSetupView?(v, section)
         currentView = v
         return v
@@ -488,12 +528,8 @@ public class SectionHeaderFooterView<ViewType: UICollectionReusableView>: Sectio
      * 注册Header/Footer
      * Register Header/Footer
      */
-    public func regist(to view: QuickListView, for type: QuickListReusableType) {
-        if let fromNib = self.fromNib {
-            view.register(fromNib, forCellWithReuseIdentifier: identifier)
-        } else {
-            view.register(ViewType.self, forSupplementaryViewOfKind: type.elementKind, withReuseIdentifier: identifier)
-        }
+    public func regist(to view: QuickListScrollView, for type: QuickListReusableType) {
+        view.reuseManager.registerReusableView(ViewType.self, elementKind: type.elementKind, identifier: identifier)
     }
 
     /**
@@ -538,7 +574,9 @@ public class SectionHeaderFooterView<ViewType: UICollectionReusableView>: Sectio
     }
 }
 
-class SectionStringHeaderFooterView: UICollectionReusableView {
+/// 字符串类型的 Header/Footer 视图
+/// String type Header/Footer view
+class SectionStringHeaderFooterView: QuickScrollViewReusableView {
     /**
      * 展示的标题内容
      * Title content to be displayed
@@ -591,7 +629,7 @@ class SectionStringHeaderFooterView: UICollectionReusableView {
     
     public let titleLabel: UILabel = UILabel()
     
-    override init(frame: CGRect) {
+    required init(frame: CGRect) {
         super.init(frame: frame)
         
         backgroundColor = UIColor.init(white: 0.88, alpha: 1.0)

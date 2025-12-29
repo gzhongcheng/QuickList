@@ -80,7 +80,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
     public override func layoutWith(layout: QuickListCollectionLayout, section: Section, currentStart: CGPoint) -> QuickListSectionAttribute {
         let attribute = QuickListSectionAttribute()
         guard
-            let formView = section.form?.delegate?.formView,
+            let formView = section.form?.delegate?.scrollFormView,
             let form = section.form,
             let sectionIndex = section.index
         else { return attribute }

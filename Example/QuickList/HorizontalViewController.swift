@@ -93,10 +93,10 @@ class HorizontalViewController: UIViewController {
             section.itemSpace = 10
             section.column = 3
             /**
-             * 可以是自定义的UICollectionReusableView
-             * Can be a custom UICollectionReusableView
+             * 可以是自定义的QuickScrollViewReusableView
+             * Can be a custom QuickScrollViewReusableView
              */
-            section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
+            section.footer = SectionHeaderFooterView<QuickScrollViewReusableView> { view,section in
                 view.backgroundColor = .lightGray
             }
             /**
@@ -106,7 +106,7 @@ class HorizontalViewController: UIViewController {
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
-            section.decoration = SectionDecorationView<UICollectionReusableView> { view, _  in
+            section.decoration = SectionDecorationView<QuickScrollViewReusableView> { view, _  in
                 let imageView = UIImageView(image: UIImage(named: "E-1251692-C01A20FE"))
                 view.addSubview(imageView)
                 imageView.snp.makeConstraints { make in

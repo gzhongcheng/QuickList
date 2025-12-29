@@ -52,7 +52,7 @@ public final class LineItem: ItemOf<CollectionLineCell>, ItemType {
     public var lineWidth: CGFloat = 0.5 {
         didSet {
             guard let indexPath = self.indexPath else { return }
-            section?.form?.delegate?.formView?.reloadItems(at: [indexPath])
+            section?.form?.delegate?.scrollFormView?.reloadItems(at: [indexPath])
         }
     }
     

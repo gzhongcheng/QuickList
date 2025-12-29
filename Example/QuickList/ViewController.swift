@@ -112,7 +112,7 @@ class ViewController: UIViewController {
         formHeader.displayType = .normal
         formlist.form.header = formHeader
         
-//        formlist.form.footer = FormDecorationView<UICollectionReusableView> { view in
+//        formlist.form.footer = FormDecorationView<QuickScrollViewReusableView> { view in
 //            view.backgroundColor = .yellow
 //        }
 //        formlist.form.footer?.height = { _,_,_ in
@@ -204,10 +204,10 @@ class ViewController: UIViewController {
             section.itemSpace = 10
             section.column = 3
             /**
-             * 可以是自定义的UICollectionReusableView
-             * Can be a custom UICollectionReusableView
+             * 可以是自定义的QuickScrollViewReusableView
+             * Can be a custom QuickScrollViewReusableView
              */
-            section.footer = SectionHeaderFooterView<UICollectionReusableView> { view,section in
+            section.footer = SectionHeaderFooterView<QuickScrollViewReusableView> { view,section in
                 view.backgroundColor = .lightGray
             }
             /**
@@ -217,7 +217,7 @@ class ViewController: UIViewController {
             section.footer?.height = { section, estimateItemSize, scrollDirection in
                 return 40
             }
-            section.decoration = SectionDecorationView<UICollectionReusableView> { view, _  in
+            section.decoration = SectionDecorationView<QuickScrollViewReusableView> { view, _  in
                 let imageView = UIImageView(image: UIImage(named: "E-1251692-C01A20FE"))
                 view.addSubview(imageView)
                 imageView.snp.makeConstraints { make in
@@ -340,7 +340,7 @@ class ViewController: UIViewController {
             section.contentInset = .init(top: 20, left: 16, bottom: 20, right: 16)
             section.lineSpace = 10
             section.column = 1
-//            section.decoration = SectionDecorationView<UICollectionReusableView> { view in
+//            section.decoration = SectionDecorationView<QuickScrollViewReusableView> { view in
 //                view.backgroundColor = .yellow
 //            }
             section.header?.shouldSuspension = true

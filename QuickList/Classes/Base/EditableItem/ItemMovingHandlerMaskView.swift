@@ -169,7 +169,7 @@ public class ItemMovingHandlerMaskView: UIView {
         
         DispatchQueue.main.async {
             guard
-                let listView = self.item?.section?.form?.delegate?.formView
+                let listView = self.item?.section?.form?.delegate?.scrollFormView
             else { return }
             let pointInScrollView = listView.convert(pointInWindow, from: UIApplication.shared.keyWindow)
             switch listView.scrollDirection {
@@ -205,7 +205,7 @@ public class ItemMovingHandlerMaskView: UIView {
         if let targetMoveIndexPath = self.targetMoveIndexPath {
             removeTargetIndicator()
             item.isDragging = false
-            item.form?.delegate?.formView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+            item.form?.delegate?.scrollFormView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
                 guard
                   let section = item.section, 
                   let currentItemIndexPath = item.indexPath, 
@@ -233,7 +233,7 @@ public class ItemMovingHandlerMaskView: UIView {
         } else {
             let itemAttr = item.form?.listLayout?.layoutAttributesForItem(at: indexPath)
             let itemFrame = itemAttr?.frame ?? .zero
-            let itemPointInWindow = item.form?.delegate?.formView?.convert(itemFrame.origin, to: UIApplication.shared.keyWindow) ?? .zero
+            let itemPointInWindow = item.form?.delegate?.scrollFormView?.convert(itemFrame.origin, to: UIApplication.shared.keyWindow) ?? .zero
             UIView.animate(withDuration: 0.3, animations: {
                 self.moveSnapshotContainerView.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
             }, completion: { _ in
@@ -254,7 +254,7 @@ public class ItemMovingHandlerMaskView: UIView {
             return
         }
         guard
-            let listView = self.item?.section?.form?.delegate?.formView
+            let listView = self.item?.section?.form?.delegate?.scrollFormView
         else {
             stopAutoScroll()
             return
@@ -285,7 +285,7 @@ public class ItemMovingHandlerMaskView: UIView {
     
     @objc private func scrollScrollView() {
         guard
-            let listView = self.item?.section?.form?.delegate?.formView,
+            let listView = self.item?.section?.form?.delegate?.scrollFormView,
             let targetPoint = self.autoScrollTargetPoint
         else {
             return
@@ -344,7 +344,7 @@ public class ItemMovingHandlerMaskView: UIView {
         guard
             !isUpdatingTargetPointer,
             let item = self.item,
-            let listView = item.form?.delegate?.formView,
+            let listView = item.form?.delegate?.scrollFormView,
             let moveSnapshot = self.moveSnapshot,
             let targetItem = item.form?.listLayout?.getTargetItem(at: moveSnapshot.convert(CGPoint(x: moveStartPointInItem.x, y: moveStartPointInItem.y), to: listView)),
             let targetIndexPath = targetItem.indexPath,
@@ -548,7 +548,7 @@ public class ItemMovingHandlerMaskView: UIView {
                 removeTargetIndicator()
                 isUpdatingTargetPointer = true
                 DispatchQueue.main.async {
-                    item.form?.delegate?.formView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
+                    item.form?.delegate?.scrollFormView?.handler.updateLayout(sections: nil, inAnimation: .transform, othersInAnimation: .transform) { (listView, layout) in
                         guard
                             let section = item.section,
                             let currentItemIndexPath = item.indexPath,

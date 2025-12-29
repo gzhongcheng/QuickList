@@ -147,7 +147,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
              * Calculate the Header of the entire list
              */
             if
-                let collectionView = self.collectionView,
+                let scrollView = form.delegate?.scrollFormView,
                 let header = form.header
             {
                 headerAttributes = UICollectionViewLayoutAttributes(
@@ -156,12 +156,12 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 )
                 var frame: CGRect = .zero
                 if self.scrollDirection == .vertical {
-                    let height = header.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
+                    let height = header.height(form, scrollView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: 0, y: currentOffset.y, width: scrollView.bounds.width, height: height)
                     currentOffset.y += height
                 } else {
-                    let height = collectionView.bounds.size.height - collectionView.adjustedContentInset.top - collectionView.adjustedContentInset.bottom
-                    let width = header.height(form, CGSize(width: collectionView.bounds.size.width, height: height), self.scrollDirection)
+                    let height = scrollView.bounds.size.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom
+                    let width = header.height(form, CGSize(width: scrollView.bounds.size.width, height: height), self.scrollDirection)
                     frame = CGRect(x: currentOffset.x, y: 0, width: width, height: height)
                     currentOffset.x += width
                 }
@@ -296,7 +296,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
          * 计算整个列表的Footer
          * Calculate the Footer of the entire list
          */
-        if let collectionView = self.collectionView {
+        if let scrollView = form.delegate?.scrollFormView {
             if let footer = form.footer {
                 footerAttributes = UICollectionViewLayoutAttributes(
                     forSupplementaryViewOfKind: QuickListReusableType.formFooter.elementKind,
@@ -304,12 +304,12 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                 )
                 var frame: CGRect = .zero
                 if self.scrollDirection == .vertical {
-                    let height = footer.height(form, collectionView.bounds.size, self.scrollDirection)
-                    frame = CGRect(x: 0, y: currentOffset.y, width: collectionView.bounds.width, height: height)
+                    let height = footer.height(form, scrollView.bounds.size, self.scrollDirection)
+                    frame = CGRect(x: 0, y: currentOffset.y, width: scrollView.bounds.width, height: height)
                     currentOffset.y += height
                 } else {
-                    let height = collectionView.bounds.size.height - collectionView.adjustedContentInset.top - collectionView.adjustedContentInset.bottom
-                    let width = footer.height(form, CGSize(width: collectionView.bounds.size.width, height: height), self.scrollDirection)
+                    let height = scrollView.bounds.size.height - scrollView.adjustedContentInset.top - scrollView.adjustedContentInset.bottom
+                    let width = footer.height(form, CGSize(width: scrollView.bounds.size.width, height: height), self.scrollDirection)
                     frame = CGRect(x: currentOffset.x, y: 0, width: width, height: height)
                     currentOffset.x += width
                 }
@@ -320,7 +320,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         
         if form.needCenterIfNotFull {
             if scrollDirection == .vertical {
-                if currentOffset.y < form.delegate?.formView?.bounds.height ?? 0 {
+                if currentOffset.y < form.delegate?.scrollFormView?.bounds.height ?? 0 {
                     /**
                      * 如果内容高度小于视图高度，居中显示
                      * If content height is less than view height, center display
@@ -329,7 +329,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                      * 计算内容需要偏移的位置
                      * Calculate the offset position needed for content
                      */
-                    let offsetY = ((form.delegate?.formView?.bounds.height ?? 0) - currentOffset.y) * 0.5
+                    let offsetY = ((form.delegate?.scrollFormView?.bounds.height ?? 0) - currentOffset.y) * 0.5
                     /**
                      * 设置所有内容偏移
                      * Set all content offset
@@ -345,7 +345,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     }
                 }
             } else {
-                if currentOffset.x < form.delegate?.formView?.bounds.width ?? 0 {
+                if currentOffset.x < form.delegate?.scrollFormView?.bounds.width ?? 0 {
                     /**
                      * 如果内容宽度小于视图宽度，居中显示
                      * If content width is less than view width, center display
@@ -354,7 +354,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                      * 计算内容需要偏移的位置
                      * Calculate the offset position needed for content
                      */
-                    let offsetX = ((form.delegate?.formView?.bounds.width ?? 0) - currentOffset.x) * 0.5
+                    let offsetX = ((form.delegate?.scrollFormView?.bounds.width ?? 0) - currentOffset.x) * 0.5
                     /**
                      * 设置所有内容偏移
                      * Set all content offset
@@ -400,16 +400,17 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         super.prepare()
         if needReloadAll {
             self.invalidateLayout()
+            let scrollViewBounds = form?.delegate?.scrollFormView?.bounds ?? .zero
             if self.scrollDirection == .horizontal {
                 guard
-                    collectionView?.bounds.size.height ?? 0 > 0
+                    scrollViewBounds.size.height > 0
                 else {
                     print("collectionview的尺寸为0，不进行布局")
                     return
                 }
             } else {
                 guard
-                    collectionView?.bounds.size.width ?? 0 > 0
+                    scrollViewBounds.size.width > 0
                 else {
                     print("collectionview的尺寸为0，不进行布局")
                     return
@@ -449,7 +450,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     func addSection(section: Section, customStartPoint: CGPoint? = nil, changeCurrentOffset: Bool = true) -> QuickListSectionAttribute? {
         guard
             let sectionIndex = section.index,
-            let collectionView = self.collectionView as? QuickListView
+            let scrollView = form?.delegate?.scrollFormView
         else { return nil }
 
         var layout: QuickListBaseLayout = self.defaultLayout
@@ -464,9 +465,9 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         if sectionIndex == 0 {
             if section.isFormHeader {
                 if self.scrollDirection == .vertical {
-                    self.suspensionHeaderSectionSize = CGSize(width: collectionView.bounds.width, height: sectionAttr.endPoint.y - sectionAttr.startPoint.y)
+                    self.suspensionHeaderSectionSize = CGSize(width: scrollView.bounds.width, height: sectionAttr.endPoint.y - sectionAttr.startPoint.y)
                 } else {
-                    self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: collectionView.bounds.height)
+                    self.suspensionHeaderSectionSize = CGSize(width: sectionAttr.endPoint.x - sectionAttr.startPoint.x, height: scrollView.bounds.height)
                 }
                 /**
                     * 记录初始位置
@@ -516,7 +517,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     }
 
     public func getTargetItem(at point: CGPoint) -> Item? {
-        guard let formView = self.form?.delegate?.formView else { return nil }
+        guard let formView = self.form?.delegate?.scrollFormView else { return nil }
         if point.x < 0 || point.y < 0 {
             return form?.sections.first?.items.first
         }
@@ -562,7 +563,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
      * Get array of element positions within range
      */
     public override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        guard let formView = self.form?.delegate?.formView else { return nil }
+        guard let formView = self.form?.delegate?.scrollFormView else { return nil }
         var rect = rect
         if rect.size.width < 1 {
             rect = CGRect(x: rect.minX, y: rect.minY, width: formView.bounds.width, height: rect.height)
@@ -728,7 +729,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
     public override var collectionViewContentSize: CGSize {
         switch scrollDirection {
         case .horizontal:
-            guard let view = self.form?.delegate?.formView else {
+            guard let view = self.form?.delegate?.scrollFormView else {
                 return .zero
             }
             return CGSize(
@@ -737,7 +738,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             )
         case .vertical:
             return CGSize(
-                width: max(currentOffset.x, self.form?.delegate?.formView?.bounds.width ?? 0),
+                width: max(currentOffset.x, self.form?.delegate?.scrollFormView?.bounds.width ?? 0),
                 height: currentOffset.y
             )
         @unknown default:
@@ -983,50 +984,59 @@ extension QuickListSectionAttribute {
             /**
              * 设置整个section悬停
              * Set entire section floating
+             * 注意：需要使用 copy() 复制属性，避免修改原始对象
+             * Note: Must use copy() to copy attributes, avoid modifying original objects
              */
-            if var headerAttributes = self.headerAttributes {
-                suspensionAttributes(&headerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
-                resultAttrs.append(headerAttributes)
+            if let headerAttributes = self.headerAttributes?.copy() as? UICollectionViewLayoutAttributes {
+                var headerAttrCopy = headerAttributes
+                suspensionAttributes(&headerAttrCopy, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
+                resultAttrs.append(headerAttrCopy)
             }
-            if var footerAttributes = self.footerAttributes {
-                suspensionAttributes(&footerAttributes, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
-                resultAttrs.append(footerAttributes)
+            if let footerAttributes = self.footerAttributes?.copy() as? UICollectionViewLayoutAttributes {
+                var footerAttrCopy = footerAttributes
+                suspensionAttributes(&footerAttrCopy, zIndex: 1026, for: view, headerSize: headerSize, with: scrollDirection)
+                resultAttrs.append(footerAttrCopy)
             }
             for itemAttr in self.itemAttributes.values {
-                var itemAttr = itemAttr
-                suspensionAttributes(&itemAttr, zIndex: 1024, for: view, headerSize: headerSize, with: scrollDirection)
-                resultAttrs.append(itemAttr)
+                guard let itemAttrCopy = itemAttr.copy() as? UICollectionViewLayoutAttributes else { continue }
+                var mutableItemAttr = itemAttrCopy
+                suspensionAttributes(&mutableItemAttr, zIndex: 1024, for: view, headerSize: headerSize, with: scrollDirection)
+                resultAttrs.append(mutableItemAttr)
             }
-            if var decorationAttributes = self.decorationAttributes {
-                suspensionAttributes(&decorationAttributes, zIndex: 1022, for: view, headerSize: headerSize, with: scrollDirection)
-                resultAttrs.append(decorationAttributes)
+            if let decorationAttributes = self.decorationAttributes?.copy() as? UICollectionViewLayoutAttributes {
+                var decorationAttrCopy = decorationAttributes
+                suspensionAttributes(&decorationAttrCopy, zIndex: 1022, for: view, headerSize: headerSize, with: scrollDirection)
+                resultAttrs.append(decorationAttrCopy)
             }
-            if var suspensionDecorationAttributes = self.suspensionDecorationAttributes {
-                suspensionAttributes(&suspensionDecorationAttributes, zIndex: 1021, for: view, headerSize: headerSize, with: scrollDirection)
+            if let suspensionDecorationAttributes = self.suspensionDecorationAttributes?.copy() as? UICollectionViewLayoutAttributes {
+                var suspensionDecorAttrCopy = suspensionDecorationAttributes
+                suspensionAttributes(&suspensionDecorAttrCopy, zIndex: 1021, for: view, headerSize: headerSize, with: scrollDirection)
                 switch scrollDirection {
                 case .horizontal:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.x > headerSize.width - view.adjustedContentInset.left ? 1 : 0
+                    suspensionDecorAttrCopy.alpha = view.contentOffset.x > headerSize.width - view.adjustedContentInset.left ? 1 : 0
                 case .vertical:
-                    suspensionDecorationAttributes.alpha = view.contentOffset.y > headerSize.height - view.adjustedContentInset.top ? 1 : 0
+                    suspensionDecorAttrCopy.alpha = view.contentOffset.y > headerSize.height - view.adjustedContentInset.top ? 1 : 0
                 @unknown default:
                     break
                 }
-                resultAttrs.append(suspensionDecorationAttributes)
+                resultAttrs.append(suspensionDecorAttrCopy)
             }
         } else if rect.intersects(sectionArea) {
-            if var headerAttributes = self.headerAttributes {
+            if let headerAttributes = self.headerAttributes?.copy() as? UICollectionViewLayoutAttributes {
                 if self.shouldSuspensionHeader {
-                    suspensionHeaderAttributes(&headerAttributes, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, suspensionHeaderSectionSize: suspensionHeaderSectionSize, with: scrollDirection)
-                    resultAttrs.append(headerAttributes)
+                    var headerAttrCopy = headerAttributes
+                    suspensionHeaderAttributes(&headerAttrCopy, for: view, headerSize: headerSize, suspensionHeader: suspensionHeader, suspensionHeaderSectionSize: suspensionHeaderSectionSize, with: scrollDirection)
+                    resultAttrs.append(headerAttrCopy)
                 } else if rect.intersects(headerAttributes.frame) {
                     headerAttributes.zIndex = 503
                     resultAttrs.append(headerAttributes)
                 }
             }
-            if var footerAttributes = self.footerAttributes {
+            if let footerAttributes = self.footerAttributes?.copy() as? UICollectionViewLayoutAttributes {
                 if self.shouldSuspensionFooter {
-                    suspensionFooterAttributes(&footerAttributes, for: view, footerSize: footerSize, suspensionFooter: suspensionFooter, with: scrollDirection)
-                    resultAttrs.append(footerAttributes)
+                    var footerAttrCopy = footerAttributes
+                    suspensionFooterAttributes(&footerAttrCopy, for: view, footerSize: footerSize, suspensionFooter: suspensionFooter, with: scrollDirection)
+                    resultAttrs.append(footerAttrCopy)
                 } else if rect.intersects(footerAttributes.frame) {
                     footerAttributes.zIndex = 502
                     resultAttrs.append(footerAttributes)
@@ -1035,12 +1045,13 @@ extension QuickListSectionAttribute {
 
             for itemAttr in self.itemAttributes.values {
                 if rect.intersects(itemAttr.frame) {
-                    itemAttr.zIndex = 500
-                    resultAttrs.append(itemAttr)
+                    guard let itemAttrCopy = itemAttr.copy() as? UICollectionViewLayoutAttributes else { continue }
+                    itemAttrCopy.zIndex = 500
+                    resultAttrs.append(itemAttrCopy)
                 }
             }
 
-            if let decorationAttributes = self.decorationAttributes {
+            if let decorationAttributes = self.decorationAttributes?.copy() as? UICollectionViewLayoutAttributes {
                 decorationAttributes.zIndex = 498
                 resultAttrs.append(decorationAttributes)
             }

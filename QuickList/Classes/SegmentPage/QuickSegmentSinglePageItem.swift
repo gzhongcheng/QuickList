@@ -69,7 +69,7 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
         if
             let pageVC = pageViewController,
-            let viewController = section?.form?.delegate?.formView?.getViewController(),
+            let viewController = section?.form?.delegate?.scrollFormView?.getViewController(),
             pageVC.parent != viewController || pageVC.view.superview != cell.contentView
         {
             pageVC.listScrollView()?.pageBoxView = segmentPagesView
