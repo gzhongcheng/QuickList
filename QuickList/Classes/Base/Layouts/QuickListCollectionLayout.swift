@@ -171,6 +171,10 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
             currentOffset.y += form.contentInset.top
             currentOffset.x += form.contentInset.left
         } else {
+            var index = index
+            if index >= self.sectionAttributes.count {
+                index -= 1
+            }
             for (i, attr) in self.sectionAttributes {
                 if i < index {
                     continue
