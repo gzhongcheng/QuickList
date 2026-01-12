@@ -173,7 +173,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
         } else {
             var index = index
             if index >= self.sectionAttributes.count {
-                index -= 1
+                index -= self.sectionAttributes.count - 1
             }
             for (i, attr) in self.sectionAttributes {
                 if i < index {
