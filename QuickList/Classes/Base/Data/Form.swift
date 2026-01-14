@@ -202,6 +202,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.append(contentsOf: sections)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -228,6 +229,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.append(section)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -251,6 +253,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.insert(section, at: index)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -264,6 +267,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.insert(contentsOf: sections, at: index)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -288,6 +292,7 @@ public final class Form: NSObject {
             self.removeAll()
             self.append(contentsOf: sections)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
@@ -338,6 +343,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.replaceSubrange(range, with: sections)
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
@@ -382,6 +388,7 @@ public final class Form: NSObject {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
             self.removeAll(where: { sections.contains($0) })
             setNeedReloadList()
+            completion?()
             return
         }
         self.delegate?.updateLayout(sections: nil, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in

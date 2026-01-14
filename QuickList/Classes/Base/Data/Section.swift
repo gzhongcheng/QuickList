@@ -300,6 +300,7 @@ open class Section: NSObject {
         guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
             self.append(item)
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -325,6 +326,7 @@ open class Section: NSObject {
         guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
             self.append(contentsOf: items)
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -354,6 +356,7 @@ open class Section: NSObject {
         guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
             self.insert(item, at: index)
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
@@ -378,6 +381,7 @@ open class Section: NSObject {
         guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
             self.removeAll(where: { items.contains($0) })
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: .transform, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
@@ -426,6 +430,7 @@ open class Section: NSObject {
             self.removeAll()
             self.append(contentsOf: newItems)
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: otherSectionsInAnimation, performBatchUpdates: { [weak self] (listView, layout) in
@@ -465,6 +470,7 @@ open class Section: NSObject {
         guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
             self.replaceSubrange(range, with: newItems)
             setNeedReloadList()
+            completion?()
             return
         }
         self.form?.delegate?.updateLayout(sections: [self], inAnimation: animation, othersInAnimation: nil, performBatchUpdates: { [weak self] (listView, layout) in
