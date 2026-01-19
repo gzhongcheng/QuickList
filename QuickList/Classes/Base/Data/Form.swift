@@ -191,6 +191,53 @@ public final class Form: NSObject {
     }
 
     /**
+     * 打开指定Section并关闭其他Section
+     * Open specified Section and close other Sections
+     * - Parameters:
+     *   - section: 需要打开的Section / Section to open
+     *   - others: 需要关闭的Sections / Sections to close
+     *   - animation: 动画 / Animation
+     *   - completion: 完成回调 / Completion callback
+     */
+    public func openSectionAndCloseOthers(section: Section, others: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+        guard self.listView?.superview != nil, self.listView?.window != nil else {
+            for item in section.items {
+                item.isHidden = false
+            }
+            section.needUpdateLayout = true
+            for other in others {
+                for item in other.items {
+                    item.isHidden = true
+                }
+                other.needUpdateLayout = true
+            }
+            completion?()
+            return
+        }
+        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: animation, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            var minIndex: Int = section.index ?? 0
+            for item in section.items {
+                item.isHidden = false
+            }
+            section.needUpdateLayout = true
+            for other in others {
+                for item in other.items {
+                    if let cell = item.cell, let section = item.section {
+                        animation?.animateOut(view: cell, to: item, at: section)
+                    }
+                    item.isHidden = true
+                }
+                other.needUpdateLayout = true
+                if other.index ?? 0 < minIndex {
+                    minIndex = other.index ?? 0
+                }
+            }
+            layout?.reloadSectionsAfter(index: minIndex, needOldSectionAttributes: true)
+        }, completion: completion)
+    }
+
+    /**
      * 添加Section数组, 更新界面布局
      * Add Section array, update interface layout
      * - Parameters:
@@ -346,12 +393,17 @@ public final class Form: NSObject {
             completion?()
             return
         }
+        // 验证range的有效性，防止越界
+        let validLowerBound = Swift.max(0, Swift.min(range.lowerBound, self.sections.count))
+        let validUpperBound = Swift.max(validLowerBound, Swift.min(range.upperBound, self.sections.count))
+        let validRange = validLowerBound..<validUpperBound
+        
         self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: .transform, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             var removedSectionIndexSet: IndexSet = IndexSet()
             var removedSections: [Section] = []
             self.sections.enumerated().forEach { (index, section) in
-                if index >= range.lowerBound && index < range.upperBound  {
+                if index >= validRange.lowerBound && index < validRange.upperBound  {
                     if let outAnimation = outAnimation {
                         section.items.forEach { item in
                             if let cell = item.cell, let section = item.section {
@@ -366,13 +418,17 @@ public final class Form: NSObject {
             }
             self.sections.removeAll(where: { removedSections.contains($0) })
             var addedSectionIndexSet: IndexSet = IndexSet()
+            let insertStartIndex = validRange.lowerBound
             sections.enumerated().forEach { (index, section) in
-                self.insert(section, at: index + range.lowerBound)
-                addedSectionIndexSet.insert(index + range.lowerBound)
+                let insertIndex = insertStartIndex + index
+                // 确保插入索引不超过当前数组大小（允许插入到末尾）
+                let safeInsertIndex = Swift.min(insertIndex, self.sections.count)
+                self.insert(section, at: safeInsertIndex)
+                addedSectionIndexSet.insert(safeInsertIndex)
             }
             listView?.deleteSections(removedSectionIndexSet)
             listView?.insertSections(addedSectionIndexSet)
-            layout?.reloadSectionsAfter(index: range.lowerBound, needOldSectionAttributes: false)
+            layout?.reloadSectionsAfter(index: validRange.lowerBound, needOldSectionAttributes: false)
         }, completion: completion)
     }
 

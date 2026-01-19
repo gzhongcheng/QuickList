@@ -254,29 +254,52 @@ open class Section: NSObject {
      * Hide all items
      */
     public func hideAllItems(withOut: [Item] = [], inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, outAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.items.reversed().forEach { (item) in
+                if !withOut.contains(item) {
+                    item.isHidden = true
+                }
+            }
+            self.needUpdateLayout = true
+            completion?()
+            return
+        }
         if let threeDAnim = outAnimation as? ThreeDFoldListReloadAnimation {
             threeDAnim.setSkipItems(items: withOut, at: self)
         }
-        self.items.reversed().forEach { (item) in
-            if !withOut.contains(item) {
-                item.isHidden = true
-                guard let cell = item.cell, let section = item.section else { return }
-                outAnimation?.animateOut(view: cell, to: item, at: section)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            self.items.reversed().forEach { (item) in
+                if !withOut.contains(item) {
+                    if let cell = item.cell, let section = item.section {
+                        outAnimation?.animateOut(view: cell, to: item, at: section)
+                    }
+                    item.isHidden = true
+                }
             }
-        }
-        self.needUpdateLayout = true
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
+            layout?.reloadSectionsAfter(index: self.index ?? 0, needOldSectionAttributes: true)
+        }, completion: completion)
     }
     /**
      * 显示所有item
      * Show all items
      */
     public func showAllItems(inAnimation: ListReloadAnimation? = ListReloadAnimation.transform, completion: (() -> Void)? = nil) {
-        self.items.forEach { (item) in
-            item.isHidden = false
+        guard self.form?.listView?.superview != nil, self.form?.listView?.window != nil else {
+            self.items.forEach { (item) in
+                item.isHidden = false
+            }
+            self.needUpdateLayout = true
+            completion?()
+            return
         }
-        self.needUpdateLayout = true
-        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: nil, completion: completion)
+        self.form?.delegate?.updateLayout(sections: [self], inAnimation: inAnimation, othersInAnimation: inAnimation != nil ? .transform : nil, performBatchUpdates: { [weak self] (listView, layout) in
+            guard let `self` = self else { return }
+            self.items.forEach { (item) in
+                item.isHidden = false
+            }
+            layout?.reloadSectionsAfter(index: self.index ?? 0, needOldSectionAttributes: true)
+        }, completion: completion)
     }
     
     /**
