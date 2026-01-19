@@ -175,6 +175,12 @@ open class Section: NSObject {
         super.init()
     }
     
+    deinit {
+        // 清理布局缓存，防止内存泄漏
+        // Clear layout cache to prevent memory leaks
+        layout?.clearCache(for: self)
+    }
+    
     /**
      * 初始化并在完成时回调
      * Initialize and callback when completed

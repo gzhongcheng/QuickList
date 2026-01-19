@@ -191,20 +191,22 @@ public final class Form: NSObject {
     }
 
     /**
-     * 打开指定Section并关闭其他Section
-     * Open specified Section and close other Sections
+     * 打开指定Sections并关闭其他Sections
+     * Open specified Sections and close other Sections
      * - Parameters:
-     *   - section: 需要打开的Section / Section to open
+     *   - sections: 需要打开的Sections / Sections to open
      *   - others: 需要关闭的Sections / Sections to close
      *   - animation: 动画 / Animation
      *   - completion: 完成回调 / Completion callback
      */
-    public func openSectionAndCloseOthers(section: Section, others: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
+    public func openSectionsAndCloseOthers(sections: [Section], others: [Section], animation: ListReloadAnimation? = nil, completion: (() -> Void)? = nil) {
         guard self.listView?.superview != nil, self.listView?.window != nil else {
-            for item in section.items {
-                item.isHidden = false
+            for section in sections {
+                for item in section.items {
+                    item.isHidden = false
+                }
+                section.needUpdateLayout = true
             }
-            section.needUpdateLayout = true
             for other in others {
                 for item in other.items {
                     item.isHidden = true
@@ -214,13 +216,18 @@ public final class Form: NSObject {
             completion?()
             return
         }
-        self.delegate?.updateLayout(sections: [section], inAnimation: animation, othersInAnimation: animation, performBatchUpdates: { [weak self] (listView, layout) in
+        self.delegate?.updateLayout(sections: sections, inAnimation: animation, othersInAnimation: animation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
-            var minIndex: Int = section.index ?? 0
-            for item in section.items {
-                item.isHidden = false
+            var minIndex: Int = sections.first?.index ?? 0
+            for section in sections {
+                for item in section.items {
+                    item.isHidden = false
+                }
+                section.needUpdateLayout = true
+                if section.index ?? 0 < minIndex {
+                    minIndex = section.index ?? 0
+                }
             }
-            section.needUpdateLayout = true
             for other in others {
                 for item in other.items {
                     if let cell = item.cell, let section = item.section {
@@ -356,6 +363,9 @@ public final class Form: NSObject {
                             removedItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
                         }
                     }
+                    // 清理布局缓存，防止内存泄漏
+                    // Clear layout cache to prevent memory leaks
+                    section.layout?.clearCache(for: section)
                     section.form = nil
                     removedSectionIndexSet.insert(sectionIndex)
                 }
@@ -411,6 +421,9 @@ public final class Form: NSObject {
                             }
                         }
                     }
+                    // 清理布局缓存，防止内存泄漏
+                    // Clear layout cache to prevent memory leaks
+                    section.layout?.clearCache(for: section)
                     section.form = nil
                     removedSectionIndexSet.insert(index)
                     removedSections.append(section)
@@ -459,6 +472,9 @@ public final class Form: NSObject {
                             }
                         }
                     }
+                    // 清理布局缓存，防止内存泄漏
+                    // Clear layout cache to prevent memory leaks
+                    section.layout?.clearCache(for: section)
                     section.form = nil
                     removedSectionIndexSet.insert(index)
                 }
@@ -554,7 +570,12 @@ extension Form : RangeReplaceableCollection {
     public func replaceSubrange<C: Collection>(_ subRange: Range<Int>, with newElements: C) where C.Iterator.Element == Section {
         let lower = Swift.max(0, Swift.min(subRange.lowerBound, sections.count - 1))
         let upper = Swift.min(subRange.upperBound, sections.count)
-        sections[lower ..< upper].forEach({ $0.form = self })
+        // 清理被替换的section的布局缓存，防止内存泄漏
+        // Clear layout cache for replaced sections to prevent memory leaks
+        sections[lower ..< upper].forEach({ section in
+            section.layout?.clearCache(for: section)
+            section.form = nil
+        })
         sections.replaceSubrange(lower ..< upper, with: newElements)
         newElements.forEach({
             $0.form = self
@@ -568,6 +589,9 @@ extension Form : RangeReplaceableCollection {
         }
         let oldSection = sections[i]
         sections.remove(at: i)
+        // 清理布局缓存，防止内存泄漏
+        // Clear layout cache to prevent memory leaks
+        oldSection.layout?.clearCache(for: oldSection)
         oldSection.form = nil
         return oldSection
     }
@@ -577,13 +601,21 @@ extension Form : RangeReplaceableCollection {
     }
 
     public func removeAll(keepingCapacity keepCapacity: Bool = false) {
-        sections.forEach({ $0.form = nil })
+        sections.forEach({ section in
+            // 清理布局缓存，防止内存泄漏
+            // Clear layout cache to prevent memory leaks
+            section.layout?.clearCache(for: section)
+            section.form = nil
+        })
         sections.removeAll(keepingCapacity: keepCapacity)
     }
     
     public func removeAll(where shouldBeRemoved: (Section) throws -> Bool) rethrows {
         sections.forEach({ section in
             if (try? shouldBeRemoved(section)) ?? false {
+                // 清理布局缓存，防止内存泄漏
+                // Clear layout cache to prevent memory leaks
+                section.layout?.clearCache(for: section)
                 section.form = nil
             }
         })

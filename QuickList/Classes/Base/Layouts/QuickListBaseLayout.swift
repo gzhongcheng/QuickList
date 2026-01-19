@@ -70,6 +70,22 @@ open class QuickListBaseLayout {
     var cacheAttrs: [Section: QuickListSectionAttribute] = [:]
     
     /**
+     * 清理指定section的缓存
+     * Clear cache for specified section
+     */
+    func clearCache(for section: Section) {
+        cacheAttrs.removeValue(forKey: section)
+    }
+    
+    /**
+     * 清理所有缓存
+     * Clear all cache
+     */
+    func clearAllCache() {
+        cacheAttrs.removeAll()
+    }
+    
+    /**
      * layout获取布局对象
      * Layout gets layout object
      */
