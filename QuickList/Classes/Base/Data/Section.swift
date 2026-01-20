@@ -113,6 +113,12 @@ open class Section: NSObject {
      */
     public var layout: QuickListBaseLayout?
     
+    /**
+     * section的布局属性缓存
+     * Section's layout attribute cache
+     */
+    public internal(set) var layoutAttribute: QuickListSectionAttribute?
+    
     // MARK: - header and footer
     /**
      * section的header
@@ -173,12 +179,6 @@ open class Section: NSObject {
     // MARK: - Initialization
     public required override init() {
         super.init()
-    }
-    
-    deinit {
-        // 清理布局缓存，防止内存泄漏
-        // Clear layout cache to prevent memory leaks
-        layout?.clearCache(for: self)
     }
     
     /**

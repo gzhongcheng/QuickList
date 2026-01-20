@@ -67,24 +67,6 @@ public class QuickListSectionAttribute: NSObject {
 }
 
 open class QuickListBaseLayout {
-    var cacheAttrs: [Section: QuickListSectionAttribute] = [:]
-    
-    /**
-     * 清理指定section的缓存
-     * Clear cache for specified section
-     */
-    func clearCache(for section: Section) {
-        cacheAttrs.removeValue(forKey: section)
-    }
-    
-    /**
-     * 清理所有缓存
-     * Clear all cache
-     */
-    func clearAllCache() {
-        cacheAttrs.removeAll()
-    }
-    
     /**
      * layout获取布局对象
      * Layout gets layout object
@@ -94,13 +76,13 @@ open class QuickListBaseLayout {
             let sectionAttr = QuickListSectionAttribute()
             sectionAttr.startPoint = currentStart
             sectionAttr.endPoint = currentStart
-            self.cacheAttrs[section] = sectionAttr
+            section.layoutAttribute = sectionAttr
             return sectionAttr
         }
         
         let sectionAttr = self.layoutWith(layout: layout, section: section, currentStart: currentStart)
         section.needUpdateLayout = false
-        self.cacheAttrs[section] = sectionAttr
+        section.layoutAttribute = sectionAttr
         return sectionAttr
     }
     

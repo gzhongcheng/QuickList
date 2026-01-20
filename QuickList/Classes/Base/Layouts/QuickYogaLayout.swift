@@ -393,7 +393,7 @@ public class QuickYogaLayout: QuickListBaseLayout {
 
     public override func calculateItemsFrameWhenOthersFolded(items: [Item], at section: Section) -> [Item : CGRect] {
         guard
-            let cacheAttr = cacheAttrs[section],
+            let cacheAttr = section.layoutAttribute,
             let layout = section.form?.listLayout
         else { return [:] }
         var itemTargetFrames: [Item: CGRect] = [:]
