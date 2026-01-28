@@ -592,7 +592,7 @@ extension FormViewHandler: UICollectionViewDelegate {
             for (sectionIndex, section) in form.sections.enumerated() {
                 for i in section.items {
                     var targetSelect: Bool = i.isSelected
-                    if form.singleSelection || form.selectedItemDecoration != nil {
+                    if form.singleSelection || form.selectedItemDecoration != nil || section.singleSelection {
                         targetSelect = item == i
                     } else if item == i {
                         targetSelect = !i.isSelected

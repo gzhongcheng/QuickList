@@ -48,6 +48,12 @@ open class Section: NSObject {
      * Whether hidden
      */
     public var isHidden: Bool = false
+    
+    /**
+     * 是否单选，form的单选优先级更高，这里的配置仅在form非单选的情况下生效
+     * Whether single selection
+     */
+    public var singleSelection: Bool = false
 
     /**
      * 尺寸占比（横向滚动时为宽度占比，纵向滚动时为高度占比），范围为0-1，默认1

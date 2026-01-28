@@ -75,6 +75,7 @@ public final class EmptyItem: ItemOf<CollectionEmptyCell> {
     public init(size: CGSize, config: ((EmptyItem) -> Void)? = nil) {
         super.init(title: nil, tag: nil)
         itemSize = size
+        self.isSelectable = false
         config?(self)
     }
     
@@ -87,6 +88,7 @@ public final class EmptyItem: ItemOf<CollectionEmptyCell> {
         super.init(title: nil, tag: nil)
         self.weight = weight
         itemHeight = height
+        self.isSelectable = false
         config?(self)
     }
     
@@ -98,6 +100,7 @@ public final class EmptyItem: ItemOf<CollectionEmptyCell> {
     public init(width: CGFloat, config: ((EmptyItem) -> Void)? = nil) {
         super.init(title: nil, tag: nil)
         itemWidth = width
+        self.isSelectable = false
         config?(self)
     }
     
@@ -109,6 +112,7 @@ public final class EmptyItem: ItemOf<CollectionEmptyCell> {
     public init(ratio: CGSize, config: ((EmptyItem) -> Void)? = nil) {
         super.init(title: nil, tag: nil)
         itemRatio = ratio
+        self.isSelectable = false
         config?(self)
     }
     
