@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'QuickList'
-  s.version          = '1.1.33'
+  s.version          = '1.1.34'
   s.summary          = 'A short description of QuickList.'
 
 # This description is used to generate tags and improve search results.
