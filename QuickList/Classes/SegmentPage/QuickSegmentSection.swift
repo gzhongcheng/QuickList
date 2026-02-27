@@ -117,7 +117,7 @@ public class QuickSegmentSection: Section {
      */
     var pageContainerHeight: CGFloat?
     
-    var scrollManager: QuickSegmentScrollManager?
+    weak var scrollManager: QuickSegmentScrollManager?
     
     var currentPageIndex: Int = 0 {
         didSet {
