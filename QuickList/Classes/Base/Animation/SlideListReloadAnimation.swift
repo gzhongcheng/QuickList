@@ -13,22 +13,20 @@ import Foundation
  * Slide from left, slide from left animation
  */
 public class LeftSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0)
         view.alpha = 0
-        targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
             UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
-        addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
+        addOutSnapshotAndDoAnimation(view: view, viewZPosition: viewZPosition, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: -view.bounds.width, y: 0)
             snapshot.alpha = 0
         })
@@ -60,22 +58,20 @@ public class LeftSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnima
  * Slide from right, slide from right animation
  */
 public class RightSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: view.bounds.width, y: 0)
         view.alpha = 0
-        targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
             UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
-        addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
+        addOutSnapshotAndDoAnimation(view: view, viewZPosition: viewZPosition, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: view.bounds.width, y: 0)
             snapshot.alpha = 0
         })
@@ -107,22 +103,20 @@ public class RightSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnim
  * Slide from top, slide from top animation
  */
 public class TopSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: 0, y: -view.bounds.height)
         view.alpha = 0
-        targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
             UIView.animate(withDuration: self.duration, animations: {
                 view.transform = .identity
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
-        addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
+        addOutSnapshotAndDoAnimation(view: view, viewZPosition: viewZPosition, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: 0, y: -view.bounds.height)
             snapshot.alpha = 0
         })
@@ -154,22 +148,20 @@ public class TopSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimat
  * Slide from bottom, slide from bottom animation
  */
 public class BottomSlideListReloadAnimation: ListReloadAnimation, ConcatenateAnimationType {
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         view.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
         view.alpha = 0
-        targetAttributes?.alpha = 0
         view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
             UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                 view.transform = .identity
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
-        addOutSnapshotAndDoAnimation(view: view, at: section, animation: { snapshot in
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
+        addOutSnapshotAndDoAnimation(view: view, viewZPosition: viewZPosition, at: section, animation: { snapshot in
             snapshot.transform = CGAffineTransform(translationX: 0, y: view.bounds.height)
             snapshot.alpha = 0
         })

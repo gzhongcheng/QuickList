@@ -130,14 +130,13 @@ public class ItemMovingHandlerMaskView: UIView {
             return
         }
         item.isDragging = true
-        item.form?.listLayout?.layoutAttributesForItem(at: indexPath)?.alpha = 0
-        cell.alpha = 0
         
         prohibitScroll(for: cell)
 
         moveStartPointInItem = pointInCell
         moveStartPointInWindow = pointInWindow
         moveSnapshot = cell.snapshotView(afterScreenUpdates: false)
+        cell.alpha = 0
         moveSnapshot?.contentMode = .topLeft
         moveSnapshotContainerView.frame = CGRect(x: pointInWindow.x - pointInCell.x, y: pointInWindow.y - pointInCell.y, width: cell.frame.width, height: cell.frame.height)
         if let delegate = item.delegate {
@@ -225,7 +224,6 @@ public class ItemMovingHandlerMaskView: UIView {
                     self.moveSnapshotContainerView.frame = CGRect(x: targetCellFrameInWindow.x, y: targetCellFrameInWindow.y, width: targetCellFrame.width, height: targetCellFrame.height)
                 }
             } completion: {
-                self.item?.form?.listLayout?.layoutAttributesForItem(at: targetMoveIndexPath)?.alpha = 1
                 self.item?.cell?.alpha = 1
                 item.delegate?.didFinishExchange(item: item)
                 self.reset()
@@ -238,7 +236,6 @@ public class ItemMovingHandlerMaskView: UIView {
                 self.moveSnapshotContainerView.frame = CGRect(x: itemPointInWindow.x, y: itemPointInWindow.y, width: itemFrame.width, height: itemFrame.height)
             }, completion: { _ in
                 item.isDragging = false
-                itemAttr?.alpha = 1
                 self.item?.cell?.alpha = 1
                 self.reset()
             })

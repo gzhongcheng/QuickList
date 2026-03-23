@@ -73,7 +73,7 @@ open class ListReloadAnimation: NSObject {
      * 动画进入
      * Animate in
      */
-    open func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+    open func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
         /**
          * 如果targetAttributes有frame，则设置view的frame为targetAttributes的frame, 子类重写时需要先调用此方法来设置view的frame，避免动画效果不正确
          * If targetAttributes has frame, set view's frame to targetAttributes's frame, subclasses need to call this method first to set view's frame, to avoid incorrect animation effect
@@ -91,7 +91,7 @@ open class ListReloadAnimation: NSObject {
      * 动画退出，因为列表刷新后，cell就会被替换掉，因此这里需要复制一个一模一样的cell的截图出来，然后进行动画退出，可以调用addOutSnapshotAndDoAnimation方法来实现
      * Animate out, because the cell will be replaced after the list is refreshed, so here we need to copy a screenshot of a cell and then animate out, you can call addOutSnapshotAndDoAnimation method to achieve this
      */
-    open func animateOut(view: UIView, to item: Item?, at section: Section) {
+    open func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
         // For example:
         // addOutSnapshotAndDoAnimation(view: view, animation: { snapshot in
         //     snapshot.alpha = 0
@@ -105,14 +105,15 @@ open class ListReloadAnimation: NSObject {
      *   - cell: 需要进行动画的cell / The cell to animate
      *   - animation: 执行的动画回调 / Animation callback
      */
-    public func addOutSnapshotAndDoAnimation(view: UIView, at section: Section, delay: TimeInterval = 0, options: UIView.AnimationOptions = [.curveEaseInOut], animation: @escaping (UIView) -> Void) {
+    public func addOutSnapshotAndDoAnimation(view: UIView, viewZPosition: CGFloat, at section: Section, delay: TimeInterval = 0, options: UIView.AnimationOptions = [.curveEaseInOut], animation: @escaping (UIView) -> Void) {
+        view.alpha = 1
         guard
             let snapshot = view.snapshotView(afterScreenUpdates: true),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
         else { return }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        snapshot.layer.zPosition = view.layer.zPosition
+        snapshot.layer.zPosition = viewZPosition
         snapshot.frame = view.convert(view.bounds, to: targetView)
         view.alpha = 0
         targetView.addSubview(snapshot)

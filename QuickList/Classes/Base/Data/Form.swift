@@ -230,7 +230,7 @@ public final class Form: NSObject {
             for other in others {
                 for item in other.items {
                     if let cell = item.cell, let section = item.section {
-                        animation?.animateOut(view: cell, to: item, at: section)
+                        animation?.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                     }
                     item.isHidden = true
                 }
@@ -357,7 +357,7 @@ public final class Form: NSObject {
                     if let outAnimation = outAnimation {
                         section.items.enumerated().forEach { (itemIndex, item) in
                             if let cell = item.cell, let section = item.section {
-                                outAnimation.animateOut(view: cell, to: item, at: section)
+                                outAnimation.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                             }
                             removedItemIndexPath.append(IndexPath(row: itemIndex, section: sectionIndex))
                         }
@@ -413,7 +413,7 @@ public final class Form: NSObject {
                     if let outAnimation = outAnimation {
                         section.items.forEach { item in
                             if let cell = item.cell, let section = item.section {
-                                outAnimation.animateOut(view: cell, to: item, at: section)
+                                outAnimation.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                             }
                         }
                     }
@@ -461,7 +461,7 @@ public final class Form: NSObject {
                     if let outAnimation = outAnimation {
                         section.items.forEach { item in
                             if let cell = item.cell, let section = item.section {
-                                outAnimation.animateOut(view: cell, to: item, at: section)
+                                outAnimation.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                             }
                         }
                     }

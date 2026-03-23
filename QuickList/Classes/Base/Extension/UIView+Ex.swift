@@ -55,6 +55,7 @@ extension UIView {
      * - Returns: 截图 / Screenshot
      */
     public func takeSnapshot(_ frame: CGRect) -> UIImage? {
+        guard frame.width > 0, frame.height > 0 else { return nil }
         UIGraphicsBeginImageContextWithOptions(frame.size, false, 0)
         
         guard let context = UIGraphicsGetCurrentContext() else { return nil }

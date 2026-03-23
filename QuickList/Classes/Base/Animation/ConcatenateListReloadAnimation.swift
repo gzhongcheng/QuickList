@@ -49,14 +49,12 @@ public class ConcatenateListReloadAnimation: ListReloadAnimation {
         return self
     }
 
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         for animation in animations {
             animation.beforeIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         }
         view.alpha = 0
-        targetAttributes?.alpha = 0
-        view.superview?.layoutIfNeeded()
         DispatchQueue.main.async {
             UIView.animate(withDuration: self.duration, animations: { [weak self] in
                 guard let self = self else { return }
@@ -64,12 +62,11 @@ public class ConcatenateListReloadAnimation: ListReloadAnimation {
                     animation.afterIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
                 }
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             })
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
-        addOutSnapshotAndDoAnimation(view: view, at: section, animation: { [weak self] snapshot in
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
+        addOutSnapshotAndDoAnimation(view: view, viewZPosition: viewZPosition, at: section, animation: { [weak self] snapshot in
             guard let self = self else { return }
             for animation in self.animations {
                 animation.outSnapshotAnimation(view: snapshot, to: item, at: section)

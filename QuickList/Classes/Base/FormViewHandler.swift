@@ -129,7 +129,7 @@ public class FormViewHandler: NSObject {
             formView?.reloadData()
         }
         self.layout.reloadAll()
-        updateSelectedItemDecorationIfNeeded()
+        updateSelectedItemDecorationIfNeeded(animation: false)
     }
     /**
      * 仅刷新Layout
@@ -152,7 +152,7 @@ public class FormViewHandler: NSObject {
      * 更新选中状态
      * Update selected state
      */
-    public func updateSelectedItemDecorationIfNeeded() {
+    public func updateSelectedItemDecorationIfNeeded(animation: Bool = true) {
         var indexPath: IndexPath?
         var isItemHidden = false
         for section in form.sections {
@@ -186,20 +186,34 @@ public class FormViewHandler: NSObject {
             }
             let targetZPosition = form.selectedItemDecorationPosition == .below ? CGFloat(layoutAttributes.zIndex) - 1 : CGFloat(layoutAttributes.zIndex) + 1
             if selectedItemDecoration.layer.zPosition != targetZPosition {
-                UIView.animate(withDuration: form.selectedItemDecorationMoveDuration) {
-                    selectedItemDecoration.alpha = 0
-                    formView.layoutIfNeeded()
-                } completion: { _ in
+                if animation {
+                    UIView.animate(withDuration: form.selectedItemDecorationMoveDuration) {
+                        selectedItemDecoration.alpha = 0
+                        formView.layoutIfNeeded()
+                    } completion: { _ in
+                        selectedItemDecoration.layer.zPosition = targetZPosition
+                        selectedItemDecoration.frame = layoutAttributes.frame
+                        formView.layoutIfNeeded()
+                        UIView.animate(withDuration: self.form.selectedItemDecorationMoveDuration) {
+                            selectedItemDecoration.alpha = isItemHidden ? 0 : 1
+                            formView.layoutIfNeeded()
+                        }
+                    }
+                } else {
                     selectedItemDecoration.layer.zPosition = targetZPosition
                     selectedItemDecoration.frame = layoutAttributes.frame
+                    selectedItemDecoration.alpha = isItemHidden ? 0 : 1
                     formView.layoutIfNeeded()
-                    UIView.animate(withDuration: self.form.selectedItemDecorationMoveDuration) {
-                        selectedItemDecoration.alpha = isItemHidden ? 0 : 1
-                        formView.layoutIfNeeded()
-                    }
                 }
             } else {
-                UIView.animate(withDuration: form.selectedItemDecorationMoveDuration) {
+                if animation {
+                    UIView.animate(withDuration: form.selectedItemDecorationMoveDuration) {
+                        selectedItemDecoration.alpha = isItemHidden ? 0 : 1
+                        selectedItemDecoration.frame = layoutAttributes.frame
+                        selectedItemDecoration.layer.zPosition = targetZPosition
+                        formView.layoutIfNeeded()
+                    }
+                } else {
                     selectedItemDecoration.alpha = isItemHidden ? 0 : 1
                     selectedItemDecoration.frame = layoutAttributes.frame
                     selectedItemDecoration.layer.zPosition = targetZPosition
@@ -306,7 +320,7 @@ extension FormViewHandler: FormDelegate {
                 self?.currentUpdateOthersInAnimation = nil
                 self?.formView?.isUserInteractionEnabled = true
                 DispatchQueue.main.async {
-                    self?.updateSelectedItemDecorationIfNeeded()
+                    self?.updateSelectedItemDecorationIfNeeded(animation: false)
                     completion?()
                 }
             }
@@ -666,7 +680,7 @@ extension FormViewHandler: UICollectionViewDelegate {
             {
                 let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-                inAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                inAnimation.animateIn(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else if
             let othersInAnimation = currentUpdateOthersInAnimation,
@@ -674,7 +688,9 @@ extension FormViewHandler: UICollectionViewDelegate {
         {
             let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
             let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-            othersInAnimation.animateIn(view: cell, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+            othersInAnimation.animateIn(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+        } else {
+            cell.contentView.alpha = 1
         }
     }
     
@@ -685,13 +701,13 @@ extension FormViewHandler: UICollectionViewDelegate {
             if let inAnimation = currentUpdateSectionInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                inAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                inAnimation.animateIn(view: view, viewZPosition: view.layer.zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else {
             if let othersInAnimation = currentUpdateOthersInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                othersInAnimation.animateIn(view: view, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                othersInAnimation.animateIn(view: view, viewZPosition: view.layer.zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         }
     }

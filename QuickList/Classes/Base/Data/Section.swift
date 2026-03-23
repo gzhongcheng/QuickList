@@ -284,7 +284,7 @@ open class Section: NSObject {
             self.items.reversed().forEach { (item) in
                 if !withOut.contains(item) {
                     if let cell = item.cell, let section = item.section {
-                        outAnimation?.animateOut(view: cell, to: item, at: section)
+                        outAnimation?.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                     }
                     item.isHidden = true
                 }
@@ -427,7 +427,7 @@ open class Section: NSObject {
                 if self.items.contains(item) {
                     removedItemIndexPaths.append(item.indexPath!)
                     if let cell = item.cell, let section = item.section {
-                        animation?.animateOut(view: cell, to: item, at: section)
+                        animation?.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                     }
                     item.section = nil
                 }
@@ -474,7 +474,7 @@ open class Section: NSObject {
             var removedItemIndexPaths: [IndexPath] = []
             self.items.enumerated().forEach { (index, item) in
                 if let cell = item.cell, let section = item.section {
-                    outAnimation?.animateOut(view: cell, to: item, at: section)
+                    outAnimation?.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                 }
                 item.section = nil
                 removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
@@ -515,7 +515,7 @@ open class Section: NSObject {
             self.items.enumerated().forEach { (index, item) in
                 if index >= range.lowerBound && index < range.upperBound {
                     if let cell = item.cell, let section = item.section {
-                        animation?.animateOut(view: cell, to: item, at: section)
+                        animation?.animateOut(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: item, at: section)
                     }
                     removedItemIndexPaths.append(IndexPath(row: index, section: sectionIndex))
                 }

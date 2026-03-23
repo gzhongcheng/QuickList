@@ -35,8 +35,8 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
 
     private var itemTargetFrames: [Item: CGRect] = [:]
     
-    public override func animateIn(view: UIView, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
-        super.animateIn(view: view, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
+    public override func animateIn(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section, lastAttributes: UICollectionViewLayoutAttributes?, targetAttributes: UICollectionViewLayoutAttributes?) {
+        super.animateIn(view: view, viewZPosition: viewZPosition, to: item, at: section, lastAttributes: lastAttributes, targetAttributes: targetAttributes)
         if item == nil {
             if
                 let lastAttributes = lastAttributes,
@@ -46,21 +46,17 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
                 view.transform = transform
             }
             view.alpha = 0
-            targetAttributes?.alpha = 0
             view.superview?.layoutIfNeeded()
             DispatchQueue.main.async {
                 UIView.animate(withDuration: self.duration, delay: 0, options: .curveEaseInOut, animations: {
                     view.transform = .identity
                     view.alpha = 1
-                    targetAttributes?.alpha = 1
                 })
             }
             return
         }
         
-        let targetItemIndex: Int = item?.indexPath?.row ?? -1
         view.alpha = 1
-        targetAttributes?.alpha = 1
         guard
             let snapshotImage = view.takeSnapshot(view.bounds),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
@@ -69,12 +65,13 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         targetView.addSubview(snapshot)
-        snapshot.layer.zPosition = view.layer.zPosition
+        snapshot.layer.zPosition = viewZPosition
         snapshot.frame = view.convert(view.bounds, to: targetView)
         view.alpha = 0
-        targetAttributes?.alpha = 0
         targetView.layoutIfNeeded()
         CATransaction.commit()
+        
+        let targetItemIndex: Int = item?.indexPath?.row ?? -1
         
         var finalPoint = targetAttributes?.frame.origin ?? CGPoint.zero
         finalPoint.x += view.frame.width * 0.5
@@ -103,19 +100,17 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             startVerticalUnfoldAnimation(to: snapshot, atIndex: targetItemIndex, targetStartPoint: startPoint, targetEndPoint: finalPoint) {
                 snapshot.removeFromSuperview()
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             }
         case .horizontal:
             startHorizontalUnfoldAnimation(to: snapshot, atIndex: targetItemIndex, targetStartPoint: startPoint, targetEndPoint: finalPoint) {
                 snapshot.removeFromSuperview()
                 view.alpha = 1
-                targetAttributes?.alpha = 1
             }
         default:
             break
         }
     }
-    public override func animateOut(view: UIView, to item: Item?, at section: Section) {
+    public override func animateOut(view: UIView, viewZPosition: CGFloat, to item: Item?, at section: Section) {
         guard
             let snapshotImage = view.takeSnapshot(view.bounds),
             let targetView = section.form?.listView ?? (UIApplication.shared.windows.first { $0.isKeyWindow })
@@ -124,7 +119,7 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         targetView.addSubview(snapshot)
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        snapshot.layer.zPosition = view.layer.zPosition
+        snapshot.layer.zPosition = viewZPosition
         snapshot.frame = view.convert(view.bounds, to: targetView)
         view.alpha = 0
         targetView.layoutIfNeeded()
@@ -282,9 +277,13 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
             startAngle = -startAngle
             setAnchorPoint(anchorPoint: CGPoint(x: 0.5, y: 1), forView: view)
         }
+        
+        let viewHeight = view.bounds.height
+        
         let rotateTransform = CATransform3DRotate(perspectiveTransform, startAngle, 1, 0, 0)
         view.layer.transform = rotateTransform
         view.layer.opacity = 0
+        view.superview?.layoutIfNeeded()
         
          /**
         * 创建一个动画，用于实现3D旋转动画
@@ -301,9 +300,9 @@ public class ThreeDFoldListReloadAnimation: ListReloadAnimation, CAAnimationDele
         let positionAnimation = CABasicAnimation()
         positionAnimation.keyPath = "position.y"
         if atIndex % 2 == 0 {
-            positionAnimation.toValue = NSNumber(value: targetEndPoint.y - view.bounds.height * 0.5)
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.y - viewHeight * 0.5)
         } else {
-            positionAnimation.toValue = NSNumber(value: targetEndPoint.y + view.bounds.height * 0.5)
+            positionAnimation.toValue = NSNumber(value: targetEndPoint.y + viewHeight * 0.5)
         }
         positionAnimation.timingFunction = CAMediaTimingFunction(name: .linear)
         

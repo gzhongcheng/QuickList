@@ -385,7 +385,7 @@ public class QuickListCollectionLayout: UICollectionViewLayout {
                     handler.updateBackgroundDecoration(contentSize: contentSize)
                 }
                 if self.form?.selectedItemDecoration != nil {
-                    handler.updateSelectedItemDecorationIfNeeded()
+                    handler.updateSelectedItemDecorationIfNeeded(animation: false)
                 }
             }
         }
