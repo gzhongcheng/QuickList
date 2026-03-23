@@ -78,7 +78,7 @@ open class ListReloadAnimation: NSObject {
          * 如果targetAttributes有frame，则设置view的frame为targetAttributes的frame, 子类重写时需要先调用此方法来设置view的frame，避免动画效果不正确
          * If targetAttributes has frame, set view's frame to targetAttributes's frame, subclasses need to call this method first to set view's frame, to avoid incorrect animation effect
          */
-        if let frame = targetAttributes?.frame {
+        if let frame = targetAttributes?.frame, item == nil {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
             view.frame = frame

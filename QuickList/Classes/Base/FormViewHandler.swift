@@ -680,7 +680,8 @@ extension FormViewHandler: UICollectionViewDelegate {
             {
                 let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-                inAnimation.animateIn(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                let zPosition = CGFloat(finalAttr?.zIndex ?? Int(cell.layer.zPosition))
+                inAnimation.animateIn(view: cell.contentView, viewZPosition: zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else if
             let othersInAnimation = currentUpdateOthersInAnimation,
@@ -688,7 +689,9 @@ extension FormViewHandler: UICollectionViewDelegate {
         {
             let oldAttr = self.layout.initialLayoutAttributesForItem(at: indexPath)
             let finalAttr = self.layout.layoutAttributesForItem(at: indexPath)
-            othersInAnimation.animateIn(view: cell.contentView, viewZPosition: cell.layer.zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+            let zPosition = CGFloat(finalAttr?.zIndex ?? Int(cell.layer.zPosition))
+            /// iOS26系统会出现动画异常，需要改回直接做cell的动画
+            othersInAnimation.animateIn(view: cell.contentView, viewZPosition: zPosition, to: cell.item, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
         } else {
             cell.contentView.alpha = 1
         }
@@ -701,13 +704,15 @@ extension FormViewHandler: UICollectionViewDelegate {
             if let inAnimation = currentUpdateSectionInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                inAnimation.animateIn(view: view, viewZPosition: view.layer.zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                let zPosition = CGFloat(finalAttr?.zIndex ?? Int(view.layer.zPosition))
+                inAnimation.animateIn(view: view, viewZPosition: zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         } else {
             if let othersInAnimation = currentUpdateOthersInAnimation {
                 let oldAttr = self.layout.initialLayoutAttributesForElement(ofKind: elementKind, at: indexPath)
                 let finalAttr = self.layout.layoutAttributesForSupplementaryView(ofKind: elementKind, at: indexPath)
-                othersInAnimation.animateIn(view: view, viewZPosition: view.layer.zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
+                let zPosition = CGFloat(finalAttr?.zIndex ?? Int(view.layer.zPosition))
+                othersInAnimation.animateIn(view: view, viewZPosition: zPosition, to: nil, at: section, lastAttributes: oldAttr, targetAttributes: finalAttr)
             }
         }
     }
