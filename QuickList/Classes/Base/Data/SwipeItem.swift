@@ -208,6 +208,9 @@ open class SwipeItemCell: ItemCell {
             make.width.equalTo(totalWidth * progress)
         }
         for button in swipedActionButtons {
+            if button.superview == nil {
+                continue
+            }
             button.snp.updateConstraints { make in
                 make.trailing.equalTo(-button.rightSpacingToCell * realProgress).priority(.high)
             }

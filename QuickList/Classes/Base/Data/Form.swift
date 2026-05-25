@@ -348,6 +348,13 @@ public final class Form: NSObject {
             completion?()
             return
         }
+        if inAnimation == nil && outAnimation == nil {
+            self.removeAll()
+            self.append(contentsOf: sections)
+            self.listView?.reload()
+            completion?()
+            return
+        }
         self.delegate?.updateLayout(sections: sections, inAnimation: inAnimation, othersInAnimation: inAnimation, performBatchUpdates: { [weak self] (listView, layout) in
             guard let `self` = self else { return }
             if self.sections.count > 0 {

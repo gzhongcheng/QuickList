@@ -126,10 +126,10 @@ public class FormViewHandler: NSObject {
     // 刷新数据 / Refresh data
     public func reloadCollection() {
         UIView.performWithoutAnimation {
-            formView?.reloadData()
+            self.layout.reloadAll()
+            self.formView?.reloadData()
+            self.updateSelectedItemDecorationIfNeeded(animation: false)
         }
-        self.layout.reloadAll()
-        updateSelectedItemDecorationIfNeeded(animation: false)
     }
     /**
      * 仅刷新Layout
