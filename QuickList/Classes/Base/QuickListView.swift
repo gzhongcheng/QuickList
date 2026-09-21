@@ -135,8 +135,33 @@ open class QuickListView: UICollectionView {
         handler.layout.add(self)
     }
     
+    private var lastMacLayoutSize: CGSize = .zero
+
+    var usesMacWindowLayout: Bool {
+        #if targetEnvironment(macCatalyst)
+        return true
+        #else
+        if #available(iOS 14.0, *) {
+            return ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return false
+        #endif
+    }
+
+    private func macLayoutSizeDidChange() -> Bool {
+        guard usesMacWindowLayout else { return false }
+        let size = bounds.size
+        guard size.width.isFinite, size.height.isFinite,
+              size.width > 0, size.height > 0, size != lastMacLayoutSize else {
+            return false
+        }
+        lastMacLayoutSize = size
+        return true
+    }
+
     open override func layoutSubviews() {
         super.layoutSubviews()
+        let macSizeChanged = macLayoutSizeDidChange()
         if needReload {
             needReload = false
             reload()
@@ -146,6 +171,10 @@ open class QuickListView: UICollectionView {
             handler.updateLayout(sections: nil, othersInAnimation: updateLayoutInAnimation)
             firstUpdateSection = .max
             updateLayoutInAnimation = nil
+        } else if macSizeChanged {
+            // Also covers a cached/offscreen list when it becomes visible after
+            // its host window was resized. Keep data and selection intact.
+            handler.updateLayout()
         }
     }
     

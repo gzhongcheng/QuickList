@@ -87,9 +87,12 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
     
     private var contentSize: CGSize = .zero {
         didSet {
-            guard let cell = cell as? QuickSegmentPagesItemCell else {
+            guard oldValue != contentSize, let cell = cell as? QuickSegmentPagesItemCell else {
                 return
             }
+            // On Mac, the page list refreshes synchronously when its actual
+            // bounds change. A deferred update here can still use the old frame.
+            guard !cell.pageList.usesMacWindowLayout else { return }
             cell.pageList.setNeedUpdateLayout(afterSection: 0, animation: ListReloadAnimation.fade)
             print("QuickSegmentPagesItem - contentSize: \(contentSize)")
         }
@@ -113,6 +116,7 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
             return
         }
         self.currentListView = cell.pageList
+        cell.pageList.pagesItem = self
         self.currentListView?.scrollManager = self.scrollManager
         self.currentListView?.pageScrollEnable = scrollEnable
         cell.pageList.scrollDirection = pagesScrollDirection
@@ -189,6 +193,7 @@ public final class QuickSegmentPagesItem: ItemOf<QuickSegmentPagesItemCell>, Ite
 extension QuickSegmentPagesItem: FormViewHandlerDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard
+            currentListView?.isRestoringPageAfterResize != true,
             scrollView.isTracking || scrollView.isDragging || scrollView.isDecelerating,
             let cell = self.cell as? QuickSegmentPagesItemCell
         else {

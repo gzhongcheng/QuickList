@@ -12,6 +12,55 @@ public class QuickSegmentPagesListView: QuickListView, QuickSegmentScrollViewTyp
     public var isQuickSegmentSubPage: Bool = false
     public var pageScrollEnable: Bool = true
     public weak var scrollManager: QuickSegmentScrollManager?
+
+    weak var pagesItem: QuickSegmentPagesItem? {
+        didSet {
+            if oldValue !== pagesItem {
+                lastMacPageSize = .zero
+                setNeedsLayout()
+            }
+        }
+    }
+    private var lastMacPageSize: CGSize = .zero
+    private(set) var isRestoringPageAfterResize = false
+
+    public override func layoutSubviews() {
+        let size = bounds.size
+        guard usesMacWindowLayout, !isRestoringPageAfterResize,
+              size.width.isFinite, size.height.isFinite,
+              size.width > 0, size.height > 0, size != lastMacPageSize,
+              let pagesItem = pagesItem,
+              let section = pagesItem.section as? QuickSegmentSection,
+              pagesItem.pageViewControllers.indices.contains(section.currentPageIndex) else {
+            super.layoutSubviews()
+            return
+        }
+
+        isRestoringPageAfterResize = true
+        defer { isRestoringPageAfterResize = false }
+        UIView.performWithoutAnimation {
+            // Refresh cached item frames before UIKit lays out visible cells;
+            // otherwise the old offset can briefly expose a different page.
+            handler.updateLayout()
+            let indexPath = IndexPath(item: section.currentPageIndex, section: 0)
+            if let attributes = collectionViewLayout.layoutAttributesForItem(at: indexPath) {
+                lastMacPageSize = size
+                contentSize = collectionViewLayout.collectionViewContentSize
+                let offset: CGPoint
+                switch scrollDirection {
+                case .horizontal:
+                    offset = CGPoint(x: attributes.frame.minX, y: contentOffset.y)
+                case .vertical:
+                    offset = CGPoint(x: contentOffset.x, y: attributes.frame.minY)
+                @unknown default:
+                    offset = contentOffset
+                }
+                // Resizing is not a page switch or a nested scrolling gesture.
+                super.setContentOffset(offset, animated: false)
+            }
+            super.layoutSubviews()
+        }
+    }
     
     public override var contentOffset: CGPoint {
         get {
@@ -23,7 +72,9 @@ public class QuickSegmentPagesListView: QuickListView, QuickSegmentScrollViewTyp
             }
             let oldValue = super.contentOffset
             super.contentOffset = newValue
-            self.scrollManager?.scrollViewDidScroll(self, from: oldValue)
+            if !isRestoringPageAfterResize {
+                self.scrollManager?.scrollViewDidScroll(self, from: oldValue)
+            }
         }
     }
     
