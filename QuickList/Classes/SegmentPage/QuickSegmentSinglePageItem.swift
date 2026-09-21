@@ -66,25 +66,27 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         guard let cell = cell as? QuickSegmentSinglePageItemCell else {
             return
         }
+        guard let pageVC = pageViewController,
+              let viewController = section?.form?.delegate?.formView?.getViewController() else {
+            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+            return
+        }
+        pageVC.listScrollView()?.pageBoxView = segmentPagesView
+        // Removing the view before this identity check made every rebind
+        // detach the same page and rebuild its constraints and appearance.
+        guard pageVC.parent != viewController || pageVC.view.superview != cell.contentView else { return }
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-        if
-            let pageVC = pageViewController,
-            let viewController = section?.form?.delegate?.formView?.getViewController(),
-            pageVC.parent != viewController || pageVC.view.superview != cell.contentView
-        {
-            pageVC.listScrollView()?.pageBoxView = segmentPagesView
-            if pageVC.parent != nil {
-                pageVC.willMove(toParent: nil)
-                pageVC.view.removeFromSuperview()
-                pageVC.endAppearanceTransition()
-                pageVC.removeFromParent()
-            }
-            viewController.addChild(pageVC)
-            pageVC.didMove(toParent: viewController)
-            cell.contentView.addSubview(pageVC.view)
-            pageVC.view.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
+        if pageVC.parent != nil {
+            pageVC.willMove(toParent: nil)
+            pageVC.view.removeFromSuperview()
+            pageVC.endAppearanceTransition()
+            pageVC.removeFromParent()
+        }
+        viewController.addChild(pageVC)
+        pageVC.didMove(toParent: viewController)
+        cell.contentView.addSubview(pageVC.view)
+        pageVC.view.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
     }
     
@@ -158,4 +160,3 @@ final class QuickSegmentSinglePageItem: ItemOf<QuickSegmentSinglePageItemCell>, 
         }
     }
 }
-
